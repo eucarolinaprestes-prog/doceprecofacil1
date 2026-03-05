@@ -5,16 +5,21 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/layout/AppLayout";
-import Login from "@/pages/Login";
-import Register from "@/pages/Register";
+import Auth from "@/pages/Auth";
 import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import Dashboard from "@/pages/Dashboard";
-import Recipes from "@/pages/Recipes";
-import Inventory from "@/pages/Inventory";
-import Clients from "@/pages/Clients";
+import Pricing from "@/pages/Pricing";
+import Products from "@/pages/Products";
 import Orders from "@/pages/Orders";
-import Financial from "@/pages/Financial";
-import Goals from "@/pages/Goals";
+import Clients from "@/pages/Clients";
+import Supplies from "@/pages/Supplies";
+import Finance from "@/pages/Finance";
+import Shopping from "@/pages/Shopping";
+import DigitalMenu from "@/pages/DigitalMenu";
+import BusinessInfo from "@/pages/BusinessInfo";
+import Plans from "@/pages/Plans";
+import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,7 +27,7 @@ const queryClient = new QueryClient();
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   if (isLoading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Carregando...</div>;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Navigate to="/auth" replace />;
   return <AppLayout>{children}</AppLayout>;
 }
 
@@ -35,16 +40,23 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 const AppRoutes = () => (
   <Routes>
-    <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-    <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+    <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
+    <Route path="/login" element={<Navigate to="/auth" replace />} />
+    <Route path="/register" element={<Navigate to="/auth" replace />} />
     <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+    <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-    <Route path="/recipes" element={<ProtectedRoute><Recipes /></ProtectedRoute>} />
-    <Route path="/inventory" element={<ProtectedRoute><Inventory /></ProtectedRoute>} />
-    <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
+    <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
+    <Route path="/products" element={<ProtectedRoute><Products /></ProtectedRoute>} />
     <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-    <Route path="/financial" element={<ProtectedRoute><Financial /></ProtectedRoute>} />
-    <Route path="/goals" element={<ProtectedRoute><Goals /></ProtectedRoute>} />
+    <Route path="/clients" element={<ProtectedRoute><Clients /></ProtectedRoute>} />
+    <Route path="/supplies" element={<ProtectedRoute><Supplies /></ProtectedRoute>} />
+    <Route path="/finance" element={<ProtectedRoute><Finance /></ProtectedRoute>} />
+    <Route path="/shopping" element={<ProtectedRoute><Shopping /></ProtectedRoute>} />
+    <Route path="/menu" element={<ProtectedRoute><DigitalMenu /></ProtectedRoute>} />
+    <Route path="/business-info" element={<ProtectedRoute><BusinessInfo /></ProtectedRoute>} />
+    <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
+    <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

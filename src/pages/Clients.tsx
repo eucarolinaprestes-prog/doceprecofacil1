@@ -1,89 +1,89 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Search, Trash2, Phone } from "lucide-react";
-import { mockClients } from "@/services/mockData";
-import type { Client } from "@/types";
+import { Users, Trash2, MessageCircle } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
 const Clients = () => {
-  const [clients, setClients] = useState<Client[]>(mockClients);
-  const [search, setSearch] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Client | null>(null);
+  const { user } = useAuth();
   const { toast } = useToast();
-
+  const [clients, setClients] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [address, setAddress] = useState("");
 
-  const resetForm = () => { setName(""); setPhone(""); setWhatsapp(""); setAddress(""); setEditing(null); };
-
-  const openEdit = (c: Client) => {
-    setEditing(c); setName(c.name); setPhone(c.phone); setWhatsapp(c.whatsapp); setAddress(c.address);
-    setDialogOpen(true);
+  const fetchClients = async () => {
+    if (!user) return;
+    const { data } = await supabase.from("clients").select("*").eq("user_id", user.id).order("name");
+    setClients(data || []);
+    setLoading(false);
   };
 
-  const save = () => {
-    const client: Client = { id: editing?.id || crypto.randomUUID(), user_id: "u1", name, phone, whatsapp, address, created_at: editing?.created_at || new Date().toISOString() };
-    if (editing) setClients(clients.map((c) => (c.id === editing.id ? client : c)));
-    else setClients([...clients, client]);
-    setDialogOpen(false); resetForm();
-    toast({ title: editing ? "Cliente atualizado!" : "Cliente adicionado!" });
+  useEffect(() => { fetchClients(); }, [user]);
+
+  const handleCreate = async () => {
+    if (!user || !name.trim()) return;
+    const { error } = await supabase.from("clients").insert({ user_id: user.id, name: name.trim(), whatsapp, address });
+    if (error) { toast({ title: "Erro", variant: "destructive" }); return; }
+    toast({ title: "Cliente adicionado!" });
+    setDialogOpen(false);
+    setName(""); setWhatsapp(""); setAddress("");
+    fetchClients();
   };
 
-  const remove = (id: string) => { setClients(clients.filter((c) => c.id !== id)); toast({ title: "Cliente excluído" }); };
+  const handleDelete = async (id: string) => {
+    await supabase.from("clients").delete().eq("id", id);
+    toast({ title: "Cliente excluído" });
+    fetchClients();
+  };
 
-  const filtered = clients.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
+  if (loading) return <div className="text-center py-16 text-muted-foreground">Carregando...</div>;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Clientes</h1>
-        <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button className="rounded-xl gap-2"><Plus className="w-4 h-4" /> Novo</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader><DialogTitle>{editing ? "Editar Cliente" : "Novo Cliente"}</DialogTitle></DialogHeader>
+        <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild><Button className="rounded-xl">+ Novo cliente</Button></DialogTrigger>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Novo cliente</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} className="h-11 rounded-xl" />
-              <Input placeholder="Telefone" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-11 rounded-xl" />
-              <Input placeholder="WhatsApp (5511999999999)" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="h-11 rounded-xl" />
-              <Input placeholder="Endereço" value={address} onChange={(e) => setAddress(e.target.value)} className="h-11 rounded-xl" />
-              <Button onClick={save} className="w-full h-11 rounded-xl" disabled={!name}>Salvar</Button>
+              <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} className="h-12 rounded-xl" />
+              <Input placeholder="WhatsApp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="h-12 rounded-xl" />
+              <Input placeholder="Endereço" value={address} onChange={(e) => setAddress(e.target.value)} className="h-12 rounded-xl" />
+              <Button onClick={handleCreate} className="w-full rounded-xl h-12">Salvar</Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder="Buscar cliente..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 h-10 rounded-xl" />
-      </div>
-
-      {filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">Nenhum cliente encontrado.</div>
+      {clients.length === 0 ? (
+        <EmptyState icon={Users} title="Nenhum cliente cadastrado" description="Adicione seus clientes para organizar suas encomendas." actionLabel="Adicionar cliente" onAction={() => setDialogOpen(true)} />
       ) : (
-        <div className="space-y-2">
-          {filtered.map((c) => (
-            <Card key={c.id} className="border-border/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => openEdit(c)}>
+        <div className="grid gap-3">
+          {clients.map((c) => (
+            <Card key={c.id}>
               <CardContent className="p-4 flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold">{c.name}</h3>
-                  <p className="text-sm text-muted-foreground">{c.phone}</p>
+                  <p className="font-semibold text-foreground">{c.name}</p>
+                  {c.whatsapp && <p className="text-sm text-muted-foreground">{c.whatsapp}</p>}
+                  {c.address && <p className="text-sm text-muted-foreground">{c.address}</p>}
                 </div>
                 <div className="flex gap-1">
                   {c.whatsapp && (
-                    <Button variant="ghost" size="icon" className="text-success hover:bg-success/10" onClick={(e) => { e.stopPropagation(); window.open(`https://wa.me/${c.whatsapp}`, "_blank"); }}>
-                      <Phone className="w-4 h-4" />
+                    <Button variant="ghost" size="icon" onClick={() => window.open(`https://wa.me/${c.whatsapp.replace(/\D/g, "")}`, "_blank")}>
+                      <MessageCircle className="w-4 h-4 text-success" />
                     </Button>
                   )}
-                  <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10" onClick={(e) => { e.stopPropagation(); remove(c.id); }}>
-                    <Trash2 className="w-4 h-4" />
+                  <Button variant="ghost" size="icon" onClick={() => handleDelete(c.id)}>
+                    <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 </div>
               </CardContent>
