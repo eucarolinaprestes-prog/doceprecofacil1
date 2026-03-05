@@ -1,155 +1,145 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Trash2 } from "lucide-react";
-import { mockOrders, mockClients, mockRecipes } from "@/services/mockData";
-import type { Order, OrderStatus, DeliveryType, PaymentMethod } from "@/types";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ShoppingBag, MessageCircle } from "lucide-react";
+import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
-const STATUS_LABELS: Record<OrderStatus, string> = { pending: "Pendente", paid: "Pago", delivered: "Entregue", cancelled: "Cancelado" };
-const STATUS_COLORS: Record<OrderStatus, string> = { pending: "bg-warning/10 text-warning border-warning/30", paid: "bg-success/10 text-success border-success/30", delivered: "bg-primary/10 text-primary border-primary/30", cancelled: "bg-destructive/10 text-destructive border-destructive/30" };
-const FILTERS: OrderStatus[] = ["pending", "paid", "delivered", "cancelled"];
+const statusLabels: Record<string, string> = { pending: "Pendente", production: "Em produção", delivered: "Entregue" };
 
 const Orders = () => {
-  const [orders, setOrders] = useState<Order[]>(mockOrders);
-  const [filter, setFilter] = useState<string>("all");
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Order | null>(null);
+  const { user } = useAuth();
   const { toast } = useToast();
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [category, setCategory] = useState("bolos");
+  const [size, setSize] = useState("");
+  const [filling, setFilling] = useState("");
+  const [topping, setTopping] = useState("");
+  const [dough, setDough] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [deliveryType, setDeliveryType] = useState("pickup");
+  const [paymentPercent, setPaymentPercent] = useState("100");
+  const [paymentMethod, setPaymentMethod] = useState("pix");
+  const [totalValue, setTotalValue] = useState("");
+  const [notes, setNotes] = useState("");
 
-  const [clientId, setClientId] = useState("");
-  const [recipeId, setRecipeId] = useState("");
-  const [quantity, setQuantity] = useState(1);
-  const [delDate, setDelDate] = useState("");
-  const [delTime, setDelTime] = useState("");
-  const [delType, setDelType] = useState<DeliveryType>("pickup");
-  const [decFee, setDecFee] = useState(0);
-  const [delFee, setDelFee] = useState(0);
-  const [discount, setDiscount] = useState(0);
-  const [customPrice, setCustomPrice] = useState<string>("");
-  const [payMethod, setPayMethod] = useState<PaymentMethod>("pix");
-  const [status, setStatus] = useState<OrderStatus>("pending");
-
-  const resetForm = () => {
-    setClientId(""); setRecipeId(""); setQuantity(1); setDelDate(""); setDelTime(""); setDelType("pickup"); setDecFee(0); setDelFee(0); setDiscount(0); setCustomPrice(""); setPayMethod("pix"); setStatus("pending"); setEditing(null);
+  const fetchOrders = async () => {
+    if (!user) return;
+    const { data } = await supabase.from("orders").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    setOrders(data || []);
+    setLoading(false);
   };
 
-  const openEdit = (o: Order) => {
-    setEditing(o); setClientId(o.client_id); setRecipeId(o.recipe_id); setQuantity(o.quantity); setDelDate(o.delivery_date); setDelTime(o.delivery_time); setDelType(o.delivery_type); setDecFee(o.decoration_fee); setDelFee(o.delivery_fee); setDiscount(o.discount); setCustomPrice(o.custom_price?.toString() || ""); setPayMethod(o.payment_method); setStatus(o.status);
-    setDialogOpen(true);
+  useEffect(() => { fetchOrders(); }, [user]);
+
+  const handleCreate = async () => {
+    if (!user) return;
+    const { error } = await supabase.from("orders").insert({
+      user_id: user.id, category, size, filling, topping, dough,
+      event_date: eventDate || null, delivery_type: deliveryType,
+      payment_percent: Number(paymentPercent), payment_method: paymentMethod,
+      total_value: Number(totalValue) || 0, notes, status: "pending",
+    });
+    if (error) { toast({ title: "Erro ao criar", variant: "destructive" }); return; }
+    toast({ title: "Encomenda criada!" });
+    setDialogOpen(false);
+    fetchOrders();
   };
 
-  const save = () => {
-    const client = mockClients.find((c) => c.id === clientId);
-    const recipe = mockRecipes.find((r) => r.id === recipeId);
-    const totalValue = customPrice ? +customPrice : 150 * quantity + decFee + delFee - discount;
-    const order: Order = {
-      id: editing?.id || crypto.randomUUID(), user_id: "u1", client_id: clientId, client_name: client?.name || "", recipe_id: recipeId, recipe_name: recipe?.name || "",
-      quantity, delivery_date: delDate, delivery_time: delTime, delivery_type: delType, decoration_fee: decFee, delivery_fee: delFee, discount, custom_price: customPrice ? +customPrice : null,
-      payment_method: payMethod, status, total_value: totalValue, profit: totalValue * 0.6, created_at: editing?.created_at || new Date().toISOString(),
-    };
-    if (editing) setOrders(orders.map((o) => (o.id === editing.id ? order : o)));
-    else setOrders([...orders, order]);
-    setDialogOpen(false); resetForm();
-    toast({ title: editing ? "Encomenda atualizada!" : "Encomenda criada!" });
+  const updateStatus = async (id: string, status: string) => {
+    await supabase.from("orders").update({ status }).eq("id", id);
+    fetchOrders();
   };
 
-  const remove = (id: string) => { setOrders(orders.filter((o) => o.id !== id)); toast({ title: "Encomenda excluída" }); };
+  const sendWhatsApp = (order: any) => {
+    const msg = encodeURIComponent(`✅ *Confirmação de Pedido*\n\nCategoria: ${order.category}\nData: ${order.event_date ? new Date(order.event_date).toLocaleDateString("pt-BR") : "A definir"}\nValor: R$ ${Number(order.total_value || 0).toFixed(2)}\n\n⚠️ Lembrando que o pedido será liberado somente após o pagamento de 100%.`);
+    window.open(`https://wa.me/?text=${msg}`, "_blank");
+  };
 
-  const filtered = filter === "all" ? orders : orders.filter((o) => o.status === filter);
+  const filterByStatus = (status: string) => orders.filter((o) => o.status === status);
+
+  if (loading) return <div className="text-center py-16 text-muted-foreground">Carregando...</div>;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Encomendas</h1>
-        <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
-          <DialogTrigger asChild>
-            <Button className="rounded-xl gap-2"><Plus className="w-4 h-4" /> Nova</Button>
-          </DialogTrigger>
-          <DialogContent className="max-h-[90vh] overflow-y-auto max-w-lg">
-            <DialogHeader><DialogTitle>{editing ? "Editar Encomenda" : "Nova Encomenda"}</DialogTitle></DialogHeader>
+        <h1 className="text-2xl font-bold text-foreground">Encomendas</h1>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild><Button className="rounded-xl">+ Nova encomenda</Button></DialogTrigger>
+          <DialogContent className="max-h-[80vh] overflow-y-auto">
+            <DialogHeader><DialogTitle>Nova encomenda</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Selecione o cliente" /></SelectTrigger>
-                <SelectContent>{mockClients.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Categoria" /></SelectTrigger>
+                <SelectContent>{["bolos", "doces", "salgados"].map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
               </Select>
-              <Select value={recipeId} onValueChange={setRecipeId}>
-                <SelectTrigger className="rounded-xl h-11"><SelectValue placeholder="Selecione a receita" /></SelectTrigger>
-                <SelectContent>{mockRecipes.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}</SelectContent>
+              <Input placeholder="Tamanho" value={size} onChange={(e) => setSize(e.target.value)} className="h-12 rounded-xl" />
+              <Input placeholder="Massa" value={dough} onChange={(e) => setDough(e.target.value)} className="h-12 rounded-xl" />
+              <Input placeholder="Recheio" value={filling} onChange={(e) => setFilling(e.target.value)} className="h-12 rounded-xl" />
+              <Input placeholder="Cobertura" value={topping} onChange={(e) => setTopping(e.target.value)} className="h-12 rounded-xl" />
+              <Input type="datetime-local" value={eventDate} onChange={(e) => setEventDate(e.target.value)} className="h-12 rounded-xl" />
+              <Select value={deliveryType} onValueChange={setDeliveryType}>
+                <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent><SelectItem value="pickup">Retirada</SelectItem><SelectItem value="delivery">Entrega</SelectItem></SelectContent>
               </Select>
-              <div className="grid grid-cols-3 gap-3">
-                <Input type="number" placeholder="Qtd" value={quantity} onChange={(e) => setQuantity(+e.target.value)} className="h-11 rounded-xl" />
-                <Input type="date" value={delDate} onChange={(e) => setDelDate(e.target.value)} className="h-11 rounded-xl" />
-                <Input type="time" value={delTime} onChange={(e) => setDelTime(e.target.value)} className="h-11 rounded-xl" />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <Select value={delType} onValueChange={(v) => setDelType(v as DeliveryType)}>
-                  <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
-                  <SelectContent><SelectItem value="pickup">Retirada</SelectItem><SelectItem value="delivery">Entrega</SelectItem></SelectContent>
-                </Select>
-                <Select value={payMethod} onValueChange={(v) => setPayMethod(v as PaymentMethod)}>
-                  <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
-                  <SelectContent><SelectItem value="pix">PIX</SelectItem><SelectItem value="cash">Dinheiro</SelectItem><SelectItem value="card">Cartão</SelectItem><SelectItem value="transfer">Transferência</SelectItem></SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <Input type="number" placeholder="Decoração R$" value={decFee} onChange={(e) => setDecFee(+e.target.value)} className="h-11 rounded-xl" step="0.01" />
-                <Input type="number" placeholder="Entrega R$" value={delFee} onChange={(e) => setDelFee(+e.target.value)} className="h-11 rounded-xl" step="0.01" />
-                <Input type="number" placeholder="Desconto R$" value={discount} onChange={(e) => setDiscount(+e.target.value)} className="h-11 rounded-xl" step="0.01" />
-              </div>
-              <Input type="number" placeholder="Preço customizado (opcional)" value={customPrice} onChange={(e) => setCustomPrice(e.target.value)} className="h-11 rounded-xl" step="0.01" />
-              {editing && (
-                <Select value={status} onValueChange={(v) => setStatus(v as OrderStatus)}>
-                  <SelectTrigger className="rounded-xl h-11"><SelectValue /></SelectTrigger>
-                  <SelectContent>{FILTERS.map((s) => <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>)}</SelectContent>
-                </Select>
-              )}
-              <Button onClick={save} className="w-full h-11 rounded-xl" disabled={!clientId || !recipeId}>Salvar</Button>
+              <Select value={paymentPercent} onValueChange={setPaymentPercent}>
+                <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent><SelectItem value="50">50%</SelectItem><SelectItem value="100">100%</SelectItem></SelectContent>
+              </Select>
+              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent><SelectItem value="pix">Pix</SelectItem><SelectItem value="dinheiro">Dinheiro</SelectItem></SelectContent>
+              </Select>
+              <Input type="number" placeholder="Valor total (R$)" value={totalValue} onChange={(e) => setTotalValue(e.target.value)} className="h-12 rounded-xl" />
+              <Input placeholder="Observações" value={notes} onChange={(e) => setNotes(e.target.value)} className="h-12 rounded-xl" />
+              <Button onClick={handleCreate} className="w-full rounded-xl h-12">Criar encomenda</Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
-      {/* Status filters */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        <Button variant={filter === "all" ? "default" : "outline"} size="sm" className="rounded-full" onClick={() => setFilter("all")}>Todos</Button>
-        {FILTERS.map((s) => (
-          <Button key={s} variant={filter === s ? "default" : "outline"} size="sm" className="rounded-full" onClick={() => setFilter(s)}>{STATUS_LABELS[s]}</Button>
+      <Tabs defaultValue="pending">
+        <TabsList className="grid grid-cols-3 w-full">
+          <TabsTrigger value="pending">Pendentes ({filterByStatus("pending").length})</TabsTrigger>
+          <TabsTrigger value="production">Produção ({filterByStatus("production").length})</TabsTrigger>
+          <TabsTrigger value="delivered">Entregues ({filterByStatus("delivered").length})</TabsTrigger>
+        </TabsList>
+        {["pending", "production", "delivered"].map((status) => (
+          <TabsContent key={status} value={status}>
+            {filterByStatus(status).length === 0 ? (
+              <EmptyState icon={ShoppingBag} title={`Nenhuma encomenda ${statusLabels[status]?.toLowerCase()}`} description="Suas encomendas aparecerão aqui." />
+            ) : (
+              <div className="grid gap-3 mt-4">
+                {filterByStatus(status).map((o) => (
+                  <Card key={o.id}><CardContent className="p-4 space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-semibold text-foreground capitalize">{o.category}</p>
+                        {o.size && <p className="text-sm text-muted-foreground">Tamanho: {o.size}</p>}
+                        {o.filling && <p className="text-sm text-muted-foreground">Recheio: {o.filling}</p>}
+                        <p className="text-sm text-primary font-bold mt-1">R$ {Number(o.total_value || 0).toFixed(2)}</p>
+                      </div>
+                      <Button variant="ghost" size="icon" onClick={() => sendWhatsApp(o)}><MessageCircle className="w-4 h-4 text-success" /></Button>
+                    </div>
+                    <div className="flex gap-2">
+                      {status === "pending" && <Button size="sm" variant="outline" onClick={() => updateStatus(o.id, "production")} className="rounded-xl text-xs">Iniciar produção</Button>}
+                      {status === "production" && <Button size="sm" variant="outline" onClick={() => updateStatus(o.id, "delivered")} className="rounded-xl text-xs">Marcar entregue</Button>}
+                    </div>
+                  </CardContent></Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
         ))}
-      </div>
-
-      {filtered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">Nenhuma encomenda encontrada.</div>
-      ) : (
-        <div className="space-y-2">
-          {filtered.map((o) => (
-            <Card key={o.id} className="border-border/50 cursor-pointer hover:shadow-md transition-shadow" onClick={() => openEdit(o)}>
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold">{o.recipe_name}</h3>
-                    <p className="text-sm text-muted-foreground">{o.client_name} • {o.quantity}x</p>
-                    <p className="text-xs text-muted-foreground">{o.delivery_date} às {o.delivery_time}</p>
-                  </div>
-                  <div className="text-right space-y-1">
-                    <Badge variant="outline" className={STATUS_COLORS[o.status]}>{STATUS_LABELS[o.status]}</Badge>
-                    <p className="text-sm font-bold">R$ {o.total_value.toFixed(2)}</p>
-                  </div>
-                </div>
-                <div className="flex justify-end mt-2">
-                  <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 h-8" onClick={(e) => { e.stopPropagation(); remove(o.id); }}>
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      </Tabs>
     </div>
   );
 };
