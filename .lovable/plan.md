@@ -1,97 +1,89 @@
 
 
-# Doce Preco Facil — Rebuild Completo
+# Doce Preço Fácil — Correções e Melhorias Completas
 
 ## Resumo
-Reconstruir todo o frontend do zero com nova estrutura de modulos, logo personalizada, Supabase como backend (auth + banco), e todas as telas iniciando vazias com empty states explicativos.
+Redesign visual completo do app com design mais moderno, vibrante e intuitivo, além de correções funcionais em todas as abas. A paleta rosa/dourado será mantida mas com mais contraste e elementos visuais 3D.
 
-## Logo
-Copiar a imagem enviada (`WhatsApp-Image-2026-02-15-at-22.11.17-removebg-preview.png`) para `src/assets/logo.png` e usar como logo principal no login, header e sidebar.
+---
 
-## Supabase
-Conectar Supabase para auth (email/senha) e banco de dados. Criar tabelas com RLS (user_id = auth.uid()).
+## 1. Design System Global
+- Atualizar CSS com cores mais vibrantes, sombras 3D em botões, gradientes mais expressivos
+- Botões com estilo "raised/3D" (box-shadow com profundidade)
+- Cards com hover effects e sombras mais pronunciadas
+- Tipografia com mais hierarquia visual
 
-### Tabelas necessarias
-- `profiles` (id, user_id, name, store_name, logo_url, whatsapp, address, desired_salary, work_days_per_week, work_hours_per_day, created_at)
-- `fixed_costs` (id, user_id, category, amount)
-- `variable_costs` (id, user_id, category, amount)
-- `ingredients` (id, user_id, name, category, unit, total_cost, quantity_purchased, supplier, cost_per_unit)
-- `packaging` (id, user_id, name, category, unit, total_cost, quantity_purchased, supplier, cost_per_unit)
-- `products` (id, user_id, name, description, category, photo_url, yield_quantity, yield_unit, preparation_time, total_cost, suggested_price, profit_margin, ingredients_json, packaging_json)
-- `clients` (id, user_id, name, whatsapp, address)
-- `orders` (id, user_id, client_id, product_id, category, size, filling, topping, dough, event_date, delivery_type, payment_percent, payment_method, status, total_value, notes)
-- `financial_income` (id, user_id, amount, category, date, payment_method, client_name, notes)
-- `financial_expense` (id, user_id, amount, category, date, supplier, description)
-- `shopping_list` (id, user_id, ingredient_name, quantity, unit_price, total)
-- `menu_settings` (id, user_id, cover_photo_url, logo_url, description, business_hours)
-- `menu_categories` (id, user_id, name, sort_order)
+## 2. Tela de Login/Cadastro
+- Logo maior (w-32 h-32 ao invés de w-24 h-24)
+- Botão de mostrar/ocultar senha (ícone Eye/EyeOff) em todos os campos de senha
+- Background com gradiente mais vivo
 
-## Navegacao
+## 3. Aba PLANOS
+- Cards com gradientes coloridos por plano (prata=cinza elegante, ouro=dourado, diamante=rosa)
+- Ícones mais elaborados (Shield, Gem, Crown)
+- Badges com efeito brilho
+- Botões com efeito 3D
 
-### Menu lateral (desktop) / Hamburger (mobile)
-Dashboard, Precos, Encomendas, Clientes, Insumos e Embalagens, Financas, Calculadora de compras, Cardapio digital, Informacoes, Planos, Configuracoes
+## 4. Aba INFORMAÇÕES (BusinessInfo)
+- Topo: upload de logo da loja
+- Textos explicativos e amigáveis falando diretamente com a pessoa
+- Seção "Descubra o valor da sua hora" com campos vazios e labels explicativas
+- Custos fixos: fluxo de adicionar um por vez (nome + valor + botão Adicionar), lista com editar/excluir, total no final
+- Custos variáveis: mesmo fluxo dos fixos, com total
 
-### Menu inferior fixo (mobile)
-Dashboard, Produtos, Encomendas, Financas, Planos (icone coroa)
+## 5. Cardápio Digital
+- Layout estilo iFood: capa, logo, horário, categorias com produtos
+- Produtos com imagem, nome, preço, descrição
+- Toggle visível/oculto
+- Botão compartilhar via WhatsApp e link
 
-## Paginas a criar/reescrever
+## 6. Calculadora de Compras
+- Adicionar botões Copiar e Editar nos itens
+- Total com botão 3D chamativo
 
-### 1. Login/Cadastro
-Tela unica com dois estados (tabs). Logo no topo. Campos conforme spec. Auth via Supabase.
+## 7. Finanças (Entradas e Saídas)
+- Design mais moderno nos cards e seletores
+- Formas de pagamento em estilo 3D (Pix, Cartão débito, Cartão crédito)
+- Gráfico de categorias (recharts PieChart)
+- Indicador positivo/negativo
+- Títulos mais pessoais
 
-### 2. Dashboard
-- Saudacao "Oi, [nome]"
-- Semana atual com dias destacados
-- Card "Vamos precificar?" com botao
-- 3 graficos (Entrada, Saida, Lucro) usando recharts
-- Acoes rapidas (4 botoes)
-- Atividades recentes
-- Tudo vazio inicialmente com empty states
+## 8. Insumos e Embalagens
+- Ingredientes: remover campo categoria, unidades fixas (g, ml, kg, l)
+- Embalagens: remover campo categoria, unidades fixas (unidade, pacote, caixa fechada)
 
-### 3. Precificacao (fluxo 5 etapas)
-Wizard com stepper: Produto → Ingredientes/Embalagens → Mao de obra/Custos fixos → Estrategia de preco → Resultado. Usa dados de "Informacoes" para calcular mao de obra e custos fixos automaticamente.
+## 9. Precificação (Wizard completo)
+- Step 1: adicionar imagem, categorias fixas (Massa, Recheio, Bolo, Fatias, Cupcakes, Salgados, Doces), tipo de venda (Unidade, Fatias, Porções, Kg), nada pré-preenchido
+- Step 2: puxar ingredientes/embalagens do estoque automaticamente, editar/excluir cada item
+- Step 3: buscar valor/hora do perfil automaticamente, custos fixos sugeridos com ajuste %, dicas explicativas
+- Step 4: margem de lucro com sugestão editável, lucro em verde, taxas opcionais (iFood %, delivery, maquininha %)
+- Step 5: preço final destacado, gráfico composição (PieChart), dica de divisão financeira, resumo completo, botão Salvar
 
-### 4. Produtos
-Lista de produtos precificados. Cards com custo/lucro/preco. Acoes: editar, duplicar, excluir.
+## 10. Clientes
+- Clientes já serão referenciados na criação de encomendas (select dropdown)
 
-### 5. Encomendas
-Abas: Pendentes, Em producao, Entregues. Formulario com campos de personalizacao (tamanho, massa, recheio, cobertura). Botao "Enviar pelo WhatsApp" com mensagens pre-formatadas.
+## 11. Encomendas
+- Títulos com primeira letra maiúscula
+- Design mais moderno e colorido
+- Formas de pagamento: Pix, Cartão crédito, Cartão débito
+- Taxas opcionais: maquininha, decoração, embalagem, topo de bolo, outros
+- "Outros" com editar/duplicar/excluir
+- Enviar por WhatsApp e link
+- Puxar clientes automaticamente
 
-### 6. Clientes
-CRUD simples: nome, WhatsApp, endereco.
+## 12. Produtos
+- Exibir custo, lucro e preço final
+- Opções: editar, copiar, excluir
 
-### 7. Insumos e Embalagens
-Dois tabs: Ingredientes / Embalagens. CRUD com calculo de custo unitario.
+---
 
-### 8. Financas
-Graficos entrada/saida. Tabs para registrar entradas e saidas com categorias especificas.
+## Escopo de Implementação
 
-### 9. Calculadora de Compras
-Lista de itens com ingrediente, quantidade, valor. Calculo de total automatico.
+Dado o volume de mudanças, sugiro implementar em **3 fases**:
 
-### 10. Cardapio Digital
-Config: foto capa, logo, descricao, horario. Categorias editaveis. Produtos com visibilidade toggle. Botao compartilhar via WhatsApp.
+**Fase 1** — Design system + Login + Planos + Informações (custos fixos/variáveis dinâmicos)
+**Fase 2** — Precificação completa + Produtos + Insumos
+**Fase 3** — Encomendas + Finanças + Calculadora + Cardápio Digital
 
-### 11. Informacoes do Negocio
-Nome da loja, logo, WhatsApp, endereco. Salario desejado + dias/horas trabalhados → calculo automatico do valor/hora. Custos fixos e variaveis (alimentam a precificacao).
-
-### 12. Planos
-3 planos: Prata (R$9,90/sem), Ouro (R$27/mes), Diamante (R$97/ano). Icone coroa no menu.
-
-### 13. Configuracoes
-Conta (senha, imagem, email), Assinatura, Notificacoes.
-
-## Implementacao
-
-Sera feito em fases dentro desta implementacao:
-1. Setup Supabase (auth + tabelas + RLS) + Logo + Design system (manter paleta atual)
-2. Layout (sidebar, bottom nav, header) + Login/Cadastro
-3. Dashboard + Informacoes do Negocio
-4. Precificacao (wizard 5 etapas) + Produtos
-5. Insumos e Embalagens + Clientes
-6. Encomendas (com WhatsApp)
-7. Financas + Calculadora de Compras
-8. Cardapio Digital + Planos + Configuracoes
-
-Todas as telas iniciam vazias com empty states didaticos. Nenhum dado mock pre-preenchido.
+Cada fase será uma mensagem separada para manter qualidade e evitar erros.
 
