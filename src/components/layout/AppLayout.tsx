@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   Menu,
+  Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -36,11 +37,10 @@ const sidebarNav = [
 ];
 
 const bottomNav = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-  { label: "Produtos", icon: Calculator, path: "/products" },
+  { label: "Painel", icon: LayoutDashboard, path: "/" },
+  { label: "Preços", icon: DollarSign, path: "/pricing", highlight: true },
   { label: "Encomendas", icon: ShoppingBag, path: "/orders" },
-  { label: "Finanças", icon: DollarSign, path: "/finance" },
-  { label: "Planos", icon: Crown, path: "/plans" },
+  { label: "Saldo", icon: DollarSign, path: "/finance" },
 ];
 
 interface AppLayoutProps {
@@ -54,6 +54,13 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const [open, setOpen] = useState(false);
 
   const isActive = (path: string) => location.pathname === path;
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Bom dia";
+    if (hour < 18) return "Boa tarde";
+    return "Boa noite";
+  };
 
   const NavItem = ({ item, onClick }: { item: typeof sidebarNav[0]; onClick?: () => void }) => (
     <button
@@ -72,14 +79,14 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
+      {/* Header - matching reference */}
       <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="w-5 h-5" />
-              </Button>
+              <button className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center md:hidden">
+                <Menu className="w-5 h-5 text-primary" />
+              </button>
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-4">
               <div className="flex items-center gap-2 mb-6">
@@ -104,9 +111,18 @@ const AppLayout = ({ children }: AppLayoutProps) => {
             <span className="font-bold text-foreground">Doce Preço Fácil</span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-muted-foreground hidden sm:block">Olá, {profile?.name || "Confeiteira"}</span>
-          <Button variant="ghost" size="sm" onClick={() => { signOut(); navigate("/auth"); }} className="text-muted-foreground hover:text-destructive">
+
+        <div className="flex-1 text-center md:text-left md:ml-4">
+          <p className="text-xs text-muted-foreground leading-none">{getGreeting()},</p>
+          <p className="text-sm font-bold text-foreground">{profile?.name || "Confeiteira"} 🌸</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center relative">
+            <Bell className="w-5 h-5 text-primary" />
+            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary rounded-full text-[10px] text-primary-foreground font-bold flex items-center justify-center">0</span>
+          </button>
+          <Button variant="ghost" size="sm" onClick={() => { signOut(); navigate("/auth"); }} className="text-muted-foreground hover:text-destructive hidden md:flex">
             <LogOut className="w-4 h-4" />
           </Button>
         </div>
@@ -124,24 +140,33 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
         {/* Content */}
         <main className="flex-1 pb-20 md:pb-6 overflow-auto">
-          <div className="container max-w-4xl py-4 md:py-6">
+          <div className="container max-w-4xl py-4 md:py-6 px-4">
             {children}
           </div>
         </main>
       </div>
 
-      {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/90 backdrop-blur-md border-t border-border flex justify-around py-2 px-1">
+      {/* Mobile bottom nav - matching reference */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border flex justify-around items-end py-2 px-1">
         {bottomNav.map((item) => (
           <button
             key={item.path}
             onClick={() => navigate(item.path)}
             className={cn(
-              "flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-xs transition-colors min-w-0",
-              isActive(item.path) ? "text-primary font-semibold" : "text-muted-foreground"
+              "flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-xs transition-colors min-w-0",
+              isActive(item.path) ? "text-primary font-bold" : "text-muted-foreground"
             )}
           >
-            <item.icon className={cn("w-5 h-5", isActive(item.path) && "text-primary")} />
+            {item.highlight ? (
+              <div className={cn(
+                "w-12 h-12 rounded-full flex items-center justify-center -mt-5 shadow-lg",
+                isActive(item.path) ? "bg-primary" : "bg-primary"
+              )}>
+                <item.icon className="w-6 h-6 text-primary-foreground" />
+              </div>
+            ) : (
+              <item.icon className={cn("w-5 h-5", isActive(item.path) && "text-primary")} />
+            )}
             <span className="truncate">{item.label}</span>
           </button>
         ))}

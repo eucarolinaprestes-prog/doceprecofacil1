@@ -6,23 +6,23 @@
 
 @layer base {
   :root {
-    --background: 0 0% 99%;
-    --foreground: 340 10% 20%;
+    --background: 340 30% 97%;
+    --foreground: 340 15% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 340 10% 20%;
+    --card-foreground: 340 15% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 340 10% 20%;
+    --popover-foreground: 340 15% 15%;
 
-    --primary: 350 50% 52%;
+    --primary: 340 75% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 355 85% 94%;
-    --secondary-foreground: 350 50% 32%;
+    --secondary: 340 60% 93%;
+    --secondary-foreground: 340 75% 35%;
 
-    --muted: 30 30% 96%;
-    --muted-foreground: 340 10% 42%;
+    --muted: 340 25% 93%;
+    --muted-foreground: 340 10% 45%;
 
     --accent: 30 60% 58%;
     --accent-foreground: 30 60% 12%;
@@ -30,48 +30,48 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 350 25% 88%;
-    --input: 350 25% 85%;
-    --ring: 350 50% 52%;
+    --border: 340 30% 88%;
+    --input: 340 30% 85%;
+    --ring: 340 75% 55%;
 
     --radius: 0.875rem;
 
-    --rose-gold: 350 35% 56%;
+    --rose-gold: 340 40% 56%;
     --rose-gold-foreground: 0 0% 100%;
     --gold: 30 60% 58%;
     --gold-foreground: 30 60% 12%;
-    --pink-light: 355 85% 96%;
-    --pink-medium: 350 65% 86%;
-    --success: 152 70% 42%;
+    --pink-light: 340 60% 96%;
+    --pink-medium: 340 65% 86%;
+    --success: 152 70% 38%;
     --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --sidebar-background: 355 85% 97%;
-    --sidebar-foreground: 340 10% 22%;
-    --sidebar-primary: 350 50% 52%;
+    --sidebar-background: 340 60% 97%;
+    --sidebar-foreground: 340 15% 22%;
+    --sidebar-primary: 340 75% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 355 65% 92%;
-    --sidebar-accent-foreground: 350 50% 32%;
-    --sidebar-border: 350 25% 88%;
-    --sidebar-ring: 350 50% 52%;
+    --sidebar-accent: 340 55% 92%;
+    --sidebar-accent-foreground: 340 75% 35%;
+    --sidebar-border: 340 30% 88%;
+    --sidebar-ring: 340 75% 55%;
   }
 
   .dark {
     --background: 340 18% 7%;
-    --foreground: 355 25% 93%;
+    --foreground: 340 25% 93%;
 
     --card: 340 18% 10%;
-    --card-foreground: 355 25% 93%;
+    --card-foreground: 340 25% 93%;
 
     --popover: 340 18% 10%;
-    --popover-foreground: 355 25% 93%;
+    --popover-foreground: 340 25% 93%;
 
-    --primary: 350 55% 58%;
+    --primary: 340 70% 58%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 340 22% 16%;
-    --secondary-foreground: 355 25% 88%;
+    --secondary-foreground: 340 25% 88%;
 
     --muted: 340 18% 14%;
     --muted-foreground: 340 12% 52%;
@@ -84,9 +84,9 @@
 
     --border: 340 18% 16%;
     --input: 340 18% 16%;
-    --ring: 350 55% 58%;
+    --ring: 340 70% 58%;
 
-    --rose-gold: 350 40% 52%;
+    --rose-gold: 340 40% 52%;
     --rose-gold-foreground: 0 0% 100%;
     --gold: 30 50% 52%;
     --gold-foreground: 30 50% 95%;
@@ -98,13 +98,13 @@
     --warning-foreground: 0 0% 100%;
 
     --sidebar-background: 340 18% 9%;
-    --sidebar-foreground: 355 25% 88%;
-    --sidebar-primary: 350 55% 58%;
+    --sidebar-foreground: 340 25% 88%;
+    --sidebar-primary: 340 70% 58%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 340 22% 14%;
-    --sidebar-accent-foreground: 355 25% 88%;
+    --sidebar-accent-foreground: 340 25% 88%;
     --sidebar-border: 340 18% 16%;
-    --sidebar-ring: 350 55% 58%;
+    --sidebar-ring: 340 70% 58%;
   }
 }
 
@@ -120,13 +120,13 @@
 @layer components {
   .btn-3d {
     @apply relative transition-all duration-150 active:translate-y-0.5;
-    box-shadow: 0 4px 0 0 hsl(350 50% 40%), 0 6px 12px -2px hsl(350 50% 52% / 0.3);
+    box-shadow: 0 4px 0 0 hsl(340 75% 42%), 0 6px 12px -2px hsl(340 75% 55% / 0.3);
   }
   .btn-3d:hover {
-    box-shadow: 0 4px 0 0 hsl(350 50% 38%), 0 8px 16px -2px hsl(350 50% 52% / 0.4);
+    box-shadow: 0 4px 0 0 hsl(340 75% 38%), 0 8px 16px -2px hsl(340 75% 55% / 0.4);
   }
   .btn-3d:active {
-    box-shadow: 0 2px 0 0 hsl(350 50% 40%), 0 3px 6px -2px hsl(350 50% 52% / 0.3);
+    box-shadow: 0 2px 0 0 hsl(340 75% 42%), 0 3px 6px -2px hsl(340 75% 55% / 0.3);
   }
 
   .btn-3d-gold {
@@ -142,23 +142,23 @@
 
   .card-elevated {
     @apply transition-all duration-200;
-    box-shadow: 0 2px 8px -2px hsl(350 25% 52% / 0.1), 0 4px 16px -4px hsl(350 25% 52% / 0.08);
+    box-shadow: 0 2px 8px -2px hsl(340 30% 52% / 0.1), 0 4px 16px -4px hsl(340 30% 52% / 0.08);
   }
   .card-elevated:hover {
-    box-shadow: 0 4px 12px -2px hsl(350 25% 52% / 0.15), 0 8px 24px -4px hsl(350 25% 52% / 0.12);
+    box-shadow: 0 4px 12px -2px hsl(340 30% 52% / 0.15), 0 8px 24px -4px hsl(340 30% 52% / 0.12);
     transform: translateY(-2px);
   }
 
   .gradient-primary {
-    background: linear-gradient(135deg, hsl(350 50% 52%), hsl(350 60% 62%));
+    background: linear-gradient(135deg, hsl(340 75% 55%), hsl(340 65% 62%));
   }
   .gradient-gold {
     background: linear-gradient(135deg, hsl(30 60% 52%), hsl(35 70% 62%));
   }
   .gradient-rose {
-    background: linear-gradient(135deg, hsl(350 50% 52%), hsl(330 50% 58%));
+    background: linear-gradient(135deg, hsl(340 75% 55%), hsl(320 60% 58%));
   }
   .gradient-bg {
-    background: linear-gradient(160deg, hsl(355 85% 96%) 0%, hsl(30 40% 96%) 50%, hsl(350 60% 94%) 100%);
+    background: linear-gradient(160deg, hsl(340 60% 96%) 0%, hsl(340 40% 95%) 50%, hsl(340 50% 94%) 100%);
   }
 }
