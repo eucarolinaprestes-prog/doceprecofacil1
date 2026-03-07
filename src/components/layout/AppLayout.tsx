@@ -25,13 +25,13 @@ import logo from "@/assets/logo.png";
 const sidebarNav = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
   { label: "Preços", icon: Calculator, path: "/pricing" },
+  { label: "Produtos", icon: Package, path: "/products" },
   { label: "Encomendas", icon: ShoppingBag, path: "/orders" },
   { label: "Clientes", icon: Users, path: "/clients" },
   { label: "Insumos e Embalagens", icon: Package, path: "/supplies" },
-  { label: "Finanças", icon: DollarSign, path: "/finance" },
+  { label: "Financeiro", icon: DollarSign, path: "/business-info" },
   { label: "Calculadora de Compras", icon: ShoppingCart, path: "/shopping" },
   { label: "Cardápio Digital", icon: BookOpen, path: "/menu" },
-  { label: "Informações", icon: Info, path: "/business-info" },
   { label: "Planos", icon: Crown, path: "/plans" },
   { label: "Configurações", icon: Settings, path: "/settings" },
 ];

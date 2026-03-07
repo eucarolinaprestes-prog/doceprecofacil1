@@ -5,81 +5,68 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
-import { ShoppingBag, MessageCircle, Link2, Trash2, Copy, Pencil, CreditCard, Smartphone } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { ShoppingBag, MessageCircle, Link2, Trash2, ChevronLeft, Plus } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
 const statusLabels: Record<string, string> = { pending: "Pendente", production: "Em Produção", delivered: "Entregue" };
-const statusColors: Record<string, string> = { pending: "bg-warning/10 text-warning", production: "bg-primary/10 text-primary", delivered: "bg-success/10 text-success" };
-const orderCategories = ["Bolos", "Doces", "Salgados", "Cupcakes", "Fatias", "Outros"];
-
-const paymentOptions = [
-  { value: "pix", label: "Pix", icon: Smartphone, color: "bg-success/10 border-success/30 text-success" },
-  { value: "credito", label: "Crédito", icon: CreditCard, color: "bg-primary/10 border-primary/30 text-primary" },
-  { value: "debito", label: "Débito", icon: CreditCard, color: "bg-accent/10 border-accent/30 text-accent" },
-];
+const statusColors: Record<string, string> = { pending: "text-warning", production: "text-primary", delivered: "text-success" };
 
 const Orders = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [orders, setOrders] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [tab, setTab] = useState<"list" | "calendar">("list");
 
+  // Form
+  const [clientName, setClientName] = useState("");
   const [clientId, setClientId] = useState("");
-  const [category, setCategory] = useState("");
-  const [size, setSize] = useState("");
-  const [filling, setFilling] = useState("");
-  const [topping, setTopping] = useState("");
-  const [dough, setDough] = useState("");
   const [eventDate, setEventDate] = useState("");
-  const [deliveryType, setDeliveryType] = useState("pickup");
+  const [eventTime, setEventTime] = useState("");
+  const [status, setStatus] = useState("pending");
+  const [orderProducts, setOrderProducts] = useState<{ product_id: string; name: string; price: number }[]>([]);
   const [paymentPercent, setPaymentPercent] = useState("100");
-  const [paymentMethod, setPaymentMethod] = useState("pix");
-  const [totalValue, setTotalValue] = useState("");
+  const [customPercent, setCustomPercent] = useState("");
   const [notes, setNotes] = useState("");
-
-  // Optional fees
-  const [cardFeeEnabled, setCardFeeEnabled] = useState(false);
-  const [cardFeeValue, setCardFeeValue] = useState("3");
-  const [decoFeeEnabled, setDecoFeeEnabled] = useState(false);
-  const [decoFeeValue, setDecoFeeValue] = useState("");
-  const [packFeeEnabled, setPackFeeEnabled] = useState(false);
-  const [packFeeValue, setPackFeeValue] = useState("");
-  const [topperFeeEnabled, setTopperFeeEnabled] = useState(false);
-  const [topperFeeValue, setTopperFeeValue] = useState("");
 
   const fetchData = async () => {
     if (!user) return;
-    const [{ data: ord }, { data: cli }] = await Promise.all([
+    const [{ data: ord }, { data: cli }, { data: prods }] = await Promise.all([
       supabase.from("orders").select("*, clients(name, whatsapp)").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("clients").select("*").eq("user_id", user.id).order("name"),
+      supabase.from("products").select("*").eq("user_id", user.id).order("name"),
     ]);
     setOrders(ord || []);
     setClients(cli || []);
+    setProducts(prods || []);
     setLoading(false);
   };
 
   useEffect(() => { fetchData(); }, [user]);
 
+  const totalValue = orderProducts.reduce((s, p) => s + p.price, 0);
+  const paidPercent = paymentPercent === "outro" ? Number(customPercent) || 0 : Number(paymentPercent);
+  const paidValue = totalValue * (paidPercent / 100);
+
   const handleCreate = async () => {
     if (!user) return;
-    const extras = [
-      cardFeeEnabled ? Number(cardFeeValue) || 0 : 0,
-      decoFeeEnabled ? Number(decoFeeValue) || 0 : 0,
-      packFeeEnabled ? Number(packFeeValue) || 0 : 0,
-      topperFeeEnabled ? Number(topperFeeValue) || 0 : 0,
-    ].reduce((a, b) => a + b, 0);
-
+    const finalClientName = clientId ? clients.find(c => c.id === clientId)?.name || clientName : clientName;
     const { error } = await supabase.from("orders").insert({
-      user_id: user.id, client_id: clientId || null, category, size, filling, topping, dough,
-      event_date: eventDate || null, delivery_type: deliveryType,
-      payment_percent: Number(paymentPercent), payment_method: paymentMethod,
-      total_value: (Number(totalValue) || 0) + extras, notes, status: "pending",
+      user_id: user.id,
+      client_id: clientId || null,
+      event_date: eventDate || null,
+      status,
+      payment_percent: paidPercent,
+      total_value: totalValue,
+      notes,
+      category: orderProducts.map(p => p.name).join(", ") || "Sem produtos",
     });
     if (error) { toast({ title: "Erro ao criar", variant: "destructive" }); return; }
     toast({ title: "Encomenda criada! 🎉" });
@@ -89,13 +76,13 @@ const Orders = () => {
   };
 
   const resetForm = () => {
-    setClientId(""); setCategory(""); setSize(""); setFilling(""); setTopping("");
-    setDough(""); setEventDate(""); setTotalValue(""); setNotes("");
-    setCardFeeEnabled(false); setDecoFeeEnabled(false); setPackFeeEnabled(false); setTopperFeeEnabled(false);
+    setClientName(""); setClientId(""); setEventDate(""); setEventTime("");
+    setStatus("pending"); setOrderProducts([]); setPaymentPercent("100");
+    setCustomPercent(""); setNotes("");
   };
 
-  const updateStatus = async (id: string, status: string) => {
-    await supabase.from("orders").update({ status }).eq("id", id);
+  const updateStatus = async (id: string, newStatus: string) => {
+    await supabase.from("orders").update({ status: newStatus }).eq("id", id);
     fetchData();
   };
 
@@ -103,161 +90,262 @@ const Orders = () => {
     await supabase.from("orders").delete().eq("id", id);
     toast({ title: "Encomenda excluída" });
     fetchData();
-  };
-
-  const duplicateOrder = async (order: any) => {
-    const { id, created_at, updated_at, clients: _, ...rest } = order;
-    await supabase.from("orders").insert({ ...rest, status: "pending" });
-    toast({ title: "Encomenda duplicada! ✅" });
-    fetchData();
+    setSelectedOrder(null);
   };
 
   const buildMessage = (order: any) => {
-    const clientName = order.clients?.name || "Cliente";
-    return `✅ *Confirmação de Pedido*\n\n👤 Cliente: ${clientName}\n📋 Categoria: ${order.category}\n📅 Data: ${order.event_date ? new Date(order.event_date).toLocaleDateString("pt-BR") : "A definir"}\n💰 Valor: R$ ${Number(order.total_value || 0).toFixed(2)}\n💳 Pagamento: ${order.payment_method}\n\n${order.notes ? `📝 Obs: ${order.notes}\n\n` : ""}⚠️ Pedido liberado após confirmação do pagamento.`;
+    const name = order.clients?.name || "Cliente";
+    return `✅ *Confirmação de Pedido*\n\n👤 Cliente: ${name}\n📋 ${order.category || ""}\n📅 Data: ${order.event_date ? new Date(order.event_date).toLocaleDateString("pt-BR") : "A definir"}\n💰 Total: R$ ${Number(order.total_value || 0).toFixed(2)}\nPagamento: ${order.payment_percent || 100}%\n\n${order.notes ? `📝 ${order.notes}` : ""}`;
   };
 
   const sendWhatsApp = (order: any) => {
     const phone = order.clients?.whatsapp?.replace(/\D/g, "") || "";
-    const msg = encodeURIComponent(buildMessage(order));
-    window.open(`https://wa.me/${phone}?text=${msg}`, "_blank");
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(buildMessage(order))}`, "_blank");
   };
 
-  const shareLink = (order: any) => {
-    const text = buildMessage(order);
-    navigator.clipboard.writeText(text);
-    toast({ title: "Texto copiado! Cole onde quiser 📋" });
+  const copyMessage = (order: any) => {
+    navigator.clipboard.writeText(buildMessage(order));
+    toast({ title: "Resumo copiado! 📋" });
   };
 
-  const filterByStatus = (status: string) => orders.filter((o) => o.status === status);
+  const pendingCount = orders.filter(o => o.status === "pending").length;
+  const productionCount = orders.filter(o => o.status === "production").length;
+  const todayCount = orders.filter(o => {
+    if (!o.event_date) return false;
+    return new Date(o.event_date).toDateString() === new Date().toDateString();
+  }).length;
+  const totalRevenue = orders.reduce((s, o) => s + Number(o.total_value || 0), 0);
 
   if (loading) return <div className="text-center py-16 text-muted-foreground">Carregando...</div>;
 
-  return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <div className="w-14 h-14 rounded-2xl gradient-rose flex items-center justify-center mx-auto shadow-lg">
-          <ShoppingBag className="w-7 h-7 text-white" />
+  // Order detail view
+  if (selectedOrder) {
+    const o = selectedOrder;
+    return (
+      <div className="space-y-5">
+        <button onClick={() => setSelectedOrder(null)} className="flex items-center gap-1 text-muted-foreground">
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <div>
+          <h2 className="text-lg font-extrabold text-foreground">Encomenda #{o.id.slice(0, 4).toUpperCase()}</h2>
+          <p className="text-sm text-muted-foreground">{o.clients?.name || "Cliente"}</p>
+          <span className={`text-xs font-bold ${statusColors[o.status]} bg-${o.status === "pending" ? "warning" : o.status === "production" ? "primary" : "success"}/10 px-2 py-0.5 rounded-full`}>
+            ● {statusLabels[o.status]}
+          </span>
         </div>
-        <h1 className="text-2xl font-extrabold text-foreground">Suas Encomendas</h1>
-        <p className="text-sm text-muted-foreground">Gerencie todos os seus pedidos em um só lugar 📦</p>
-      </div>
 
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogTrigger asChild>
-          <Button className="w-full rounded-xl h-12 btn-3d font-bold gap-2">+ Nova Encomenda</Button>
-        </DialogTrigger>
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Nova Encomenda</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            {clients.length > 0 && (
+        <Card className="card-elevated">
+          <CardContent className="p-4 space-y-2">
+            <p className="text-xs text-muted-foreground">Cliente & Entrega</p>
+            <p className="font-bold text-foreground text-lg">{o.clients?.name || "—"}</p>
+            {o.event_date && <p className="text-sm text-muted-foreground">📅 {new Date(o.event_date).toLocaleDateString("pt-BR")}</p>}
+          </CardContent>
+        </Card>
+
+        <Card className="card-elevated">
+          <CardContent className="p-4 space-y-2">
+            <p className="text-xs text-muted-foreground">Produtos</p>
+            <div className="flex justify-between">
+              <span className="font-bold text-foreground">Total</span>
+              <span className="font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-muted-foreground">Pagamento ({o.payment_percent || 100}%)</span>
+              <span className="text-primary font-bold">R$ {(Number(o.total_value || 0) * (o.payment_percent || 100) / 100).toFixed(2)}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Status actions */}
+        <div className="space-y-2">
+          {o.status === "pending" && (
+            <Button onClick={() => { updateStatus(o.id, "production"); setSelectedOrder({ ...o, status: "production" }); }} className="w-full rounded-xl h-12 btn-3d font-bold">
+              Iniciar Produção
+            </Button>
+          )}
+          {o.status === "production" && (
+            <Button onClick={() => { updateStatus(o.id, "delivered"); setSelectedOrder({ ...o, status: "delivered" }); }} className="w-full rounded-xl h-12 font-bold bg-success hover:bg-success/90 text-success-foreground">
+              Marcar Entregue ✅
+            </Button>
+          )}
+        </div>
+
+        <Button onClick={() => sendWhatsApp(o)} className="w-full rounded-xl h-12 font-bold bg-success hover:bg-success/90 text-success-foreground gap-2">
+          <MessageCircle className="w-5 h-5" /> Enviar resumo no WhatsApp
+        </Button>
+        <Button variant="outline" onClick={() => copyMessage(o)} className="w-full rounded-xl h-12 font-bold gap-2 text-primary">
+          <Link2 className="w-5 h-5" /> Copiar resumo
+        </Button>
+        <Button variant="outline" onClick={() => { deleteOrder(o.id); }} className="w-full rounded-xl h-12 font-bold gap-2 text-destructive">
+          <Trash2 className="w-5 h-5" /> Excluir encomenda
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-extrabold text-foreground flex items-center gap-2">📦 Encomendas</h1>
+          <p className="text-sm text-muted-foreground">Gerencie suas encomendas e entregas</p>
+        </div>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="rounded-xl h-10 btn-3d font-bold gap-1 px-5">+ Nova</Button>
+          </DialogTrigger>
+          <DialogContent className="max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Nova Encomenda</DialogTitle>
+              <p className="text-sm text-muted-foreground">Preencha os dados da encomenda</p>
+            </DialogHeader>
+            <div className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-muted-foreground">Cliente</label>
-                <Select value={clientId} onValueChange={setClientId}>
-                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Selecione o cliente..." /></SelectTrigger>
+                <label className="text-sm font-semibold text-foreground">Cliente</label>
+                {clients.length > 0 ? (
+                  <Select value={clientId} onValueChange={(v) => { setClientId(v); setClientName(clients.find(c => c.id === v)?.name || ""); }}>
+                    <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Nome do cliente" /></SelectTrigger>
+                    <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                ) : (
+                  <Input placeholder="Nome do cliente" value={clientName} onChange={(e) => setClientName(e.target.value)} className="h-12 rounded-xl" />
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-foreground">Data de entrega</label>
+                  <Input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} className="h-12 rounded-xl" />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-foreground">Horário</label>
+                  <Input type="time" value={eventTime} onChange={(e) => setEventTime(e.target.value)} className="h-12 rounded-xl" />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-foreground">Status</label>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                    <SelectItem value="pending">Pendente</SelectItem>
+                    <SelectItem value="production">Em Produção</SelectItem>
+                    <SelectItem value="delivered">Entregue</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-            )}
 
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-muted-foreground">Categoria</label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Selecione..." /></SelectTrigger>
-                <SelectContent>{orderCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-
-            <Input placeholder="Tamanho" value={size} onChange={(e) => setSize(e.target.value)} className="h-12 rounded-xl" />
-            <Input placeholder="Massa" value={dough} onChange={(e) => setDough(e.target.value)} className="h-12 rounded-xl" />
-            <Input placeholder="Recheio" value={filling} onChange={(e) => setFilling(e.target.value)} className="h-12 rounded-xl" />
-            <Input placeholder="Cobertura" value={topping} onChange={(e) => setTopping(e.target.value)} className="h-12 rounded-xl" />
-            <Input type="datetime-local" value={eventDate} onChange={(e) => setEventDate(e.target.value)} className="h-12 rounded-xl" />
-
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-muted-foreground">Como vai receber?</label>
-              <div className="grid grid-cols-3 gap-2">
-                {paymentOptions.map(pm => (
-                  <button key={pm.value} onClick={() => setPaymentMethod(pm.value)}
-                    className={`p-3 rounded-xl border-2 text-center transition-all ${paymentMethod === pm.value ? pm.color + " border-current font-bold shadow-md" : "border-border bg-secondary/30 text-muted-foreground"}`}
-                    style={paymentMethod === pm.value ? { boxShadow: "0 3px 0 0 currentColor" } : {}}>
-                    <pm.icon className="w-5 h-5 mx-auto mb-1" />
-                    <span className="text-xs font-medium">{pm.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <Input type="number" placeholder="Valor total (R$)" value={totalValue} onChange={(e) => setTotalValue(e.target.value)} className="h-12 rounded-xl text-lg font-bold" />
-
-            <p className="text-xs font-bold text-foreground mt-2">Taxas opcionais</p>
-            <div className="space-y-2">
-              {[
-                { label: "Taxa da maquininha (%)", enabled: cardFeeEnabled, setEnabled: setCardFeeEnabled, value: cardFeeValue, setValue: setCardFeeValue, suffix: "%" },
-                { label: "Taxa de decoração (R$)", enabled: decoFeeEnabled, setEnabled: setDecoFeeEnabled, value: decoFeeValue, setValue: setDecoFeeValue, suffix: "R$" },
-                { label: "Taxa de embalagem (R$)", enabled: packFeeEnabled, setEnabled: setPackFeeEnabled, value: packFeeValue, setValue: setPackFeeValue, suffix: "R$" },
-                { label: "Taxa topo de bolo (R$)", enabled: topperFeeEnabled, setEnabled: setTopperFeeEnabled, value: topperFeeValue, setValue: setTopperFeeValue, suffix: "R$" },
-              ].map(fee => (
-                <div key={fee.label} className="flex items-center justify-between bg-secondary/40 p-2.5 rounded-xl">
-                  <div className="flex items-center gap-2">
-                    <Switch checked={fee.enabled} onCheckedChange={fee.setEnabled} />
-                    <span className="text-xs font-medium">{fee.label}</span>
-                  </div>
-                  {fee.enabled && <Input type="number" value={fee.value} onChange={(e) => fee.setValue(e.target.value)} className="w-20 h-8 rounded-lg text-sm text-center" />}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-foreground">Produtos</label>
+                  {products.length > 0 && (
+                    <Select onValueChange={(id) => {
+                      const p = products.find(pr => pr.id === id);
+                      if (p) setOrderProducts([...orderProducts, { product_id: p.id, name: p.name, price: Number(p.suggested_price || 0) }]);
+                    }}>
+                      <SelectTrigger className="h-9 rounded-full bg-secondary text-primary text-xs font-bold border-0 px-4 w-auto">
+                        <span>+ Adicionar Produto</span>
+                      </SelectTrigger>
+                      <SelectContent>{products.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - R$ {Number(p.suggested_price || 0).toFixed(2)}</SelectItem>)}</SelectContent>
+                    </Select>
+                  )}
                 </div>
-              ))}
-            </div>
-
-            <Input placeholder="Observações" value={notes} onChange={(e) => setNotes(e.target.value)} className="h-12 rounded-xl" />
-            <Button onClick={handleCreate} className="w-full rounded-xl h-12 btn-3d font-bold">Criar Encomenda</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <Tabs defaultValue="pending">
-        <TabsList className="grid grid-cols-3 w-full h-12 rounded-xl">
-          <TabsTrigger value="pending" className="rounded-xl text-xs font-bold">Pendentes ({filterByStatus("pending").length})</TabsTrigger>
-          <TabsTrigger value="production" className="rounded-xl text-xs font-bold">Produção ({filterByStatus("production").length})</TabsTrigger>
-          <TabsTrigger value="delivered" className="rounded-xl text-xs font-bold">Entregues ({filterByStatus("delivered").length})</TabsTrigger>
-        </TabsList>
-        {["pending", "production", "delivered"].map((status) => (
-          <TabsContent key={status} value={status}>
-            {filterByStatus(status).length === 0 ? (
-              <EmptyState icon={ShoppingBag} title={`Nenhuma encomenda ${statusLabels[status]?.toLowerCase()}`} description="Suas encomendas aparecerão aqui." />
-            ) : (
-              <div className="grid gap-3 mt-4">
-                {filterByStatus(status).map((o) => (
-                  <Card key={o.id} className="card-elevated overflow-hidden">
-                    <div className={`h-1.5 ${status === "pending" ? "bg-warning" : status === "production" ? "bg-primary" : "bg-success"}`} />
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-extrabold text-foreground text-lg capitalize">{o.category}</p>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${statusColors[status]}`}>{statusLabels[status]}</span>
-                          {o.clients?.name && <p className="text-sm text-muted-foreground mt-1">👤 {o.clients.name}</p>}
-                          {o.filling && <p className="text-xs text-muted-foreground">Recheio: {o.filling}</p>}
-                          {o.event_date && <p className="text-xs text-muted-foreground">📅 {new Date(o.event_date).toLocaleDateString("pt-BR")}</p>}
-                        </div>
-                        <p className="text-xl font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</p>
-                      </div>
-                      <div className="flex gap-1 flex-wrap">
-                        {status === "pending" && <Button size="sm" onClick={() => updateStatus(o.id, "production")} className="rounded-xl text-xs btn-3d flex-1">Iniciar produção</Button>}
-                        {status === "production" && <Button size="sm" onClick={() => updateStatus(o.id, "delivered")} className="rounded-xl text-xs bg-success hover:bg-success/90 text-success-foreground flex-1">Marcar entregue</Button>}
-                        <Button size="sm" variant="outline" onClick={() => sendWhatsApp(o)} className="rounded-xl text-xs gap-1"><MessageCircle className="w-3.5 h-3.5 text-success" /></Button>
-                        <Button size="sm" variant="outline" onClick={() => shareLink(o)} className="rounded-xl text-xs gap-1"><Link2 className="w-3.5 h-3.5" /></Button>
-                        <Button size="sm" variant="outline" onClick={() => duplicateOrder(o)} className="rounded-xl text-xs"><Copy className="w-3.5 h-3.5" /></Button>
-                        <Button size="sm" variant="outline" onClick={() => deleteOrder(o.id)} className="rounded-xl text-xs text-destructive hover:text-destructive"><Trash2 className="w-3.5 h-3.5" /></Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                {orderProducts.map((op, idx) => (
+                  <div key={idx} className="flex items-center gap-2 bg-secondary/40 p-2 rounded-xl">
+                    <span className="text-sm flex-1">{op.name}</span>
+                    <span className="text-sm font-bold text-primary">R$ {op.price.toFixed(2)}</span>
+                    <button onClick={() => setOrderProducts(orderProducts.filter((_, i) => i !== idx))} className="text-destructive p-1">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 ))}
               </div>
-            )}
-          </TabsContent>
-        ))}
-      </Tabs>
+
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-foreground">💰 Valor Pago</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {["50", "100"].map(v => (
+                    <button key={v} onClick={() => setPaymentPercent(v)}
+                      className={`h-10 rounded-xl font-bold text-sm transition-all ${paymentPercent === v ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-muted-foreground"}`}>
+                      {v}%
+                    </button>
+                  ))}
+                  <button onClick={() => setPaymentPercent("outro")}
+                    className={`h-10 rounded-xl font-bold text-sm transition-all ${paymentPercent === "outro" ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-muted-foreground"}`}>
+                    Outro
+                  </button>
+                </div>
+                {paymentPercent === "outro" && (
+                  <Input type="number" placeholder="%" value={customPercent} onChange={(e) => setCustomPercent(e.target.value)} className="h-10 rounded-xl" />
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-foreground">Observações (opcional)</label>
+                <Textarea placeholder="Informações adicionais..." value={notes} onChange={(e) => setNotes(e.target.value)} className="rounded-xl" />
+              </div>
+
+              <Button onClick={handleCreate} className="w-full rounded-xl h-12 btn-3d font-bold gap-2">
+                <ShoppingBag className="w-5 h-5" /> Salvar Encomenda
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Status cards */}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-pink-light p-4 rounded-2xl">
+          <p className="text-2xl font-extrabold text-primary">{pendingCount}</p>
+          <p className="text-xs text-muted-foreground">Pendentes</p>
+        </div>
+        <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-2xl">
+          <p className="text-2xl font-extrabold text-blue-600 dark:text-blue-400">{productionCount}</p>
+          <p className="text-xs text-muted-foreground">Em Produção</p>
+        </div>
+        <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-2xl">
+          <p className="text-2xl font-extrabold text-success">{todayCount}</p>
+          <p className="text-xs text-muted-foreground">Entregas Hoje</p>
+        </div>
+        <div className="bg-warning/10 p-4 rounded-2xl">
+          <p className="text-2xl font-extrabold text-warning">R$ {totalRevenue.toFixed(2)}</p>
+          <p className="text-xs text-muted-foreground">Lucro Total</p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="grid grid-cols-2 gap-0 bg-muted rounded-xl p-1">
+        <button onClick={() => setTab("list")} className={`h-10 rounded-xl text-sm font-bold transition-all ${tab === "list" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground"}`}>
+          📋 Lista
+        </button>
+        <button onClick={() => setTab("calendar")} className={`h-10 rounded-xl text-sm font-bold transition-all ${tab === "calendar" ? "bg-primary text-primary-foreground shadow" : "text-muted-foreground"}`}>
+          📅 Calendário
+        </button>
+      </div>
+
+      {/* Order list */}
+      {orders.length === 0 ? (
+        <EmptyState icon={ShoppingBag} title="Nenhuma encomenda ainda" description="Crie sua primeira encomenda." />
+      ) : (
+        <div className="space-y-3">
+          {orders.map((o) => (
+            <Card key={o.id} className="card-elevated cursor-pointer" onClick={() => setSelectedOrder(o)}>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="font-extrabold text-foreground">{o.clients?.name || "Cliente"}</p>
+                  <p className="text-xs text-muted-foreground">{o.category || "—"}</p>
+                  <p className="text-xs text-muted-foreground">{orderProducts.length || 0} produtos</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</p>
+                  <span className={`text-xs font-bold ${statusColors[o.status]}`}>{statusLabels[o.status]}</span>
+                  <p className="text-xs text-primary">Pago: {o.payment_percent || 100}%</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
