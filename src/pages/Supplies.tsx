@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, Trash2, Pencil, Copy, Milk, Box, BookOpen } from "lucide-react";
+import { Package, Trash2, Pencil, Copy, Milk, Box } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
@@ -19,18 +19,15 @@ const packagingUnits = ["unidade", "pacote", "caixa fechada"];
 const Supplies = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "ingredients";
   const [activeTab, setActiveTab] = useState(initialTab);
   const [ingredients, setIngredients] = useState<any[]>([]);
   const [packagingItems, setPackagingItems] = useState<any[]>([]);
-  const [recipes, setRecipes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogType, setDialogType] = useState<"ingredient" | "packaging">("ingredient");
-
 
   const [name, setName] = useState("");
   const [unit, setUnit] = useState("g");
@@ -43,14 +40,12 @@ const Supplies = () => {
   const fetchAll = async () => {
     if (!user) return;
     setLoading(true);
-    const [{ data: ing }, { data: pkg }, { data: rec }] = await Promise.all([
+    const [{ data: ing }, { data: pkg }] = await Promise.all([
       supabase.from("ingredients").select("*").eq("user_id", user.id).order("name"),
       supabase.from("packaging").select("*").eq("user_id", user.id).order("name"),
-      supabase.from("recipes").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
     ]);
     setIngredients(ing || []);
     setPackagingItems(pkg || []);
-    setRecipes(rec || []);
     setLoading(false);
   };
 
@@ -107,26 +102,6 @@ const Supplies = () => {
     toast({ title: "Duplicado! ✅" }); fetchAll();
   };
 
-  const handleDeleteRecipe = async (id: string) => {
-    await supabase.from("recipes").delete().eq("id", id);
-    toast({ title: "Receita excluída" }); fetchAll();
-  };
-
-  const handleDuplicateRecipe = async (r: any) => {
-    const { id, created_at, updated_at, ...rest } = r;
-    await supabase.from("recipes").insert({ ...rest, name: `${rest.name} (cópia)` });
-    toast({ title: "Receita duplicada! ✅" }); fetchAll();
-  };
-
-  const openEditRecipe = (r: any) => {
-    // Navigate to pricing page in recipe mode with pre-filled data
-    navigate(`/pricing?edit=recipe&id=${r.id}`);
-  };
-
-  const handleSaveRecipe = async () => {
-    // No longer needed - editing happens in Pricing page
-  };
-
   const renderItemList = (items: any[], table: "ingredients" | "packaging", type: "ingredient" | "packaging") => {
     if (items.length === 0) {
       return <EmptyState icon={type === "ingredient" ? Milk : Box} title={`Nenhum ${type === "ingredient" ? "ingrediente" : "embalagem"} cadastrado`} description="Comece cadastrando seus insumos." actionLabel="Adicionar" onAction={() => openNewDialog(type)} />;
@@ -167,14 +142,13 @@ const Supplies = () => {
           <Package className="w-7 h-7 text-white" />
         </div>
         <h1 className="text-2xl font-extrabold text-foreground">Insumos</h1>
-        <p className="text-sm text-muted-foreground">Gerencie ingredientes, embalagens e receitas 🧁</p>
+        <p className="text-sm text-muted-foreground">Gerencie ingredientes e embalagens 📦</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 w-full h-12 rounded-xl">
+        <TabsList className="grid grid-cols-2 w-full h-12 rounded-xl">
           <TabsTrigger value="ingredients" className="rounded-xl font-bold text-xs">🥄 Ingredientes</TabsTrigger>
           <TabsTrigger value="packaging" className="rounded-xl font-bold text-xs">📦 Embalagens</TabsTrigger>
-          <TabsTrigger value="recipes" className="rounded-xl font-bold text-xs">📋 Receitas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="ingredients" className="space-y-4 mt-4">
@@ -186,48 +160,8 @@ const Supplies = () => {
           <Button onClick={() => openNewDialog("packaging")} className="w-full rounded-xl h-12 btn-3d text-base font-bold gap-2">+ Adicionar embalagem</Button>
           {renderItemList(packagingItems, "packaging", "packaging")}
         </TabsContent>
-
-        <TabsContent value="recipes" className="space-y-4 mt-4">
-          {recipes.length === 0 ? (
-            <EmptyState icon={BookOpen} title="Nenhuma receita cadastrada" description="Precifique receitas na aba Precificação." />
-          ) : (
-            <div className="grid gap-3">
-              {recipes.map((r) => {
-                const ingCount = Array.isArray(r.ingredients_json) ? r.ingredients_json.length : 0;
-                const yieldInfo = r.yield_quantity && r.yield_unit ? `${r.yield_quantity} ${r.yield_unit}` : null;
-                const costPerUnit = yieldInfo && Number(r.yield_quantity) > 0 ? Number(r.total_cost || 0) / Number(r.yield_quantity) : null;
-                return (
-                  <Card key={r.id} className="card-elevated">
-                    <CardContent className="p-4 flex items-center gap-3">
-                      {(r as any).photo_url ? (
-                        <img src={(r as any).photo_url} alt={r.name} className="w-14 h-14 rounded-xl object-cover shrink-0 shadow-sm" />
-                      ) : (
-                        <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-                          <BookOpen className="w-6 h-6 text-muted-foreground" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-foreground truncate">{r.name}</p>
-                        <p className="text-xs text-muted-foreground">{ingCount} ingrediente(s)</p>
-                        {yieldInfo && <p className="text-xs text-muted-foreground">Rendimento: {yieldInfo}</p>}
-                        <p className="text-sm font-bold text-success">Custo: R$ {Number(r.total_cost || 0).toFixed(2)}</p>
-                        {costPerUnit !== null && <p className="text-xs font-bold text-primary">R$ {costPerUnit.toFixed(2)} por {r.yield_unit}</p>}
-                      </div>
-                      <div className="flex flex-col gap-1 shrink-0">
-                        <Button variant="ghost" size="icon" onClick={() => openEditRecipe(r)}><Pencil className="w-4 h-4 text-primary" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDuplicateRecipe(r)}><Copy className="w-4 h-4 text-muted-foreground" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDeleteRecipe(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
-        </TabsContent>
       </Tabs>
 
-      {/* Shared Dialog for ingredients/packaging */}
       <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
         <DialogContent>
           <DialogHeader><DialogTitle>{editingId ? "Editar" : "Novo"} {dialogType === "ingredient" ? "ingrediente" : "embalagem"}</DialogTitle></DialogHeader>
@@ -250,7 +184,6 @@ const Supplies = () => {
           </div>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 };
