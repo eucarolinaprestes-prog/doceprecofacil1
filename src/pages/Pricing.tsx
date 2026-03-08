@@ -651,7 +651,6 @@ const Pricing = () => {
                   </Select>
                   <CurrencyInput placeholder="R$ total" value={manualIng.cost} onValueChange={(v) => setManualIng({ ...manualIng, cost: v })} className="h-11 rounded-xl flex-1" />
                 </div>
-                <Hint>Informe a quantidade total comprada e o valor total pago. Ex: 1000g por R$ 12.00</Hint>
                 <Button onClick={addManualIngredient} className="w-full rounded-xl h-10 font-bold">Adicionar</Button>
               </CardContent></Card>
             )}
