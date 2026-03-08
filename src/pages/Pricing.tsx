@@ -36,7 +36,7 @@ const yieldUnits = [
 ];
 
 interface StockItem { id: string; name: string; unit: string; cost_per_unit: number; quantity_purchased: number; total_cost: number; }
-interface SelectedItem { id: string; name: string; unit: string; cost_per_unit: number; quantity_used: number; isManual?: boolean; }
+interface SelectedItem { id: string; name: string; unit: string; cost_per_unit: number; quantity_used: string; isManual?: boolean; }
 
 const CHART_COLORS = ["hsl(340, 75%, 55%)", "hsl(40, 80%, 55%)", "hsl(152, 70%, 38%)"];
 
@@ -138,7 +138,7 @@ const Pricing = () => {
               name: item.name,
               unit: item.unit,
               cost_per_unit: Number(item.cost_per_unit) || 0,
-              quantity_used: Number(item.quantity_used) || 0,
+              quantity_used: String(Number(item.quantity_used) || 0),
               isManual: true,
             })));
           }
@@ -151,7 +151,7 @@ const Pricing = () => {
   const addFromStock = (item: StockItem, type: "ingredient" | "packaging") => {
     const list = type === "ingredient" ? selectedIngredients : selectedPackaging;
     if (list.find(i => i.id === item.id)) return;
-    const newItem = { id: item.id, name: item.name, unit: item.unit, cost_per_unit: item.cost_per_unit, quantity_used: 0 };
+    const newItem: SelectedItem = { id: item.id, name: item.name, unit: item.unit, cost_per_unit: item.cost_per_unit, quantity_used: "" };
     type === "ingredient" ? setSelectedIngredients([...list, newItem]) : setSelectedPackaging([...list, newItem]);
   };
 
@@ -160,7 +160,7 @@ const Pricing = () => {
     setSelectedIngredients([...selectedIngredients, {
       id: `manual-${Date.now()}`, name: manualIng.name, unit: manualIng.unit,
       cost_per_unit: Number(manualIng.cost) / (Number(manualIng.qty) || 1),
-      quantity_used: Number(manualIng.qty) || 1, isManual: true,
+      quantity_used: manualIng.qty || "1", isManual: true,
     }]);
     setManualIng({ name: "", qty: "", unit: "g", cost: "" });
     setShowIngManual(false);
@@ -171,13 +171,13 @@ const Pricing = () => {
     setSelectedPackaging([...selectedPackaging, {
       id: `manual-${Date.now()}`, name: manualPkg.name, unit: manualPkg.unit,
       cost_per_unit: Number(manualPkg.cost) / (Number(manualPkg.qty) || 1),
-      quantity_used: Number(manualPkg.qty) || 1, isManual: true,
+      quantity_used: manualPkg.qty || "1", isManual: true,
     }]);
     setManualPkg({ name: "", qty: "", unit: "un", cost: "" });
     setShowPkgManual(false);
   };
 
-  const updateSelectedQty = (id: string, qty: number, type: "ingredient" | "packaging") => {
+  const updateSelectedQty = (id: string, qty: string, type: "ingredient" | "packaging") => {
     const setter = type === "ingredient" ? setSelectedIngredients : setSelectedPackaging;
     const list = type === "ingredient" ? selectedIngredients : selectedPackaging;
     setter(list.map(i => i.id === id ? { ...i, quantity_used: qty } : i));
@@ -202,8 +202,8 @@ const Pricing = () => {
   };
 
   // Calculations
-  const ingredientsCost = selectedIngredients.reduce((s, i) => s + i.cost_per_unit * i.quantity_used, 0);
-  const packagingCost = selectedPackaging.reduce((s, i) => s + i.cost_per_unit * i.quantity_used, 0);
+  const ingredientsCost = selectedIngredients.reduce((s, i) => s + i.cost_per_unit * (Number(i.quantity_used) || 0), 0);
+  const packagingCost = selectedPackaging.reduce((s, i) => s + i.cost_per_unit * (Number(i.quantity_used) || 0), 0);
   const laborCost = hourlyRate * (Number(prepTime) || 0) / 60;
   const fixedCostValue = totalFixedCosts * (fixedCostPercent[0] / 100);
   const baseCost = ingredientsCost + packagingCost + laborCost + fixedCostValue;
@@ -288,7 +288,7 @@ const Pricing = () => {
   /** Item row: name | qty | value on ONE line, small actions below */
   const ItemRow = ({ item, type }: { item: SelectedItem; type: "ingredient" | "packaging" }) => {
     const isEditing = editingId === item.id;
-    const cost = item.cost_per_unit * item.quantity_used;
+    const cost = item.cost_per_unit * (Number(item.quantity_used) || 0);
 
     return (
       <div className="bg-secondary/40 p-3 rounded-xl space-y-1.5">
@@ -309,7 +309,7 @@ const Pricing = () => {
             inputMode="decimal"
             placeholder="Qtd"
             value={item.quantity_used || ""}
-            onChange={(e) => updateSelectedQty(item.id, Number(e.target.value) || 0, type)}
+            onChange={(e) => updateSelectedQty(item.id, e.target.value, type)}
             className="w-[72px] h-9 rounded-lg text-sm text-center bg-background shrink-0"
           />
           <span className="text-xs text-muted-foreground shrink-0 w-6">{item.unit}</span>
@@ -331,9 +331,6 @@ const Pricing = () => {
           </button>
         </div>
 
-        {item.quantity_used === 0 && !isEditing && (
-          <Hint>Coloque a quantidade que você usa nessa receita</Hint>
-        )}
       </div>
     );
   };
@@ -433,7 +430,6 @@ const Pricing = () => {
           <div className="space-y-5">
             <div>
               <h2 className="text-xl font-extrabold text-foreground">Ingredientes da receita</h2>
-              <Hint>Informe a quantidade de cada ingrediente usado</Hint>
             </div>
 
             <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
@@ -638,7 +634,7 @@ const Pricing = () => {
               </div>
             </div>
 
-            <Hint>Informe a quantidade de cada ingrediente usado nessa receita</Hint>
+            
 
             {showIngManual && (
               <Card className="border border-border"><CardContent className="p-4 space-y-3">
