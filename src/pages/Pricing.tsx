@@ -36,7 +36,7 @@ const yieldUnits = [
 ];
 
 interface StockItem { id: string; name: string; unit: string; cost_per_unit: number; quantity_purchased: number; total_cost: number; }
-interface SelectedItem { id: string; name: string; unit: string; cost_per_unit: number; quantity_used: number; isManual?: boolean; }
+interface SelectedItem { id: string; name: string; unit: string; cost_per_unit: number; quantity_used: string; isManual?: boolean; }
 
 const CHART_COLORS = ["hsl(340, 75%, 55%)", "hsl(40, 80%, 55%)", "hsl(152, 70%, 38%)"];
 
