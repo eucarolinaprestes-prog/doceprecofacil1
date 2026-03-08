@@ -332,24 +332,6 @@ const SettingsPage = () => {
           </Card>
         </TabsContent>
 
-        {/* NOTIFICATIONS TAB */}
-        <TabsContent value="notifications" className="space-y-4 mt-4">
-          <Card className="card-elevated">
-            <CardContent className="p-5 space-y-4">
-              {[
-                { label: "Lembretes de encomendas", icon: "📦" },
-                { label: "Lembretes de produção", icon: "👩‍🍳" },
-                { label: "Alertas de estoque baixo", icon: "⚠️" },
-                { label: "Resumo semanal", icon: "📊" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between">
-                  <span className="text-sm text-foreground">{item.icon} {item.label}</span>
-                  <Switch />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
 
       <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl h-14 btn-3d font-bold text-base gap-2">
