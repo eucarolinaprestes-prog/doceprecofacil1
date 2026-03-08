@@ -162,27 +162,6 @@ const Shopping = () => {
     setTimeout(() => saveAll(), 400);
   };
 
-  const clearAllLists = async () => {
-    if (!user) return;
-    const today = new Date().toISOString().slice(0, 10);
-    // Delete all today's items
-    const todayIds = allItems
-      .filter(i => i.created_at?.slice(0, 10) === today)
-      .map(i => i.id)
-      .filter(Boolean);
-
-    if (todayIds.length > 0) {
-      await supabase.from("shopping_list").delete().in("id", todayIds as string[]);
-    }
-
-    // Reset all store items
-    const map: Record<string, ShoppingItem[]> = {};
-    storeOptions.forEach(store => { map[store] = [emptyRow()]; });
-    setStoreItems(map);
-    fetchAllItems();
-    toast({ title: "Lista limpa com sucesso!" });
-  };
-
   const grandTotal = items.reduce((sum, i) => sum + (i.quantity * i.unit_price), 0);
 
   // History: group by date and store
@@ -294,18 +273,30 @@ const Shopping = () => {
             <p className="text-sm font-medium opacity-90">Total — {selectedStore}</p>
             <p className="text-3xl font-extrabold">R$ {grandTotal.toFixed(2)}</p>
           </div>
+          {/* Action buttons */}
+          <div className="space-y-2">
+            <Button
+              onClick={() => { saveAll(); toast({ title: "Compra finalizada!", description: `${selectedStore} salvo no histórico.` }); }}
+              className="w-full rounded-2xl h-12 font-bold text-sm bg-emerald-500 hover:bg-emerald-600 text-white"
+              style={{ boxShadow: "0 4px 0 0 hsl(150 50% 30%)" }}
+            >
+              ✅ Finalizar Compras
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!selectedStore) return;
+                setStoreItems(prev => ({ ...prev, [selectedStore]: [emptyRow()] }));
+                toast({ title: "Carrinho limpo!" });
+              }}
+              className="w-full rounded-2xl h-12 font-bold text-sm border-primary text-primary hover:bg-primary/10"
+            >
+              🧹 Limpar Carrinho
+            </Button>
+          </div>
         </>
       )}
-
-      {/* Clear list button */}
-      <Button
-        variant="destructive"
-        onClick={clearAllLists}
-        className="w-full rounded-2xl h-12 font-bold text-sm"
-      >
-        <Trash2 className="w-4 h-4 mr-2" />
-        Limpar Lista Completa
-      </Button>
 
       {/* History toggle */}
       <button
@@ -316,7 +307,7 @@ const Shopping = () => {
             : "bg-primary/10 text-primary border-primary/20"
         }`}
       >
-        Histórico de Compras
+        📊 Histórico de Compras
       </button>
 
       {/* History */}
