@@ -114,26 +114,6 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Chart */}
-      {(totalIncome > 0 || totalExpense > 0) && (
-        <Card className="card-elevated">
-          <CardContent className="p-4">
-            <p className="text-sm font-bold text-foreground mb-3">📈 Gráfico do mês</p>
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={chartData}>
-                <XAxis dataKey="name" tick={{ fontSize: 11, fontWeight: 700 }} axisLine={false} tickLine={false} />
-                <YAxis hide />
-                <Tooltip formatter={(v: number) => `R$ ${v.toFixed(2)}`} />
-                <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                  {chartData.map((d, i) => (
-                    <Cell key={i} fill={d.color} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Botões de ação */}
       <div className="grid grid-cols-2 gap-3">
