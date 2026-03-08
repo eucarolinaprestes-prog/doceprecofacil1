@@ -208,6 +208,8 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      <FinanceDialog type={dialogType} onClose={() => setDialogType(null)} onSaved={fetchData} />
     </div>
   );
 };
