@@ -825,25 +825,25 @@ const Pricing = () => {
               <Star className="w-5 h-5 text-success" />
               <h3 className="font-extrabold text-foreground">Parabéns, você precificou! 🎉</h3>
             </div>
-            <p className="text-sm text-muted-foreground">Agora tenha atenção em como dividir esse valor:</p>
+            <p className="text-sm text-foreground">Agora tenha atenção em como dividir esse valor:</p>
             <div className="space-y-2">
               <div className="flex justify-between text-sm bg-background p-3 rounded-xl">
-                <span className="text-muted-foreground">💰 Custos (insumos + fixos)</span>
-                <span className="font-bold">R$ {baseCost.toFixed(2)}</span>
+                <span className="text-foreground">💰 Custos (insumos + fixos)</span>
+                <span className="font-bold text-foreground">R$ {baseCost.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm bg-background p-3 rounded-xl">
-                <span className="text-muted-foreground">👩‍🍳 Pró-labore (sua hora)</span>
-                <span className="font-bold">R$ {laborCost.toFixed(2)}</span>
+                <span className="text-foreground">👩‍🍳 Pró-labore (sua hora)</span>
+                <span className="font-bold text-foreground">R$ {laborCost.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm bg-background p-3 rounded-xl">
-                <span className="text-muted-foreground">📈 Lucro da empresa</span>
+                <span className="text-foreground">📈 Lucro da empresa</span>
                 <span className="font-bold text-success">R$ {(profitValue - laborCost > 0 ? profitValue - laborCost : profitValue).toFixed(2)}</span>
               </div>
             </div>
             <div className="space-y-1.5 pt-2">
-              <p className="text-xs text-muted-foreground">💡 <strong>Dica:</strong> Separe o lucro da empresa do seu pró-labore. O lucro da empresa deve ser reinvestido no negócio.</p>
-              <p className="text-xs text-muted-foreground">💡 <strong>Dica:</strong> Reserve pelo menos 10% do faturamento para um fundo de emergência.</p>
-              <p className="text-xs text-muted-foreground">💡 <strong>Dica:</strong> Nunca cobre abaixo do custo total, mesmo para amigos e família. Ofereça descontos pequenos no lucro.</p>
+              <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Separe o lucro da empresa do seu pró-labore. O lucro da empresa deve ser reinvestido no negócio.</p>
+              <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Reserve pelo menos 10% do faturamento para um fundo de emergência.</p>
+              <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Nunca cobre abaixo do custo total, mesmo para amigos e família. Ofereça descontos pequenos no lucro.</p>
             </div>
           </CardContent></Card>
 
