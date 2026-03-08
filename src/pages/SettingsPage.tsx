@@ -311,7 +311,7 @@ const SettingsPage = () => {
                   <Input placeholder="Especifique o custo..." value={newVarCustomName} onChange={(e) => setNewVarCustomName(e.target.value)} className="h-11 rounded-xl" />
                 )}
                 <div className="flex gap-2">
-                  <Input type="number" placeholder="Valor (R$)" value={newVarAmount} onChange={(e) => setNewVarAmount(e.target.value)} className="h-11 rounded-xl flex-1" />
+                  <CurrencyInput placeholder="Valor (R$)" value={newVarAmount} onValueChange={setNewVarAmount} className="h-11 rounded-xl flex-1" />
                   <Select value={newVarFreq} onValueChange={setNewVarFreq}>
                     <SelectTrigger className="h-11 rounded-xl w-28"><SelectValue /></SelectTrigger>
                     <SelectContent>{frequencies.map(f => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}</SelectContent>
