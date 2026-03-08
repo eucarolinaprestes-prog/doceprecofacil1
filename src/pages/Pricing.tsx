@@ -816,54 +816,35 @@ const Pricing = () => {
           </div>
 
           {chartData.length > 0 && (
-            <Card className="border border-border"><CardContent className="p-4">
-              <p className="text-sm font-bold text-center mb-3">Composição do preço</p>
+            <Card className="border border-success/30 bg-success/5"><CardContent className="p-4 space-y-4">
+              <div className="flex items-center gap-2">
+                <Star className="w-5 h-5 text-success" />
+                <p className="text-sm font-extrabold text-foreground">Parabéns, você precificou! 🎉</p>
+              </div>
               <ResponsiveContainer width="100%" height={180}>
                 <PieChart><Pie data={chartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} innerRadius={40} paddingAngle={2}>
                   {chartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
                 </Pie></PieChart>
               </ResponsiveContainer>
-              <div className="space-y-1.5 mt-2">
+              <div className="space-y-1.5">
                 {chartData.map((d, i) => (
                   <div key={d.name} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS[i] }} />
-                      <span className="text-muted-foreground">{d.name}</span>
+                      <span className="text-foreground">{d.name}</span>
                     </div>
                     <span className="font-bold">R$ {d.value.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
+              <div className="border-t border-success/20 pt-3 space-y-1.5">
+                <p className="text-sm text-foreground font-semibold">Agora tenha atenção em como dividir esse valor:</p>
+                <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Separe o lucro da empresa do seu pró-labore. O lucro da empresa deve ser reinvestido no negócio.</p>
+                <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Reserve pelo menos 10% do faturamento para um fundo de emergência.</p>
+                <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Nunca cobre abaixo do custo total, mesmo para amigos e família. Ofereça descontos pequenos no lucro.</p>
+              </div>
             </CardContent></Card>
           )}
-
-          {/* Dicas abaixo do gráfico */}
-          <Card className="border border-success/30 bg-success/5"><CardContent className="p-5 space-y-3">
-            <div className="flex items-center gap-2 mb-1">
-              <Star className="w-5 h-5 text-success" />
-              <h3 className="font-extrabold text-foreground">Parabéns, você precificou! 🎉</h3>
-            </div>
-            <p className="text-sm text-foreground">Agora tenha atenção em como dividir esse valor:</p>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm bg-background p-3 rounded-xl">
-                <span className="text-foreground">💰 Custos (insumos + fixos)</span>
-                <span className="font-bold text-foreground">R$ {baseCost.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm bg-background p-3 rounded-xl">
-                <span className="text-foreground">👩‍🍳 Pró-labore (sua hora)</span>
-                <span className="font-bold text-foreground">R$ {laborCost.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm bg-background p-3 rounded-xl">
-                <span className="text-foreground">📈 Lucro da empresa</span>
-                <span className="font-bold text-success">R$ {(profitValue - laborCost > 0 ? profitValue - laborCost : profitValue).toFixed(2)}</span>
-              </div>
-            </div>
-            <div className="space-y-1.5 pt-2">
-              <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Separe o lucro da empresa do seu pró-labore. O lucro da empresa deve ser reinvestido no negócio.</p>
-              <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Reserve pelo menos 10% do faturamento para um fundo de emergência.</p>
-              <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Nunca cobre abaixo do custo total, mesmo para amigos e família. Ofereça descontos pequenos no lucro.</p>
-            </div>
-          </CardContent></Card>
         </div>
       )}
 
