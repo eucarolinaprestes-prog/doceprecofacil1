@@ -539,6 +539,7 @@ export type Database = {
           id: string
           ingredient_name: string
           quantity: number | null
+          store: string | null
           total: number | null
           unit_price: number | null
           user_id: string
@@ -548,6 +549,7 @@ export type Database = {
           id?: string
           ingredient_name: string
           quantity?: number | null
+          store?: string | null
           total?: number | null
           unit_price?: number | null
           user_id: string
@@ -557,6 +559,7 @@ export type Database = {
           id?: string
           ingredient_name?: string
           quantity?: number | null
+          store?: string | null
           total?: number | null
           unit_price?: number | null
           user_id?: string
