@@ -172,12 +172,6 @@ const Orders = () => {
     setSelectedOrder(null);
   };
 
-  const duplicateOrder = async (o: any) => {
-    const { id, created_at, updated_at, clients: _, ...rest } = o;
-    await supabase.from("orders").insert({ ...rest, status: "pending" });
-    toast({ title: "Encomenda duplicada! ✅" });
-    fetchData();
-  };
 
   const buildMessage = (order: any) => {
     const clientName = order.clients?.name || "Cliente";
