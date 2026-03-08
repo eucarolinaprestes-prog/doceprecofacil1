@@ -334,9 +334,13 @@ const Orders = () => {
     if (statusFilter === "finished") return o.status === "finished";
     if (statusFilter === "delivered") return o.status === "delivered";
     return true;
-  })).sort((a, b) => {
+  }).sort((a, b) => {
     const dateA = a.event_date || "";
     const dateB = b.event_date || "";
+    // Pedidos sem data vão pro final
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1;
+    if (!dateB) return -1;
     return dateA.localeCompare(dateB);
   });
 
