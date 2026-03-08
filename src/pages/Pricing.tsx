@@ -57,6 +57,7 @@ const Pricing = () => {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   // Product step 0
   const [productName, setProductName] = useState("");
