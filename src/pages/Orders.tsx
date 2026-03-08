@@ -337,19 +337,6 @@ const Orders = () => {
         </div>
       )}
 
-      {/* WhatsApp Preview Dialog */}
-      <Dialog open={!!whatsappPreview} onOpenChange={() => setWhatsappPreview(null)}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>📱 Pré-visualização da mensagem</DialogTitle>
-            <p className="text-xs text-muted-foreground">Revise e edite antes de enviar</p>
-          </DialogHeader>
-          <Textarea value={whatsappPreview || ""} onChange={(e) => setWhatsappPreview(e.target.value)} className="min-h-[300px] rounded-xl text-sm" />
-          <Button onClick={sendWhatsApp} className="w-full rounded-xl h-12 font-bold bg-success hover:bg-success/90 text-success-foreground gap-2">
-            <WhatsAppIcon className="w-5 h-5" /> Enviar no WhatsApp
-          </Button>
-        </DialogContent>
-      </Dialog>
 
       {/* New Order Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
