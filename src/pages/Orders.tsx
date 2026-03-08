@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -353,7 +354,7 @@ const Orders = () => {
             <div className="space-y-1">
               <label className="text-sm font-semibold">Valor da encomenda (R$)</label>
               <div className="flex gap-2">
-                <Input type="number" step="0.01" placeholder="Digitar valor" value={totalValue} onChange={(e) => setTotalValue(e.target.value)} className="h-12 rounded-xl flex-1" />
+                <CurrencyInput placeholder="Digitar valor" value={totalValue} onValueChange={setTotalValue} className="h-12 rounded-xl flex-1" />
                 {products.length > 0 && (
                   <Select onValueChange={(id) => { const p = products.find(pr => pr.id === id); if (p) setTotalValue(String(p.suggested_price || 0)); }}>
                     <SelectTrigger className="h-12 rounded-xl w-40"><SelectValue placeholder="Do produto" /></SelectTrigger>

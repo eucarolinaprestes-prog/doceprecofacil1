@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -465,7 +466,7 @@ const Pricing = () => {
                     <SelectTrigger className="h-11 rounded-xl w-20"><SelectValue /></SelectTrigger>
                     <SelectContent>{["g", "ml", "kg", "l"].map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
                   </Select>
-                  <Input type="number" placeholder="R$" value={manualIng.cost} onChange={(e) => setManualIng({ ...manualIng, cost: e.target.value })} className="h-11 rounded-xl flex-1" />
+                  <CurrencyInput placeholder="R$" value={manualIng.cost} onValueChange={(v) => setManualIng({ ...manualIng, cost: v })} className="h-11 rounded-xl flex-1" />
                 </div>
                 <Button onClick={addManualIngredient} className="w-full rounded-xl h-10 font-bold">Adicionar</Button>
               </CardContent></Card>
@@ -503,7 +504,7 @@ const Pricing = () => {
                     <SelectTrigger className="h-11 rounded-xl w-24"><SelectValue /></SelectTrigger>
                     <SelectContent>{["un", "pacote", "caixa"].map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
                   </Select>
-                  <Input type="number" placeholder="R$" value={manualPkg.cost} onChange={(e) => setManualPkg({ ...manualPkg, cost: e.target.value })} className="h-11 rounded-xl flex-1" />
+                  <CurrencyInput placeholder="R$" value={manualPkg.cost} onValueChange={(v) => setManualPkg({ ...manualPkg, cost: v })} className="h-11 rounded-xl flex-1" />
                 </div>
                 <Button onClick={addManualPackaging} className="w-full rounded-xl h-10 font-bold">Adicionar</Button>
               </CardContent></Card>

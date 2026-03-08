@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, Trash2, CheckCircle2, Building2, Target } from "lucide-react";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -224,7 +225,7 @@ const SettingsPage = () => {
 
               <div className="space-y-1">
                 <label className="text-sm font-semibold text-foreground">Qual é o salário mensal desejado?</label>
-                <Input type="number" placeholder="R$" value={desiredSalary} onChange={(e) => setDesiredSalary(e.target.value)} className="h-12 rounded-xl" />
+                <CurrencyInput placeholder="R$" value={desiredSalary} onValueChange={setDesiredSalary} className="h-12 rounded-xl" />
               </div>
               <div className="space-y-1">
                 <label className="text-sm font-semibold text-foreground">Quantas horas por dia você trabalha?</label>
@@ -261,7 +262,7 @@ const SettingsPage = () => {
                   <Input placeholder="Especifique o custo..." value={newFixedCustomName} onChange={(e) => setNewFixedCustomName(e.target.value)} className="h-11 rounded-xl" />
                 )}
                 <div className="flex gap-2">
-                  <Input type="number" placeholder="Valor (R$)" value={newFixedAmount} onChange={(e) => setNewFixedAmount(e.target.value)} className="h-11 rounded-xl flex-1" />
+                  <CurrencyInput placeholder="Valor (R$)" value={newFixedAmount} onValueChange={setNewFixedAmount} className="h-11 rounded-xl flex-1" />
                   <Select value={newFixedFreq} onValueChange={setNewFixedFreq}>
                     <SelectTrigger className="h-11 rounded-xl w-28"><SelectValue /></SelectTrigger>
                     <SelectContent>{frequencies.map(f => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}</SelectContent>
@@ -310,7 +311,7 @@ const SettingsPage = () => {
                   <Input placeholder="Especifique o custo..." value={newVarCustomName} onChange={(e) => setNewVarCustomName(e.target.value)} className="h-11 rounded-xl" />
                 )}
                 <div className="flex gap-2">
-                  <Input type="number" placeholder="Valor (R$)" value={newVarAmount} onChange={(e) => setNewVarAmount(e.target.value)} className="h-11 rounded-xl flex-1" />
+                  <CurrencyInput placeholder="Valor (R$)" value={newVarAmount} onValueChange={setNewVarAmount} className="h-11 rounded-xl flex-1" />
                   <Select value={newVarFreq} onValueChange={setNewVarFreq}>
                     <SelectTrigger className="h-11 rounded-xl w-28"><SelectValue /></SelectTrigger>
                     <SelectContent>{frequencies.map(f => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}</SelectContent>

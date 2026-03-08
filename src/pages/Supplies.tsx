@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -232,7 +233,7 @@ const Supplies = () => {
               <SelectContent>{(dialogType === "ingredient" ? ingredientUnits : packagingUnits).map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
             </Select>
             <div className="grid grid-cols-2 gap-3">
-              <Input type="number" step="0.01" placeholder="Valor pago (R$)" value={totalCost} onChange={(e) => setTotalCost(e.target.value)} className="h-12 rounded-xl" />
+              <CurrencyInput placeholder="Valor pago (R$)" value={totalCost} onValueChange={setTotalCost} className="h-12 rounded-xl" />
               <Input type="number" placeholder="Qtd comprada" value={quantityPurchased} onChange={(e) => setQuantityPurchased(e.target.value)} className="h-12 rounded-xl" />
             </div>
             <div className="grid grid-cols-2 gap-3">
