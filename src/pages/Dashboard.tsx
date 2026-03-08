@@ -217,19 +217,21 @@ const Dashboard = () => {
               const dateStr = format(day, "yyyy-MM-dd");
               const hasOrder = orderDates[dateStr];
               const inMonth = isSameMonth(day, calendarMonth);
+              const pending = hasOrder && orders.some(o => o.event_date && format(new Date(o.event_date), "yyyy-MM-dd") === dateStr && o.status === "pending");
               return (
                 <div
                   key={day.toISOString()}
                   className={`flex flex-col items-center py-2 rounded-xl text-xs font-semibold relative transition-all ${
                     !inMonth ? "opacity-20" :
                     isToday(day) ? "gradient-primary text-primary-foreground shadow-lg scale-105" :
-                    hasOrder ? "bg-primary/10 text-primary font-extrabold border border-primary/20" :
-                    "text-foreground hover:bg-primary/5"
+                    pending ? "bg-success/15 text-success font-extrabold border border-success/30 shadow-sm" :
+                    hasOrder ? "bg-muted text-foreground font-extrabold border border-border" :
+                    "text-foreground hover:bg-muted/50"
                   }`}
                 >
                   <span className="text-sm font-bold">{format(day, "d")}</span>
                   {hasOrder && inMonth && (
-                    <span className={`w-1.5 h-1.5 rounded-full absolute bottom-1 ${isToday(day) ? "bg-primary-foreground" : "bg-primary"}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full absolute bottom-1 ${isToday(day) ? "bg-primary-foreground" : pending ? "bg-success" : "bg-muted-foreground"}`} />
                   )}
                 </div>
               );
