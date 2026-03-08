@@ -51,9 +51,11 @@ const Pricing = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<PricingMode>("select");
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
 
   // Product step 0
   const [productName, setProductName] = useState("");
