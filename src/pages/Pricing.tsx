@@ -568,11 +568,11 @@ const Pricing = () => {
               <h3 className="text-base font-bold text-foreground">🥄 Ingredientes</h3>
               <div className="flex gap-2">
                 <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
-                  <SelectTrigger className="h-8 rounded-full bg-success/15 text-success text-xs font-bold border-0 px-3 w-auto"><span>+ Estoque</span></SelectTrigger>
+                  <SelectTrigger className="h-8 rounded-full bg-primary/15 text-foreground text-xs font-bold border-0 px-3 w-auto"><span>+ Estoque</span></SelectTrigger>
                   <SelectContent>{stockIngredients.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
                 </Select>
                 <Select onValueChange={(id) => { const recipe = savedRecipes.find(r => r.id === id); if (recipe) addFromRecipe(recipe); }}>
-                  <SelectTrigger className="h-8 rounded-full bg-[hsl(210,80%,55%)]/15 text-[hsl(210,80%,45%)] text-xs font-bold border-0 px-3 w-auto"><span>+ Receitas</span></SelectTrigger>
+                  <SelectTrigger className="h-8 rounded-full bg-primary/15 text-foreground text-xs font-bold border-0 px-3 w-auto"><span>+ Receitas</span></SelectTrigger>
                   <SelectContent>{savedRecipes.map(r => <SelectItem key={r.id} value={r.id}>{r.name} (R$ {(r.total_cost / r.yield_quantity).toFixed(2)}/{r.yield_unit})</SelectItem>)}</SelectContent>
                 </Select>
               </div>
