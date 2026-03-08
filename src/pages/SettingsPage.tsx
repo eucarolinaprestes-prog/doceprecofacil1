@@ -301,7 +301,17 @@ const SettingsPage = () => {
             <CardContent className="p-5 space-y-4">
               <h3 className="text-base font-extrabold text-foreground">📊 Custos Variáveis</h3>
               <div className="space-y-3">
-                <Input placeholder="Nome do custo" value={newVarName} onChange={(e) => setNewVarName(e.target.value)} className="h-11 rounded-xl" />
+                <div className="flex flex-wrap gap-2">
+                  {variableCostCategories.map(c => (
+                    <button key={c} onClick={() => setNewVarCategory(c)}
+                      className={`px-3 py-2 rounded-xl text-sm font-bold transition-all ${newVarCategory === c ? "bg-success text-success-foreground shadow-md" : "bg-secondary text-muted-foreground"}`}>
+                      {c}
+                    </button>
+                  ))}
+                </div>
+                {newVarCategory === "Outros" && (
+                  <Input placeholder="Especifique o custo..." value={newVarCustomName} onChange={(e) => setNewVarCustomName(e.target.value)} className="h-11 rounded-xl" />
+                )}
                 <div className="flex gap-2">
                   <Input type="number" placeholder="Valor (R$)" value={newVarAmount} onChange={(e) => setNewVarAmount(e.target.value)} className="h-11 rounded-xl flex-1" />
                   <Select value={newVarFreq} onValueChange={setNewVarFreq}>
@@ -309,7 +319,7 @@ const SettingsPage = () => {
                     <SelectContent>{frequencies.map(f => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                {newVarName.trim() && newVarAmount && (
+                {newVarCategory && newVarAmount && (
                   <Button onClick={addVariableCost} className="w-full rounded-xl h-11 font-bold bg-success hover:bg-success/90 text-success-foreground">
                     Adicionar
                   </Button>
