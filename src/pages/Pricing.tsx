@@ -376,7 +376,7 @@ const Pricing = () => {
 
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-primary">Nome da receita *</label>
-              <Input placeholder="Ex: Massa de chocolate belga" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
+              <Input placeholder="Ex: Massa de chocolate" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
               <Hint>Dê um nome claro para identificar essa receita depois, ex: "Ganache de chocolate meio amargo"</Hint>
             </div>
 
