@@ -68,7 +68,7 @@ const Finance = () => {
     }
     toast({ title: dialogType === "income" ? "Entrada registrada! 💚" : "Saída registrada! 📝" });
     setDialogType(null);
-    setAmount(""); setCategory(""); setNotes(""); setSupplier(""); setDescription(""); setClientName("");
+    setAmount(""); setCategory(""); setCustomCategory(""); setNotes(""); setSupplier(""); setDescription(""); setClientName("");
     fetchData();
   };
 
