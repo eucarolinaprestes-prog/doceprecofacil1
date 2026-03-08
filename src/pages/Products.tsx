@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Copy, Pencil, Package } from "lucide-react";
+import { Trash2, Copy, Pencil, Cake } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
