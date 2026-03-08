@@ -837,7 +837,7 @@ const Pricing = () => {
                   </div>
                 ))}
               </div>
-              <div className="border-t border-success/20 pt-3 space-y-1.5">
+              <div className="border-t border-primary/20 pt-3 space-y-1.5">
                 <p className="text-sm text-foreground font-semibold">Agora tenha atenção em como dividir esse valor:</p>
                 <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Separe o lucro da empresa do seu pró-labore. O lucro da empresa deve ser reinvestido no negócio.</p>
                 <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Reserve pelo menos 10% do faturamento para um fundo de emergência.</p>
