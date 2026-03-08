@@ -162,27 +162,6 @@ const Shopping = () => {
     setTimeout(() => saveAll(), 400);
   };
 
-  const clearAllLists = async () => {
-    if (!user) return;
-    const today = new Date().toISOString().slice(0, 10);
-    // Delete all today's items
-    const todayIds = allItems
-      .filter(i => i.created_at?.slice(0, 10) === today)
-      .map(i => i.id)
-      .filter(Boolean);
-
-    if (todayIds.length > 0) {
-      await supabase.from("shopping_list").delete().in("id", todayIds as string[]);
-    }
-
-    // Reset all store items
-    const map: Record<string, ShoppingItem[]> = {};
-    storeOptions.forEach(store => { map[store] = [emptyRow()]; });
-    setStoreItems(map);
-    fetchAllItems();
-    toast({ title: "Lista limpa com sucesso!" });
-  };
-
   const grandTotal = items.reduce((sum, i) => sum + (i.quantity * i.unit_price), 0);
 
   // History: group by date and store
