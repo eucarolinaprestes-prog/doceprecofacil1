@@ -140,7 +140,7 @@ const Finance = () => {
       </div>
 
       {/* Fechamento de Caixa */}
-      <Button onClick={() => setShowReport(true)} className="w-full rounded-xl h-14 font-bold text-base gap-2 gradient-gold text-white" style={{ boxShadow: "0 4px 0 0 hsl(30 60% 40%), 0 6px 12px -2px hsl(30 60% 58% / 0.3)" }}>
+      <Button onClick={() => setShowReport(true)} className="w-full rounded-xl h-14 font-bold text-base gap-2 gradient-gold text-yellow-950" style={{ boxShadow: "0 4px 0 0 hsl(45 85% 42%), 0 6px 12px -2px hsl(45 85% 52% / 0.3)" }}>
         <BarChart3 className="w-5 h-5" /> 📋 Fechamento de Caixa
       </Button>
 
