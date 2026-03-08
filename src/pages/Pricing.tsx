@@ -297,16 +297,22 @@ const Pricing = () => {
           photoUrl = urlData.publicUrl;
         }
       }
-      await supabase.from("products").insert({
-        user_id: user.id, name: productName, description: productDesc,
+      const payload = {
+        name: productName, description: productDesc,
         category: "",
         yield_quantity: 1, yield_unit: finalSaleType,
         preparation_time: Number(prepTime) || 0, total_cost: baseCost,
         suggested_price: suggestedPrice, profit_margin: profitMargin[0],
         ingredients_json: selectedIngredients as any, packaging_json: selectedPackaging as any,
         photo_url: photoUrl || "",
-      });
-      toast({ title: "Produto salvo com sucesso! 🎉" });
+      };
+      if (editingProductId) {
+        await supabase.from("products").update(payload).eq("id", editingProductId);
+        toast({ title: "Produto atualizado com sucesso! 🎉" });
+      } else {
+        await supabase.from("products").insert({ ...payload, user_id: user.id });
+        toast({ title: "Produto salvo com sucesso! 🎉" });
+      }
       navigate("/products");
     } catch { toast({ title: "Erro ao salvar", variant: "destructive" }); }
     finally { setSaving(false); }

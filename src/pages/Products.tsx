@@ -74,7 +74,7 @@ const Products = () => {
                   <div className="flex items-start justify-between">
                     <h3 className="font-extrabold text-foreground text-lg">{p.name}</h3>
                     <div className="flex gap-1 shrink-0">
-                      <Button variant="ghost" size="icon" onClick={() => navigate("/pricing")}><Pencil className="w-4 h-4 text-primary" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => navigate(`/pricing?edit=product&id=${p.id}`)}><Pencil className="w-4 h-4 text-primary" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => handleDuplicate(p)}><Copy className="w-4 h-4 text-muted-foreground" /></Button>
                       <Button variant="ghost" size="icon" onClick={() => handleDelete(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                     </div>
