@@ -287,7 +287,7 @@ const Orders = () => {
           </DialogHeader>
           <Textarea value={whatsappPreview || ""} onChange={(e) => setWhatsappPreview(e.target.value)} className="min-h-[300px] rounded-xl text-sm" />
           <Button onClick={sendWhatsApp} className="w-full rounded-xl h-12 font-bold bg-success hover:bg-success/90 text-success-foreground gap-2">
-            <MessageCircle className="w-5 h-5" /> Enviar no WhatsApp
+            <WhatsAppIcon className="w-5 h-5" /> Enviar no WhatsApp
           </Button>
         </DialogContent>
       </Dialog>
