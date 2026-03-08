@@ -792,7 +792,7 @@ const Pricing = () => {
             {/* iFood */}
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-sm">iFood / Uber Eats</span>
+                <span className="text-sm">iFood</span>
                 <Switch checked={ifoodEnabled} onCheckedChange={setIfoodEnabled} />
               </div>
               {ifoodEnabled && (
