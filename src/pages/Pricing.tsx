@@ -66,6 +66,7 @@ const Pricing = () => {
   const [customSaleType, setCustomSaleType] = useState("");
   const [productPhotoPreview, setProductPhotoPreview] = useState("");
   const [productPhotoFile, setProductPhotoFile] = useState<File | null>(null);
+  const [productYieldQty, setProductYieldQty] = useState("");
 
   // Recipe
   const [recipeName, setRecipeName] = useState("");
@@ -168,6 +169,7 @@ const Pricing = () => {
           setProductName(product.name);
           setProductDesc(product.description || "");
           setSaleType(product.yield_unit || "");
+          setProductYieldQty(String(product.yield_quantity || "1"));
           if (product.photo_url) setProductPhotoPreview(product.photo_url);
           setPrepTime(String(product.preparation_time || ""));
           setProfitMargin([Number(product.profit_margin) || 30]);
@@ -272,8 +274,35 @@ const Pricing = () => {
   ];
 
   const canAdvanceProduct = () => {
-    if (step === 0) return productName.trim() && saleType;
+    if (step === 0) return !!(productName.trim() && saleType && productYieldQty && Number(productYieldQty) > 0);
+    if (step === 1) return selectedIngredients.length > 0;
+    if (step === 2) return !!(prepTime && Number(prepTime) > 0);
     return true;
+  };
+
+  const getStepError = () => {
+    if (mode === "product") {
+      if (step === 0) {
+        if (!productName.trim()) return "Preencha o nome do produto";
+        if (!saleType) return "Selecione o tipo de venda";
+        if (!productYieldQty || Number(productYieldQty) <= 0) return "Informe o rendimento";
+      }
+      if (step === 1) {
+        if (selectedIngredients.length === 0) return "Adicione pelo menos 1 ingrediente";
+      }
+      if (step === 2) {
+        if (!prepTime || Number(prepTime) <= 0) return "Informe o tempo de produção";
+      }
+    }
+    if (mode === "recipe") {
+      if (step === 0 && !recipeName.trim()) return "Preencha o nome da receita";
+      if (step === 1 && selectedIngredients.length === 0) return "Adicione pelo menos 1 ingrediente";
+      if (step === 2) {
+        if (!recipeYieldQty || Number(recipeYieldQty) <= 0) return "Informe o rendimento";
+        if (!recipeYieldUnit) return "Selecione a unidade de medida";
+      }
+    }
+    return null;
   };
 
   const handleProductPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -300,7 +329,7 @@ const Pricing = () => {
       const payload = {
         name: productName, description: productDesc,
         category: "",
-        yield_quantity: 1, yield_unit: finalSaleType,
+        yield_quantity: Number(productYieldQty) || 1, yield_unit: finalSaleType,
         preparation_time: Number(prepTime) || 0, total_cost: baseCost,
         suggested_price: suggestedPrice, profit_margin: profitMargin[0],
         ingredients_json: selectedIngredients as any, packaging_json: selectedPackaging as any,
@@ -358,11 +387,21 @@ const Pricing = () => {
     setRecipePhotoPreview(URL.createObjectURL(file));
   };
 
+  const [stepError, setStepError] = useState<string | null>(null);
+
   const goNext = () => {
-    if (mode === "product" && canAdvanceProduct()) setStep(step + 1);
+    const error = getStepError();
+    if (error) {
+      setStepError(error);
+      toast({ title: error, variant: "destructive" });
+      return;
+    }
+    setStepError(null);
+    if (mode === "product") setStep(step + 1);
     if (mode === "recipe") setStep(step + 1);
   };
   const goBack = () => {
+    setStepError(null);
     if (step === 0) { setMode("select"); return; }
     setStep(Math.max(0, step - 1));
   };
@@ -531,9 +570,12 @@ const Pricing = () => {
         )}
 
         {step < 3 && (
-          <Button onClick={goNext} disabled={step === 0 ? !recipeName.trim() : false} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
-            Próximo <ChevronRight className="w-5 h-5" />
-          </Button>
+          <div className="space-y-2">
+            {stepError && <p className="text-sm font-bold text-destructive text-center">{stepError}</p>}
+            <Button onClick={goNext} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
+              Próximo <ChevronRight className="w-5 h-5" />
+            </Button>
+          </div>
         )}
       </div>
     );
@@ -593,6 +635,16 @@ const Pricing = () => {
               <Input placeholder="Especifique o tipo de venda..." value={customSaleType} onChange={(e) => setCustomSaleType(e.target.value)} className="h-12 rounded-xl mt-2" />
             )}
           </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-primary">Rendimento *</label>
+            <Hint>Quantas unidades, fatias ou porções essa receita rende?</Hint>
+            <Input type="number" placeholder="Ex: 12" value={productYieldQty} onChange={(e) => setProductYieldQty(e.target.value)} className="h-12 rounded-xl" />
+          </div>
+
+          {stepError && step === 0 && (
+            <p className="text-sm font-bold text-destructive text-center">{stepError}</p>
+          )}
         </div>
       )}
 
@@ -655,22 +707,23 @@ const Pricing = () => {
             <p className="text-sm text-muted-foreground">Vamos calcular o custo do seu tempo e gastos fixos</p>
           </div>
 
-          <div className={`p-4 rounded-xl ${salaryConfigured ? "bg-primary/10 border border-primary/20" : "bg-secondary border border-warning/30"}`}>
+          <div className={`p-5 rounded-xl ${salaryConfigured ? "bg-success/15 border-2 border-success/40" : "bg-secondary border border-warning/30"}`}>
             {salaryConfigured ? (
               <>
-                <p className="text-sm text-foreground">Valor da sua hora: <strong className="text-primary text-lg">R$ {hourlyRate.toFixed(2)}</strong></p>
-                <Hint>Esse valor foi calculado com base no salário que você configurou nas Configurações</Hint>
+                <p className="text-sm font-bold text-foreground">💰 Valor da sua hora:</p>
+                <p className="text-3xl font-extrabold text-success mt-1">R$ {hourlyRate.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground mt-1">Calculado com base no salário configurado</p>
               </>
             ) : (
               <>
-                <p className="text-sm text-foreground">⚠️ Configure seu salário nas Configurações → Financeiro</p>
+                <p className="text-sm font-bold text-foreground">⚠️ Configure seu salário nas Configurações → Financeiro</p>
                 <Hint>Sem o salário configurado, a mão de obra não será incluída no cálculo</Hint>
               </>
             )}
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Tempo de produção (minutos)</label>
+            <label className="text-sm font-semibold text-primary">Tempo de produção (minutos) *</label>
             <Input type="number" placeholder="Ex: 90" value={prepTime} onChange={(e) => setPrepTime(e.target.value)} className="h-12 rounded-xl" />
             <Hint>Quanto tempo em minutos você leva para preparar esse produto do início ao fim?</Hint>
           </div>
@@ -886,9 +939,12 @@ const Pricing = () => {
       )}
 
       {step < 4 && (
-        <Button onClick={goNext} disabled={!canAdvanceProduct()} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
-          Próximo <ChevronRight className="w-5 h-5" />
-        </Button>
+        <div className="space-y-2">
+          {stepError && <p className="text-sm font-bold text-destructive text-center">{stepError}</p>}
+          <Button onClick={goNext} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
+            Próximo <ChevronRight className="w-5 h-5" />
+          </Button>
+        </div>
       )}
     </div>
   );
