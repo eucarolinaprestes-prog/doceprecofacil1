@@ -939,9 +939,12 @@ const Pricing = () => {
       )}
 
       {step < 4 && (
-        <Button onClick={goNext} disabled={!canAdvanceProduct()} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
-          Próximo <ChevronRight className="w-5 h-5" />
-        </Button>
+        <div className="space-y-2">
+          {stepError && <p className="text-sm font-bold text-destructive text-center">{stepError}</p>}
+          <Button onClick={goNext} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
+            Próximo <ChevronRight className="w-5 h-5" />
+          </Button>
+        </div>
       )}
     </div>
   );
