@@ -227,6 +227,9 @@ const Finance = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {category === "Outros" && (
+                <Input placeholder="Especifique a categoria..." value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} className="h-12 rounded-xl mt-2" />
+              )}
             </div>
             <div className="space-y-1">
               <label className="text-xs font-semibold text-muted-foreground">Data</label>

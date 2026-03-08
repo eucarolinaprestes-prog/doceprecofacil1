@@ -324,6 +324,9 @@ const Orders = () => {
                   </button>
                 ))}
               </div>
+              {orderCategory === "Outros" && (
+                <Input placeholder="Especifique a categoria..." value={customOrderCategory} onChange={(e) => setCustomOrderCategory(e.target.value)} className="h-12 rounded-xl mt-2" />
+              )}
             </div>
 
             {/* Details */}
