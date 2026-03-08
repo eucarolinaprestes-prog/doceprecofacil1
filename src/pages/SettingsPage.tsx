@@ -349,7 +349,7 @@ const SettingsPage = () => {
               <h3 className="text-base font-extrabold text-foreground flex items-center gap-2"><Target className="w-4 h-4" /> Configurações financeiras</h3>
               <div className="space-y-1">
                 <label className="text-sm font-semibold text-foreground">Meta de faturamento mensal (R$)</label>
-                <Input type="number" placeholder="Ex: 5000" value={revenueGoal} onChange={(e) => setRevenueGoal(e.target.value)} className="h-12 rounded-xl" />
+                <CurrencyInput placeholder="Ex: 5000" value={revenueGoal} onValueChange={setRevenueGoal} className="h-12 rounded-xl" />
               </div>
             </CardContent>
           </Card>

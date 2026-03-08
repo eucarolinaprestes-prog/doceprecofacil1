@@ -120,13 +120,11 @@ const Shopping = () => {
               onBlur={handleBlur}
               className="h-10 rounded-xl text-sm text-center"
             />
-            <Input
-              type="number"
-              step="0.01"
+            <CurrencyInput
               placeholder="0,00"
-              value={item.unit_price || ""}
-              onChange={(e) => updateItem(idx, "unit_price", e.target.value)}
-              onBlur={handleBlur}
+              value={item.unit_price ? String(item.unit_price) : ""}
+              onValueChange={(v) => { updateItem(idx, "unit_price", v); }}
+              onBlurCapture={handleBlur}
               className="h-10 rounded-xl text-sm text-center"
             />
             {items.length > 1 && item.ingredient_name.trim() ? (

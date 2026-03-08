@@ -424,7 +424,7 @@ const Orders = () => {
                     <span className="text-sm">{fee.label}</span>
                     <Switch checked={fee.state.enabled} onCheckedChange={(v) => fee.setter({ ...fee.state, enabled: v })} />
                   </div>
-                  {fee.state.enabled && <Input type="number" step="0.01" placeholder="0" value={fee.state.value} onChange={(e) => fee.setter({ ...fee.state, value: e.target.value })} className="h-10 rounded-xl mt-1" />}
+                  {fee.state.enabled && <CurrencyInput placeholder="0" value={fee.state.value} onValueChange={(v) => fee.setter({ ...fee.state, value: v })} className="h-10 rounded-xl mt-1" />}
                 </div>
               ))}
             </div>
