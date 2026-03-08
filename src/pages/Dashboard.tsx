@@ -116,20 +116,20 @@ const Dashboard = () => {
       {/* Botões de ação */}
       <div className="grid grid-cols-2 gap-3">
         <button
-          onClick={() => navigate("/finance")}
+          onClick={() => setDialogType("income")}
           className="rounded-2xl h-16 bg-success text-success-foreground font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
           style={{ boxShadow: "0 4px 0 0 hsl(152 70% 26%), 0 8px 16px -4px hsl(152 70% 38% / 0.35)" }}
         >
           <ArrowUpRight className="w-5 h-5" />
-          <span>+ Entrada</span>
+          <span>Adicionar Entrada</span>
         </button>
         <button
-          onClick={() => navigate("/finance")}
+          onClick={() => setDialogType("expense")}
           className="rounded-2xl h-16 bg-destructive text-destructive-foreground font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
           style={{ boxShadow: "0 4px 0 0 hsl(0 62% 40%), 0 8px 16px -4px hsl(0 84% 60% / 0.35)" }}
         >
           <ArrowDownRight className="w-5 h-5" />
-          <span>+ Saída</span>
+          <span>Adicionar Saída</span>
         </button>
         <button
           onClick={() => navigate("/shopping")}
