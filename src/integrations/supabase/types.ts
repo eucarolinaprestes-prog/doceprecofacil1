@@ -498,6 +498,7 @@ export type Database = {
           id: string
           ingredients_json: Json | null
           name: string
+          photo_url: string | null
           total_cost: number | null
           updated_at: string
           user_id: string
@@ -510,6 +511,7 @@ export type Database = {
           id?: string
           ingredients_json?: Json | null
           name: string
+          photo_url?: string | null
           total_cost?: number | null
           updated_at?: string
           user_id: string
@@ -522,6 +524,7 @@ export type Database = {
           id?: string
           ingredients_json?: Json | null
           name?: string
+          photo_url?: string | null
           total_cost?: number | null
           updated_at?: string
           user_id?: string

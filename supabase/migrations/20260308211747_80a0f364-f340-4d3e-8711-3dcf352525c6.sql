@@ -1,0 +1,1 @@
+ALTER TABLE public.recipes ADD COLUMN photo_url text DEFAULT '';
