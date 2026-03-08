@@ -389,40 +389,12 @@ const Pricing = () => {
           </div>
         </div>
 
-        {/* Step 0: Name + Category (merged) */}
+        {/* Step 0: Name + Ingredients + Yield (all in one) */}
         {step === 0 && (
           <div className="space-y-5">
-            <h2 className="text-xl font-extrabold text-foreground">Dados da Receita</h2>
-
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-primary">Nome da receita *</label>
               <Input placeholder="Ex: Massa de chocolate" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-primary">Categoria *</label>
-              <div className="flex flex-wrap gap-2">
-                {recipeCategories.map(c => (
-                  <button key={c} onClick={() => setRecipeCategory(c)}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${recipeCategory === c ? "bg-success text-success-foreground shadow-md" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}>
-                    {c}
-                  </button>
-                ))}
-              </div>
-              {recipeCategory === "Outros" && (
-                <div className="mt-2">
-                  <Input placeholder="Digite o nome da categoria..." value={customRecipeCategory} onChange={(e) => setCustomRecipeCategory(e.target.value)} className="h-12 rounded-xl" />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Step 1: Ingredients + Yield */}
-        {step === 1 && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-xl font-extrabold text-foreground">Ingredientes da receita</h2>
             </div>
 
             <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
@@ -433,7 +405,7 @@ const Pricing = () => {
             </Select>
 
             {selectedIngredients.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground py-4">Nenhum ingrediente adicionado ainda. Toque no botão acima para começar!</p>
+              <p className="text-center text-sm text-muted-foreground py-4">Nenhum ingrediente adicionado ainda</p>
             )}
 
             {selectedIngredients.map(item => renderItemRow(item, "ingredient"))}
@@ -444,12 +416,12 @@ const Pricing = () => {
                 <h3 className="text-base font-bold text-foreground">📏 Rendimento da receita</h3>
                 <Hint>Ex: 2 kg de recheio, 3 discos, 500 ml de calda</Hint>
                 <div className="flex gap-2">
-                  <Input
-                    type="number"
+                  <input
+                    inputMode="decimal"
                     placeholder="Ex: 2"
                     value={recipeYieldQty}
                     onChange={(e) => setRecipeYieldQty(e.target.value)}
-                    className="h-12 rounded-xl flex-1"
+                    className="h-12 rounded-xl flex-1 border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
                   />
                   <div className="flex-1">
                     <Select value={recipeYieldUnit} onValueChange={setRecipeYieldUnit}>
@@ -484,17 +456,15 @@ const Pricing = () => {
           </div>
         )}
 
-        {/* Step 2: Summary */}
-        {step === 2 && (
+        {/* Step 1: Summary */}
+        {step === 1 && (
           <div className="space-y-5">
             <div className="text-center">
               <p className="text-3xl">📋</p>
               <h2 className="text-xl font-extrabold text-foreground mt-2">Resumo da Receita</h2>
-              <Hint>Confira se tudo está certo antes de salvar!</Hint>
             </div>
             <Card className="border border-border"><CardContent className="p-5 space-y-3">
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Receita</span><span className="font-bold">{recipeName}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Categoria</span><span className="font-bold">{recipeCategory === "Outros" && customRecipeCategory.trim() ? customRecipeCategory.trim() : recipeCategory}</span></div>
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Ingredientes</span><span className="font-bold">{selectedIngredients.length}</span></div>
               {recipeYieldQty && (
                 <div className="flex justify-between text-sm"><span className="text-muted-foreground">Rendimento</span><span className="font-bold">{recipeYieldQty} {finalRecipeYieldUnit}</span></div>
