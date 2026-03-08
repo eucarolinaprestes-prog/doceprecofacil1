@@ -676,7 +676,7 @@ const Pricing = () => {
               </div>
             </div>
 
-            <Hint>Adicione as embalagens que você usa para esse produto (caixa, saco, tampa...)</Hint>
+            <Hint>Embalagens usadas nesse produto</Hint>
 
             {showPkgManual && (
               <Card className="border border-border"><CardContent className="p-4 space-y-3">
