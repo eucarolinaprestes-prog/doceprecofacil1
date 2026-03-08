@@ -324,7 +324,7 @@ const Orders = () => {
                       {o.status === "pending" || o.status === "scheduled" ? "Iniciar produção" : o.status === "production" ? "Finalizar" : "Marcar entregue"}
                     </Button>
                   )}
-                  <Button size="sm" variant="outline" onClick={() => sendWhatsAppDirect(o)} className="rounded-xl h-9 text-success border-success/30 hover:bg-success/10">
+                  <Button size="sm" variant="outline" onClick={() => openWhatsAppPreview(o)} className="rounded-xl h-9 text-success border-success/30 hover:bg-success/10">
                     <WhatsAppIcon className="w-4 h-4" />
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => openEditDialog(o)} className="rounded-xl h-9">
