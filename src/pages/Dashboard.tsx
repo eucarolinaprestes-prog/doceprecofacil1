@@ -174,10 +174,10 @@ const Dashboard = () => {
             <ChevronLeft className="w-4 h-4 text-white" />
           </button>
           <div className="text-center">
-            <p className="text-sm font-extrabold text-rose-900 flex items-center gap-2">
+            <p className="text-sm font-extrabold text-white flex items-center gap-2">
               <CalendarDays className="w-4 h-4" /> Calendário de Encomendas
             </p>
-            <p className="text-xs text-rose-800/70 font-semibold capitalize mt-0.5">
+            <p className="text-xs text-white/80 font-semibold capitalize mt-0.5">
               {format(calendarMonth, "MMMM yyyy", { locale: ptBR })}
             </p>
           </div>
