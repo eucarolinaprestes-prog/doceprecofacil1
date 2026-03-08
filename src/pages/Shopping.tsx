@@ -84,7 +84,7 @@ const Shopping = () => {
     }
     updated[idx].total = updated[idx].quantity * updated[idx].unit_price;
     
-    if (idx === items.length - 1 && updated[idx].ingredient_name.trim()) {
+    if (idx === items.length - 1 && (updated[idx].ingredient_name.trim() || updated[idx].quantity > 0)) {
       updated.push({ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 });
     }
     setItems(updated);
