@@ -634,7 +634,7 @@ const Pricing = () => {
               </div>
             </div>
 
-            <Hint>Informe a quantidade de cada ingrediente usado nessa receita</Hint>
+            
 
             {showIngManual && (
               <Card className="border border-border"><CardContent className="p-4 space-y-3">
