@@ -874,14 +874,12 @@ const Pricing = () => {
                 <Star className="w-5 h-5 text-primary" />
                 <p className="text-sm font-extrabold text-foreground">Parabéns, você precificou! 🎉</p>
               </div>
-              <ResponsiveContainer width="100%" height={180}>
-                <BarChart data={chartData} barCategoryGap="30%">
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <YAxis hide />
-                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={chartData} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={4} strokeWidth={0}>
                     {chartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                  </Bar>
-                </BarChart>
+                  </Pie>
+                </PieChart>
               </ResponsiveContainer>
               <div className="space-y-1.5">
                 {chartData.map((d, i) => (
