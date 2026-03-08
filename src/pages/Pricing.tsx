@@ -816,9 +816,9 @@ const Pricing = () => {
           </div>
 
           {chartData.length > 0 && (
-            <Card className="border border-success/30 bg-success/5"><CardContent className="p-4 space-y-4">
+            <Card className="border border-primary/30 bg-background"><CardContent className="p-4 space-y-4">
               <div className="flex items-center gap-2">
-                <Star className="w-5 h-5 text-success" />
+                <Star className="w-5 h-5 text-primary" />
                 <p className="text-sm font-extrabold text-foreground">Parabéns, você precificou! 🎉</p>
               </div>
               <ResponsiveContainer width="100%" height={180}>
@@ -833,7 +833,7 @@ const Pricing = () => {
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: CHART_COLORS[i] }} />
                       <span className="text-foreground">{d.name}</span>
                     </div>
-                    <span className="font-bold">R$ {d.value.toFixed(2)}</span>
+                    <span className="font-bold" style={{ color: CHART_COLORS[i] }}>R$ {d.value.toFixed(2)}</span>
                   </div>
                 ))}
               </div>
