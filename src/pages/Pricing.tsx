@@ -889,7 +889,7 @@ const Pricing = () => {
           </CardContent></Card>
 
           <Button onClick={handleSaveProduct} disabled={saving} className="w-full rounded-2xl h-14 text-lg font-bold btn-3d gap-2">
-            <CheckCircle2 className="w-6 h-6" /> {saving ? "Salvando..." : "SALVAR PRODUTO"}
+            <CheckCircle2 className="w-6 h-6" /> {saving ? "Salvando..." : editingProductId ? "ATUALIZAR PRODUTO" : "SALVAR PRODUTO"}
           </Button>
         </div>
       )}
