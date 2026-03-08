@@ -266,10 +266,10 @@ const Pricing = () => {
   const finalRecipeYieldUnit = recipeYieldUnit === "outros" && customRecipeYieldUnit.trim() ? customRecipeYieldUnit.trim() : recipeYieldUnit;
 
   const chartData = [
-    { name: "Insumos", value: ingredientsCost + packagingCost },
-    { name: "Custos", value: fixedCostValue + laborCost },
-    { name: "Lucro", value: Math.max(0, finalProfit) },
-  ].filter(d => d.value > 0);
+    { name: "Insumos", value: Math.max(0.01, ingredientsCost + packagingCost) },
+    { name: "Custos", value: Math.max(0.01, fixedCostValue + laborCost) },
+    { name: "Lucro", value: Math.max(0.01, profitValue) },
+  ];
 
   const canAdvanceProduct = () => {
     if (step === 0) return productName.trim() && saleType;
