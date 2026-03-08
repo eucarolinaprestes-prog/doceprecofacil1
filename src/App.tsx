@@ -14,6 +14,7 @@ import Products from "@/pages/Products";
 import Orders from "@/pages/Orders";
 import Clients from "@/pages/Clients";
 import Supplies from "@/pages/Supplies";
+import Recipes from "@/pages/Recipes";
 import Packaging from "@/pages/Packaging";
 import Finance from "@/pages/Finance";
 import Shopping from "@/pages/Shopping";
