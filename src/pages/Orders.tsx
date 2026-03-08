@@ -311,13 +311,19 @@ const Orders = () => {
 
   const pendingCount = orders.filter(o => o.status === "pending" || o.status === "scheduled").length;
   const productionCount = orders.filter(o => o.status === "production").length;
-  const deliveredCount = orders.filter(o => o.status === "delivered" || o.status === "finished").length;
+  const finishedCount = orders.filter(o => o.status === "finished").length;
+  const deliveredCount = orders.filter(o => o.status === "delivered").length;
 
-  const filteredOrders = statusFilter === "all" ? orders : orders.filter(o => {
+  const filteredOrders = (statusFilter === "all" ? orders : orders.filter(o => {
     if (statusFilter === "pending") return o.status === "pending" || o.status === "scheduled";
     if (statusFilter === "production") return o.status === "production";
-    if (statusFilter === "delivered") return o.status === "delivered" || o.status === "finished";
+    if (statusFilter === "finished") return o.status === "finished";
+    if (statusFilter === "delivered") return o.status === "delivered";
     return true;
+  })).sort((a, b) => {
+    const dateA = a.event_date || "";
+    const dateB = b.event_date || "";
+    return dateA.localeCompare(dateB);
   });
 
   const nextStatus: Record<string, string> = { pending: "production", scheduled: "production", production: "finished", finished: "delivered" };
