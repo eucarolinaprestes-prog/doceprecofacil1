@@ -224,7 +224,7 @@ const Shopping = () => {
                   className="h-10 rounded-xl text-sm text-center"
                 />
                 <CurrencyInput
-                  placeholder="0,00"
+                  placeholder="Opcional"
                   value={item.unit_price ? String(item.unit_price) : ""}
                   onValueChange={(v) => { updateItem(idx, "unit_price", v); }}
                   onBlurCapture={handleBlur}
