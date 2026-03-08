@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,10 +19,10 @@ interface ShoppingItem {
 }
 
 const storeOptions = [
-  { label: "Supermercado", emoji: "🛒" },
-  { label: "Mercado", emoji: "🏪" },
-  { label: "Loja de Confeitaria", emoji: "🧁" },
-  { label: "Atacado", emoji: "📦" },
+  { label: "Supermercado" },
+  { label: "Mercado" },
+  { label: "Loja de Confeitaria" },
+  { label: "Atacado" },
 ];
 
 const Shopping = () => {
@@ -33,16 +33,18 @@ const Shopping = () => {
   const [allItems, setAllItems] = useState<ShoppingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
+  const savingRef = useRef(false);
+  const storeRef = useRef<string | null>(null);
 
-  const fetchItems = async () => {
+  const fetchAllItems = async () => {
     if (!user) return;
     const { data } = await supabase
       .from("shopping_list")
       .select("*")
       .eq("user_id", user.id)
       .order("created_at", { ascending: true });
-    
-    setAllItems(data?.map(d => ({
+
+    const mapped = data?.map(d => ({
       id: d.id,
       ingredient_name: d.ingredient_name,
       quantity: d.quantity || 0,
@@ -50,44 +52,53 @@ const Shopping = () => {
       total: d.total || 0,
       store: (d as any).store || null,
       created_at: d.created_at,
-    })) || []);
+    })) || [];
+
+    setAllItems(mapped);
     setLoading(false);
+    return mapped;
   };
 
-  useEffect(() => { fetchItems(); }, [user]);
+  useEffect(() => { fetchAllItems(); }, [user]);
 
-  // When store changes, load items for that store (today only for editing)
-  useEffect(() => {
-    if (!selectedStore) {
-      setItems([{ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 }]);
-      return;
-    }
+  const loadStoreItems = useCallback((store: string, source: ShoppingItem[]) => {
     const today = new Date().toISOString().slice(0, 10);
-    const storeItems = allItems.filter(i => 
-      i.store === selectedStore && i.created_at?.slice(0, 10) === today
+    const storeItems = source.filter(i =>
+      i.store === store && i.created_at?.slice(0, 10) === today
     );
     if (storeItems.length > 0) {
       setItems([...storeItems, { ingredient_name: "", quantity: 0, unit_price: 0, total: 0 }]);
     } else {
       setItems([{ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 }]);
     }
-  }, [selectedStore, allItems]);
+  }, []);
+
+  const handleSelectStore = async (store: string) => {
+    storeRef.current = store;
+    setSelectedStore(store);
+    setShowHistory(false);
+    const freshItems = await fetchAllItems();
+    if (freshItems) loadStoreItems(store, freshItems);
+  };
 
   const updateItem = (idx: number, field: keyof ShoppingItem, value: string) => {
-    const updated = [...items];
-    if (field === "ingredient_name") {
-      updated[idx].ingredient_name = value;
-    } else {
-      const num = Number(value) || 0;
-      if (field === "quantity") updated[idx].quantity = num;
-      if (field === "unit_price") updated[idx].unit_price = num;
-    }
-    updated[idx].total = updated[idx].quantity * updated[idx].unit_price;
-    
-    if (idx === items.length - 1 && (updated[idx].ingredient_name.trim() || updated[idx].quantity > 0)) {
-      updated.push({ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 });
-    }
-    setItems(updated);
+    setItems(prev => {
+      const updated = [...prev];
+      if (field === "ingredient_name") {
+        updated[idx] = { ...updated[idx], ingredient_name: value };
+      } else {
+        const num = Number(value) || 0;
+        if (field === "quantity") updated[idx] = { ...updated[idx], quantity: num };
+        if (field === "unit_price") updated[idx] = { ...updated[idx], unit_price: num };
+      }
+      updated[idx] = { ...updated[idx], total: updated[idx].quantity * updated[idx].unit_price };
+
+      // Auto-add new row
+      if (idx === prev.length - 1 && updated[idx].ingredient_name.trim()) {
+        updated.push({ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 });
+      }
+      return updated;
+    });
   };
 
   const removeItem = async (idx: number) => {
@@ -98,40 +109,63 @@ const Shopping = () => {
     const updated = items.filter((_, i) => i !== idx);
     if (updated.length === 0) updated.push({ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 });
     setItems(updated);
-    fetchItems();
+    fetchAllItems();
     toast({ title: "Item removido" });
   };
 
   const saveAll = useCallback(async () => {
-    if (!user || !selectedStore) return;
+    if (!user || !selectedStore || savingRef.current) return;
     const validItems = items.filter(i => i.ingredient_name.trim());
     if (validItems.length === 0) return;
-    
-    const today = new Date().toISOString().slice(0, 10);
-    // Delete today's items for this store and re-insert
-    const todayIds = allItems
-      .filter(i => i.store === selectedStore && i.created_at?.slice(0, 10) === today)
-      .map(i => i.id)
-      .filter(Boolean);
-    
-    if (todayIds.length > 0) {
-      await supabase.from("shopping_list").delete().in("id", todayIds as string[]);
+
+    savingRef.current = true;
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const todayIds = allItems
+        .filter(i => i.store === selectedStore && i.created_at?.slice(0, 10) === today)
+        .map(i => i.id)
+        .filter(Boolean);
+
+      if (todayIds.length > 0) {
+        await supabase.from("shopping_list").delete().in("id", todayIds as string[]);
+      }
+
+      await supabase.from("shopping_list").insert(
+        validItems.map(i => ({
+          user_id: user.id,
+          ingredient_name: i.ingredient_name,
+          quantity: i.quantity,
+          unit_price: i.unit_price,
+          total: i.quantity * i.unit_price,
+          store: selectedStore,
+        }))
+      );
+
+      // Update allItems without resetting the editing items
+      const { data } = await supabase
+        .from("shopping_list")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true });
+
+      setAllItems(data?.map(d => ({
+        id: d.id,
+        ingredient_name: d.ingredient_name,
+        quantity: d.quantity || 0,
+        unit_price: d.unit_price || 0,
+        total: d.total || 0,
+        store: (d as any).store || null,
+        created_at: d.created_at,
+      })) || []);
+    } finally {
+      savingRef.current = false;
     }
-    
-    await supabase.from("shopping_list").insert(
-      validItems.map(i => ({
-        user_id: user.id,
-        ingredient_name: i.ingredient_name,
-        quantity: i.quantity,
-        unit_price: i.unit_price,
-        total: i.quantity * i.unit_price,
-        store: selectedStore,
-      }))
-    );
-    fetchItems();
   }, [items, user, selectedStore, allItems]);
 
-  const handleBlur = () => { saveAll(); };
+  const handleBlur = () => {
+    // Small delay to avoid saving when user is just clicking between fields
+    setTimeout(() => saveAll(), 300);
+  };
 
   const grandTotal = items.reduce((sum, i) => sum + (i.quantity * i.unit_price), 0);
 
@@ -159,19 +193,19 @@ const Shopping = () => {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-xl font-extrabold text-foreground flex items-center gap-2">🛒 Calculadora de Compras</h1>
+      <div className="rounded-2xl bg-primary/10 p-4">
+        <h1 className="text-xl font-extrabold text-foreground">Calculadora de Compras</h1>
         <p className="text-sm text-muted-foreground">Escolha o local e monte sua lista</p>
       </div>
 
       {/* Store selector */}
       <div>
-        <p className="text-sm font-bold text-foreground mb-2">📍 Local da compra</p>
+        <p className="text-sm font-bold text-foreground mb-2">Local da compra</p>
         <div className="grid grid-cols-2 gap-2">
           {storeOptions.map(store => (
             <button
               key={store.label}
-              onClick={() => { setSelectedStore(store.label); setShowHistory(false); }}
+              onClick={() => handleSelectStore(store.label)}
               className={`rounded-2xl py-3 px-2 text-center font-bold text-sm transition-all border-2 ${
                 selectedStore === store.label
                   ? "bg-emerald-500 text-white border-emerald-600 shadow-lg scale-[1.02]"
@@ -182,22 +216,21 @@ const Shopping = () => {
                 : { boxShadow: "0 4px 0 0 hsl(30 60% 40%)" }
               }
             >
-              <span className="text-lg block">{store.emoji}</span>
               <span className="block text-white">{store.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Calculator area - only shows when store is selected */}
+      {/* Calculator area */}
       {selectedStore && !showHistory && (
         <>
-          <div className="bg-primary/5 rounded-xl p-3 text-center">
+          <div className="bg-primary/10 rounded-xl p-3 text-center">
             <p className="text-sm font-bold text-foreground">Comprando em: <span className="text-primary">{selectedStore}</span></p>
           </div>
 
           {/* Header row */}
-          <div className="grid grid-cols-[1fr_70px_80px_32px] gap-2 px-1">
+          <div className="grid grid-cols-[1fr_60px_80px_32px] gap-2 px-1">
             <span className="text-xs font-bold text-muted-foreground">Item</span>
             <span className="text-xs font-bold text-muted-foreground text-center">Qtd</span>
             <span className="text-xs font-bold text-muted-foreground text-center">Valor</span>
@@ -207,7 +240,7 @@ const Shopping = () => {
           {/* Items */}
           <div className="space-y-2">
             {items.map((item, idx) => (
-              <div key={idx} className="grid grid-cols-[1fr_70px_80px_32px] gap-2 items-center">
+              <div key={idx} className="grid grid-cols-[1fr_60px_80px_32px] gap-2 items-center">
                 <Input
                   placeholder="Nome do item"
                   value={item.ingredient_name}
@@ -217,6 +250,7 @@ const Shopping = () => {
                 />
                 <Input
                   type="number"
+                  inputMode="numeric"
                   placeholder="0"
                   value={item.quantity || ""}
                   onChange={(e) => updateItem(idx, "quantity", e.target.value)}
@@ -256,8 +290,7 @@ const Shopping = () => {
             : "bg-primary/10 text-primary border-primary/20"
         }`}
       >
-        <History className="w-4 h-4 inline-block mr-2" />
-        📊 Histórico de Compras
+        Histórico de Compras
       </button>
 
       {/* History */}
@@ -271,17 +304,15 @@ const Shopping = () => {
                 <CardContent className="p-4 space-y-3">
                   <div className="flex justify-between items-center">
                     <p className="font-extrabold text-base text-foreground">
-                      📅 {day.date === "sem-data" ? "Sem data" : new Date(day.date + "T12:00:00").toLocaleDateString("pt-BR")}
+                      {day.date === "sem-data" ? "Sem data" : new Date(day.date + "T12:00:00").toLocaleDateString("pt-BR")}
                     </p>
                     <p className="text-lg font-extrabold text-primary">R$ {day.dayTotal.toFixed(2)}</p>
                   </div>
-                  
+
                   {day.stores.map(s => (
                     <div key={s.store} className="bg-muted/50 rounded-xl p-3 space-y-1">
                       <div className="flex justify-between items-center">
-                        <p className="font-bold text-sm text-foreground">
-                          {storeOptions.find(o => o.label === s.store)?.emoji || "📍"} {s.store}
-                        </p>
+                        <p className="font-bold text-sm text-foreground">{s.store}</p>
                         <p className="font-extrabold text-sm text-success">R$ {s.total.toFixed(2)}</p>
                       </div>
                       <div className="space-y-0.5">
