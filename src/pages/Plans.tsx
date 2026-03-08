@@ -4,17 +4,6 @@ import { Crown, Star, Award, Gem, Check, Sparkles } from "lucide-react";
 
 const plans = [
   {
-    name: "Básico",
-    price: "Grátis",
-    period: "",
-    icon: Star,
-    gradient: "from-gray-400 via-gray-300 to-gray-200",
-    borderColor: "border-gray-300",
-    btnClass: "bg-gray-500 hover:bg-gray-600 text-white",
-    features: ["Precificação básica", "Até 5 produtos", "Suporte por e-mail"],
-    current: true,
-  },
-  {
     name: "Prata",
     price: "R$ 9,90",
     period: "semanal",
@@ -22,7 +11,7 @@ const plans = [
     gradient: "from-slate-400 via-slate-300 to-slate-200",
     borderColor: "border-slate-300",
     btnClass: "bg-slate-500 hover:bg-slate-600 text-white",
-    features: ["Precificação ilimitada", "Até 20 produtos", "Suporte prioritário"],
+    features: ["Precificação ilimitada", "Até 20 produtos", "Suporte individual"],
   },
   {
     name: "Ouro",
@@ -33,7 +22,7 @@ const plans = [
     borderColor: "border-amber-300",
     btnClass: "bg-amber-500 hover:bg-amber-600 text-white",
     popular: true,
-    features: ["Tudo do Prata", "Cardápio digital", "Encomendas ilimitadas", "Suporte VIP"],
+    features: ["Tudo do Prata", "Cardápio digital", "Encomendas ilimitadas", "Suporte individual VIP"],
   },
   {
     name: "Diamante",
@@ -43,7 +32,7 @@ const plans = [
     gradient: "from-rose-400 via-pink-300 to-rose-200",
     borderColor: "border-primary/40",
     btnClass: "bg-primary hover:bg-primary/90 text-primary-foreground btn-3d",
-    features: ["Tudo do Ouro", "Relatórios avançados", "WhatsApp automático", "Suporte VIP 24h"],
+    features: ["Tudo do Ouro", "Relatórios avançados", "WhatsApp automático", "Suporte individual premium"],
   },
 ];
 
