@@ -18,6 +18,7 @@ const Dashboard = () => {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [lowStockItems, setLowStockItems] = useState<any[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(today);
   const [dialogType, setDialogType] = useState<"income" | "expense" | null>(null);
 
