@@ -124,9 +124,10 @@ const SettingsPage = () => {
   };
 
   const addVariableCost = () => {
-    if (!newVarName.trim() || !newVarAmount) return;
-    setVariableCosts([...variableCosts, { category: newVarName.trim(), amount: Number(newVarAmount), frequency: newVarFreq }]);
-    setNewVarName(""); setNewVarAmount(""); setNewVarFreq("mensal");
+    const costName = newVarCategory === "Outros" && newVarCustomName.trim() ? newVarCustomName.trim() : newVarCategory;
+    if (!costName || !newVarAmount) return;
+    setVariableCosts([...variableCosts, { category: costName, amount: Number(newVarAmount), frequency: newVarFreq }]);
+    setNewVarCategory(""); setNewVarCustomName(""); setNewVarAmount(""); setNewVarFreq("mensal");
   };
 
   const handleSave = async () => {
