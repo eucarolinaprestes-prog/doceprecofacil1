@@ -34,6 +34,7 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [editingOrder, setEditingOrder] = useState<any>(null);
   const [whatsappPreview, setWhatsappPreview] = useState<string | null>(null);
   const [whatsappOrder, setWhatsappOrder] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState("all");
