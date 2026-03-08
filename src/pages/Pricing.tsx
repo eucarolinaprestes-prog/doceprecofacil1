@@ -157,6 +157,40 @@ const Pricing = () => {
           }
         }
       }
+
+      // Check if editing a product from URL params
+      if (editType === "product" && editId) {
+        const { data: product } = await supabase.from("products").select("*").eq("id", editId).single();
+        if (product) {
+          setEditingProductId(editId);
+          setMode("product");
+          setStep(0);
+          setProductName(product.name);
+          setProductDesc(product.description || "");
+          setSaleType(product.yield_unit || "");
+          if (product.photo_url) setProductPhotoPreview(product.photo_url);
+          setPrepTime(String(product.preparation_time || ""));
+          setProfitMargin([Number(product.profit_margin) || 30]);
+          if (Array.isArray(product.ingredients_json)) {
+            setSelectedIngredients((product.ingredients_json as any[]).map((item: any) => ({
+              id: item.id || `loaded-${Date.now()}-${Math.random()}`,
+              name: item.name, unit: item.unit,
+              cost_per_unit: Number(item.cost_per_unit) || 0,
+              quantity_used: String(Number(item.quantity_used) || 0),
+              isManual: true,
+            })));
+          }
+          if (Array.isArray(product.packaging_json)) {
+            setSelectedPackaging((product.packaging_json as any[]).map((item: any) => ({
+              id: item.id || `loaded-${Date.now()}-${Math.random()}`,
+              name: item.name, unit: item.unit,
+              cost_per_unit: Number(item.cost_per_unit) || 0,
+              quantity_used: String(Number(item.quantity_used) || 0),
+              isManual: true,
+            })));
+          }
+        }
+      }
     };
     load();
   }, [user]);
