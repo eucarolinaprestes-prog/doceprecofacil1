@@ -221,7 +221,7 @@ const SettingsPage = () => {
           <Card className="card-elevated">
             <CardContent className="p-5 space-y-4">
               <div>
-                <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">👩‍🍳 Descubra o valor da sua hora</h3>
+                <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">👩‍🍳 Descubra o valor da sua Hora Trabalhada</h3>
                 <p className="text-xs text-muted-foreground">Esse valor será usado automaticamente na precificação</p>
               </div>
 
