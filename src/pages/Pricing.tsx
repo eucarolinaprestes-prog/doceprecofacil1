@@ -288,7 +288,7 @@ const Pricing = () => {
   /** Item row: name | qty | value on ONE line, small actions below */
   const ItemRow = ({ item, type }: { item: SelectedItem; type: "ingredient" | "packaging" }) => {
     const isEditing = editingId === item.id;
-    const cost = item.cost_per_unit * item.quantity_used;
+    const cost = item.cost_per_unit * (Number(item.quantity_used) || 0);
 
     return (
       <div className="bg-secondary/40 p-3 rounded-xl space-y-1.5">
