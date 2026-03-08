@@ -11,8 +11,7 @@ const Dashboard = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const today = new Date();
-  const name = profile?.name || "Confeiteira";
-  const name = profile?.name || "Confeiteira";
+  const displayName = profile?.name || "Confeiteira";
 
   const [incomes, setIncomes] = useState<any[]>([]);
   const [expenses, setExpenses] = useState<any[]>([]);
