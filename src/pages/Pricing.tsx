@@ -41,10 +41,10 @@ interface SelectedItem { id: string; name: string; unit: string; cost_per_unit: 
 const CHART_COLORS = ["hsl(340, 75%, 55%)", "hsl(40, 80%, 55%)", "hsl(152, 70%, 38%)"];
 
 const Hint = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-xs text-muted-foreground flex items-start gap-1.5 mt-1">
-    <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-primary/60" />
-    <span>{children}</span>
-  </p>
+  <div className="flex items-start gap-2 mt-1.5 p-2.5 rounded-xl bg-primary/8 border border-primary/15">
+    <Info className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
+    <p className="text-xs font-medium text-primary/80 leading-relaxed">{children}</p>
+  </div>
 );
 
 const Pricing = () => {
