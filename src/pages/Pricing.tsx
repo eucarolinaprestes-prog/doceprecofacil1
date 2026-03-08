@@ -939,7 +939,7 @@ const Pricing = () => {
       {step < 4 && (
         <div className="space-y-2">
           {stepError && <p className="text-sm font-bold text-destructive text-center">{stepError}</p>}
-          <Button onClick={goNext} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
+          <Button onClick={goNext} className={`w-full rounded-2xl h-14 text-base font-bold gap-2 ${canAdvanceProduct() ? "btn-3d" : "bg-muted text-muted-foreground hover:bg-muted"}`}>
             Próximo <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
