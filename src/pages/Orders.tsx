@@ -249,13 +249,6 @@ const Orders = () => {
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
-  const sendWhatsApp = () => {
-    if (!whatsappOrder || !whatsappPreview) return;
-    const phone = whatsappOrder.clients?.whatsapp?.replace(/\D/g, "") || "";
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(whatsappPreview)}`, "_blank");
-    setWhatsappPreview(null);
-    setWhatsappOrder(null);
-  };
 
   const pendingCount = orders.filter(o => o.status === "pending" || o.status === "scheduled").length;
   const productionCount = orders.filter(o => o.status === "production").length;
