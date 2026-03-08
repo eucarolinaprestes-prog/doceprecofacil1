@@ -346,10 +346,11 @@ const Orders = () => {
 
       {/* Status tabs */}
       <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-        <TabsList className="grid grid-cols-3 w-full h-12 rounded-xl">
-          <TabsTrigger value="pending" className="rounded-xl font-bold text-xs">Pendentes ({pendingCount})</TabsTrigger>
-          <TabsTrigger value="production" className="rounded-xl font-bold text-xs">Produção ({productionCount})</TabsTrigger>
-          <TabsTrigger value="delivered" className="rounded-xl font-bold text-xs">Entregues ({deliveredCount})</TabsTrigger>
+        <TabsList className="grid grid-cols-4 w-full h-12 rounded-xl">
+          <TabsTrigger value="pending" className="rounded-xl font-bold text-[10px] px-1">Pendentes ({pendingCount})</TabsTrigger>
+          <TabsTrigger value="production" className="rounded-xl font-bold text-[10px] px-1">Produção ({productionCount})</TabsTrigger>
+          <TabsTrigger value="finished" className="rounded-xl font-bold text-[10px] px-1">Finalização ({finishedCount})</TabsTrigger>
+          <TabsTrigger value="delivered" className="rounded-xl font-bold text-[10px] px-1">Entregues ({deliveredCount})</TabsTrigger>
         </TabsList>
       </Tabs>
 
