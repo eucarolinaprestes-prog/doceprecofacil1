@@ -216,7 +216,7 @@ const Finance = () => {
           <div className="space-y-3">
             <div className="space-y-1">
               <label className="text-xs font-semibold text-muted-foreground">Quanto você {dialogType === "income" ? "recebeu" : "gastou"}?</label>
-              <Input type="number" step="0.01" placeholder="0,00" value={amount} onChange={(e) => setAmount(e.target.value)} className="h-12 rounded-xl text-lg font-bold" />
+              <CurrencyInput placeholder="0,00" value={amount} onValueChange={setAmount} className="h-12 rounded-xl text-lg font-bold" />
             </div>
             <div className="space-y-1">
               <label className="text-xs font-semibold text-muted-foreground">Categoria</label>
