@@ -247,17 +247,6 @@ const Supplies = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Recipe Edit Dialog */}
-      <Dialog open={recipeDialogOpen} onOpenChange={(o) => { setRecipeDialogOpen(o); if (!o) setEditingRecipe(null); }}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Editar Receita</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <Input placeholder="Nome da receita" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
-            <Input placeholder="Categoria (opcional)" value={recipeCategory} onChange={(e) => setRecipeCategory(e.target.value)} className="h-12 rounded-xl" />
-            <Button onClick={handleSaveRecipe} className="w-full rounded-xl h-12 btn-3d font-bold">Atualizar</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
