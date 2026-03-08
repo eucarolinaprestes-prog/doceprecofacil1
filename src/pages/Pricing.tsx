@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Info, Cake, BookOpen, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Info, BookOpen, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
