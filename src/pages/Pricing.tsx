@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Info, Cake, BookOpen, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Info, BookOpen, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -218,30 +218,30 @@ const Pricing = () => {
 
         <div className="grid gap-4">
           <button
-            onClick={() => { setMode("product"); setStep(0); }}
+            onClick={() => { setMode("recipe"); setStep(0); }}
             className="rounded-2xl p-6 flex items-center gap-4 gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
             style={{ boxShadow: "0 6px 0 0 hsl(340 75% 38%), 0 10px 20px -4px hsl(340 75% 55% / 0.4)" }}
-          >
-            <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-              <Cake className="w-7 h-7" />
-            </div>
-            <div className="text-left">
-              <p className="text-lg font-extrabold">🎂 Precificar Produto Final</p>
-              <p className="text-sm opacity-80">Bolo, doce, salgado com custo completo</p>
-            </div>
-          </button>
-
-          <button
-            onClick={() => { setMode("recipe"); setStep(0); }}
-            className="rounded-2xl p-6 flex items-center gap-4 gradient-gold text-white shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
-            style={{ boxShadow: "0 6px 0 0 hsl(30 60% 40%), 0 10px 20px -4px hsl(30 60% 58% / 0.4)" }}
           >
             <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
               <BookOpen className="w-7 h-7" />
             </div>
             <div className="text-left">
-              <p className="text-lg font-extrabold">🧁 Precificar Receitas</p>
+              <p className="text-lg font-extrabold">Precificar Receitas</p>
               <p className="text-sm opacity-80">Massa, recheio, cobertura separados</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => { setMode("product"); setStep(0); }}
+            className="rounded-2xl p-6 flex items-center gap-4 gradient-gold text-white shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+            style={{ boxShadow: "0 6px 0 0 hsl(30 60% 40%), 0 10px 20px -4px hsl(30 60% 58% / 0.4)" }}
+          >
+            <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+              <CheckCircle2 className="w-7 h-7" />
+            </div>
+            <div className="text-left">
+              <p className="text-lg font-extrabold">Precificar Produto Final</p>
+              <p className="text-sm opacity-80">Bolo, doce, salgado com custo completo</p>
             </div>
           </button>
         </div>
