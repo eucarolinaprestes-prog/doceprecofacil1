@@ -15,7 +15,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, BarChart, Bar, XAxis,
 
 const incomeCategories = ["Bolos", "Encomendas", "Fatias", "Doces", "Salgados", "Cupcakes", "Outros"];
 const expenseCategories = ["Ingredientes", "Embalagens", "Luz", "Gás", "Uber/99", "Aplicativos", "Entregador", "Compras", "Outros"];
-const COLORS = ["hsl(152, 70%, 38%)", "hsl(30, 60%, 58%)", "hsl(340, 75%, 55%)", "hsl(280, 50%, 55%)", "hsl(200, 60%, 50%)", "hsl(38, 92%, 50%)", "hsl(0, 84%, 60%)"];
+const COLORS = ["hsl(152, 70%, 38%)", "hsl(45, 85%, 52%)", "hsl(340, 75%, 55%)", "hsl(280, 50%, 55%)", "hsl(200, 60%, 50%)", "hsl(38, 92%, 50%)", "hsl(0, 84%, 60%)"];
 
 const paymentMethods = [
   { value: "pix", label: "Pix", icon: Smartphone },
