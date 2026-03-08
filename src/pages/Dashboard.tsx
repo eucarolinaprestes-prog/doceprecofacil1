@@ -49,11 +49,6 @@ const Dashboard = () => {
   const totalExpense = expenses.reduce((s, e) => s + Number(e.amount), 0);
   const profit = totalIncome - totalExpense;
 
-  const chartData = [
-    { name: "Entradas", value: totalIncome, color: "hsl(152, 70%, 38%)" },
-    { name: "Saídas", value: totalExpense, color: "hsl(0, 84%, 60%)" },
-    { name: "Lucro", value: Math.max(0, profit), color: "hsl(152, 70%, 38%)" },
-  ];
 
   // Calendar
   const orderDates = orders.reduce((acc: Record<string, number>, o) => {
