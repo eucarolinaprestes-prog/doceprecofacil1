@@ -107,25 +107,7 @@ const Supplies = () => {
     toast({ title: "Duplicado! ✅" }); fetchAll();
   };
 
-  const handleDeleteRecipe = async (id: string) => {
-    await supabase.from("recipes").delete().eq("id", id);
-    toast({ title: "Receita excluída" }); fetchAll();
-  };
 
-  const handleDuplicateRecipe = async (r: any) => {
-    const { id, created_at, updated_at, ...rest } = r;
-    await supabase.from("recipes").insert({ ...rest, name: `${rest.name} (cópia)` });
-    toast({ title: "Receita duplicada! ✅" }); fetchAll();
-  };
-
-  const openEditRecipe = (r: any) => {
-    // Navigate to pricing page in recipe mode with pre-filled data
-    navigate(`/pricing?edit=recipe&id=${r.id}`);
-  };
-
-  const handleSaveRecipe = async () => {
-    // No longer needed - editing happens in Pricing page
-  };
 
   const renderItemList = (items: any[], table: "ingredients" | "packaging", type: "ingredient" | "packaging") => {
     if (items.length === 0) {
