@@ -177,7 +177,7 @@ const Pricing = () => {
     setShowPkgManual(false);
   };
 
-  const updateSelectedQty = (id: string, qty: number, type: "ingredient" | "packaging") => {
+  const updateSelectedQty = (id: string, qty: string, type: "ingredient" | "packaging") => {
     const setter = type === "ingredient" ? setSelectedIngredients : setSelectedPackaging;
     const list = type === "ingredient" ? selectedIngredients : selectedPackaging;
     setter(list.map(i => i.id === id ? { ...i, quantity_used: qty } : i));
