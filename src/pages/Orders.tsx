@@ -36,6 +36,8 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [editingOrder, setEditingOrder] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [whatsappPreview, setWhatsappPreview] = useState<string | null>(null);
+  const [whatsappOrder, setWhatsappOrder] = useState<any>(null);
 
   // Form
   const [clientId, setClientId] = useState("");
@@ -191,11 +193,14 @@ const Orders = () => {
     details.push(`💳 *Pagamento:* ${order.payment_method?.toUpperCase() || "PIX"}`);
     const detailsStr = details.join("\n");
 
-    const deliveryInfo = order.delivery_type === "pickup" && confAddr
-      ? `\n\n📍 *Local de retirada:*\n${confAddr}`
-      : order.delivery_type === "delivery" && clientAddr
-      ? `\n\n📍 *Endereço de entrega:*\n${clientAddr}`
-      : "";
+    let deliveryInfo = "";
+    if (order.delivery_type === "pickup" && confAddr) {
+      deliveryInfo = `\n\n📍 *Retirada no endereço:*\n${confAddr}`;
+      if (timeStr) deliveryInfo += `\n🕐 *Horário para retirada:* ${timeStr}`;
+    } else if (order.delivery_type === "delivery" && clientAddr) {
+      deliveryInfo = `\n\n📍 *O pedido será entregue no endereço:*\n${clientAddr}`;
+      if (timeStr) deliveryInfo += `\n🕐 *Previsão de entrega:* ${timeStr}`;
+    }
 
     if (order.status === "pending" || order.status === "scheduled") {
       // Orçamento
@@ -243,10 +248,17 @@ const Orders = () => {
     return msg;
   };
 
-  const sendWhatsAppDirect = (order: any) => {
-    const msg = buildMessage(order);
-    const phone = order.clients?.whatsapp?.replace(/\D/g, "") || "";
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
+  const openWhatsAppPreview = (order: any) => {
+    setWhatsappPreview(buildMessage(order));
+    setWhatsappOrder(order);
+  };
+
+  const sendWhatsApp = () => {
+    if (!whatsappOrder || !whatsappPreview) return;
+    const phone = whatsappOrder.clients?.whatsapp?.replace(/\D/g, "") || "";
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(whatsappPreview)}`, "_blank");
+    setWhatsappPreview(null);
+    setWhatsappOrder(null);
   };
 
 
@@ -312,7 +324,7 @@ const Orders = () => {
                       {o.status === "pending" || o.status === "scheduled" ? "Iniciar produção" : o.status === "production" ? "Finalizar" : "Marcar entregue"}
                     </Button>
                   )}
-                  <Button size="sm" variant="outline" onClick={() => sendWhatsAppDirect(o)} className="rounded-xl h-9 text-success border-success/30 hover:bg-success/10">
+                  <Button size="sm" variant="outline" onClick={() => openWhatsAppPreview(o)} className="rounded-xl h-9 text-success border-success/30 hover:bg-success/10">
                     <WhatsAppIcon className="w-4 h-4" />
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => openEditDialog(o)} className="rounded-xl h-9">
@@ -327,6 +339,20 @@ const Orders = () => {
           ))}
         </div>
       )}
+
+      {/* WhatsApp Preview Dialog */}
+      <Dialog open={!!whatsappPreview} onOpenChange={() => { setWhatsappPreview(null); setWhatsappOrder(null); }}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>📱 Prévia da mensagem</DialogTitle>
+            <p className="text-xs text-muted-foreground">Revise e edite antes de enviar pelo WhatsApp</p>
+          </DialogHeader>
+          <Textarea value={whatsappPreview || ""} onChange={(e) => setWhatsappPreview(e.target.value)} className="min-h-[300px] rounded-xl text-sm" />
+          <Button onClick={sendWhatsApp} className="w-full rounded-xl h-12 font-bold bg-success hover:bg-success/90 text-success-foreground gap-2">
+            <WhatsAppIcon className="w-5 h-5" /> Enviar no WhatsApp
+          </Button>
+        </DialogContent>
+      </Dialog>
 
 
       {/* Order Dialog (Create / Edit) */}
