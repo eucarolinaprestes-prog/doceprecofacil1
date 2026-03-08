@@ -19,7 +19,10 @@ const packagingUnits = ["unidade", "pacote", "caixa fechada"];
 const Supplies = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("ingredients");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "ingredients";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [ingredients, setIngredients] = useState<any[]>([]);
   const [packagingItems, setPackagingItems] = useState<any[]>([]);
   const [recipes, setRecipes] = useState<any[]>([]);

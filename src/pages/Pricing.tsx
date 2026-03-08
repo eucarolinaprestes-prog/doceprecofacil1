@@ -236,7 +236,7 @@ const Pricing = () => {
         yield_unit: finalRecipeYieldUnit,
       } as any);
       toast({ title: "Receita salva com sucesso! 🎉" });
-      navigate("/supplies");
+      navigate("/supplies?tab=recipes");
     } catch { toast({ title: "Erro ao salvar", variant: "destructive" }); }
     finally { setSaving(false); }
   };
