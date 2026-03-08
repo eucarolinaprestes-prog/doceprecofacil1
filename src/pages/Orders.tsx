@@ -359,17 +359,45 @@ const Orders = () => {
       </Button>
 
       {/* Status tabs */}
-      <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-        <TabsList className="grid grid-cols-3 w-full h-auto gap-2 rounded-xl p-1.5 bg-secondary/50">
-          <TabsTrigger value="pending" className="rounded-xl font-bold text-xs py-2.5">Pendentes ({pendingCount})</TabsTrigger>
-          <TabsTrigger value="scheduled" className="rounded-xl font-bold text-xs py-2.5">Agendados ({scheduledCount})</TabsTrigger>
-          <TabsTrigger value="production" className="rounded-xl font-bold text-xs py-2.5">Produção ({productionCount})</TabsTrigger>
-        </TabsList>
-        <TabsList className="grid grid-cols-2 w-full h-auto gap-2 rounded-xl p-1.5 bg-secondary/50 mt-2">
-          <TabsTrigger value="finished" className="rounded-xl font-bold text-xs py-2.5">Finalizado ({finishedCount})</TabsTrigger>
-          <TabsTrigger value="delivered" className="rounded-xl font-bold text-xs py-2.5">Entregues ({deliveredCount})</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          { value: "pending", label: "Pendentes", count: pendingCount, icon: "📋" },
+          { value: "scheduled", label: "Agendados", count: scheduledCount, icon: "📅" },
+          { value: "production", label: "Produção", count: productionCount, icon: "👩‍🍳" },
+        ].map(tab => (
+          <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
+            className={`rounded-2xl py-3 px-2 text-center font-bold text-xs transition-all border-2 ${
+              statusFilter === tab.value
+                ? "gradient-primary text-primary-foreground border-primary shadow-lg scale-[1.02]"
+                : "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+            }`}
+            style={statusFilter === tab.value ? { boxShadow: "0 4px 0 0 hsl(340 75% 38%), 0 6px 12px -2px hsl(340 75% 55% / 0.3)" } : {}}
+          >
+            <span className="text-lg block">{tab.icon}</span>
+            <span className="block mt-0.5">{tab.label}</span>
+            <span className="block text-[10px] opacity-80 mt-0.5">{tab.count}</span>
+          </button>
+        ))}
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {[
+          { value: "finished", label: "Finalizado", count: finishedCount, icon: "✅" },
+          { value: "delivered", label: "Entregues", count: deliveredCount, icon: "🎉" },
+        ].map(tab => (
+          <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
+            className={`rounded-2xl py-3 px-2 text-center font-bold text-xs transition-all border-2 ${
+              statusFilter === tab.value
+                ? "gradient-primary text-primary-foreground border-primary shadow-lg scale-[1.02]"
+                : "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+            }`}
+            style={statusFilter === tab.value ? { boxShadow: "0 4px 0 0 hsl(340 75% 38%), 0 6px 12px -2px hsl(340 75% 55% / 0.3)" } : {}}
+          >
+            <span className="text-lg block">{tab.icon}</span>
+            <span className="block mt-0.5">{tab.label}</span>
+            <span className="block text-[10px] opacity-80 mt-0.5">{tab.count}</span>
+          </button>
+        ))}
+      </div>
 
       {/* Order list */}
       {filteredOrders.length === 0 ? (
