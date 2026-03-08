@@ -169,6 +169,7 @@ const Pricing = () => {
           setProductName(product.name);
           setProductDesc(product.description || "");
           setSaleType(product.yield_unit || "");
+          setProductYieldQty(String(product.yield_quantity || "1"));
           if (product.photo_url) setProductPhotoPreview(product.photo_url);
           setPrepTime(String(product.preparation_time || ""));
           setProfitMargin([Number(product.profit_margin) || 30]);
