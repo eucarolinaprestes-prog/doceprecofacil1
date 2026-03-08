@@ -88,8 +88,8 @@ const Dashboard = () => {
       {/* CTA Hero */}
       <button
         onClick={() => navigate("/pricing")}
-        className="w-full rounded-2xl p-6 flex items-center justify-between gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
-        style={{ boxShadow: "0 6px 0 0 hsl(340 75% 38%), 0 10px 20px -4px hsl(340 75% 55% / 0.4)" }}
+        className="w-full rounded-2xl p-6 flex items-center justify-between text-white shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+        style={{ background: "linear-gradient(135deg, hsl(340 70% 58%), hsl(340 65% 65%))", boxShadow: "0 6px 0 0 hsl(340 70% 48%), 0 10px 20px -4px hsl(340 70% 58% / 0.4)" }}
       >
         <div className="text-left">
           <p className="text-lg font-extrabold">Oi, {displayName}! 👋</p>
@@ -151,8 +151,8 @@ const Dashboard = () => {
         </button>
         <button
           onClick={() => navigate("/shopping")}
-          className="rounded-2xl h-16 gradient-primary text-primary-foreground font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
-          style={{ boxShadow: "0 4px 0 0 hsl(340 75% 38%), 0 8px 16px -4px hsl(340 75% 55% / 0.35)" }}
+          className="rounded-2xl h-16 text-white font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
+          style={{ background: "linear-gradient(135deg, hsl(340 70% 58%), hsl(340 65% 65%))", boxShadow: "0 4px 0 0 hsl(340 70% 48%), 0 8px 16px -4px hsl(340 70% 58% / 0.35)" }}
         >
           <ShoppingCart className="w-5 h-5" />
           <span>Calculadora de Compras</span>
@@ -168,27 +168,27 @@ const Dashboard = () => {
       </div>
 
       {/* Calendário mensal */}
-      <Card className="card-elevated border border-primary/20 overflow-hidden">
-        <div className="gradient-primary px-4 py-3 flex items-center justify-between">
+      <Card className="card-elevated border border-indigo-200 overflow-hidden">
+        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "linear-gradient(135deg, hsl(230 60% 55%), hsl(250 55% 62%))" }}>
           <button onClick={() => setCalendarMonth(m => subMonths(m, 1))} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
-            <ChevronLeft className="w-4 h-4 text-primary-foreground" />
+            <ChevronLeft className="w-4 h-4 text-white" />
           </button>
           <div className="text-center">
-            <p className="text-sm font-extrabold text-primary-foreground flex items-center gap-2">
+            <p className="text-sm font-extrabold text-white flex items-center gap-2">
               <CalendarDays className="w-4 h-4" /> Calendário de Encomendas
             </p>
-            <p className="text-xs text-primary-foreground/80 font-semibold capitalize mt-0.5">
+            <p className="text-xs text-white/80 font-semibold capitalize mt-0.5">
               {format(calendarMonth, "MMMM yyyy", { locale: ptBR })}
             </p>
           </div>
           <button onClick={() => setCalendarMonth(m => addMonths(m, 1))} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
-            <ChevronRight className="w-4 h-4 text-primary-foreground" />
+            <ChevronRight className="w-4 h-4 text-white" />
           </button>
         </div>
         <CardContent className="p-4">
           <div className="grid grid-cols-7 gap-1 mb-3">
             {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(d => (
-              <div key={d} className="text-center text-[10px] font-extrabold text-primary/70 uppercase tracking-wider">{d}</div>
+              <div key={d} className="text-center text-[10px] font-extrabold text-indigo-500/70 uppercase tracking-wider">{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1.5">
@@ -203,15 +203,16 @@ const Dashboard = () => {
                   onClick={() => hasOrder && inMonth ? setSelectedDate(selectedDate === dateStr ? null : dateStr) : setSelectedDate(null)}
                   className={`flex flex-col items-center py-2 rounded-xl text-xs font-semibold relative transition-all cursor-pointer ${
                     !inMonth ? "opacity-20" :
-                    isToday(day) ? "gradient-primary text-primary-foreground shadow-lg scale-105" :
+                    isToday(day) ? "text-white shadow-lg scale-105" :
                     hasOrder && isFuture ? "bg-success text-success-foreground font-extrabold shadow-sm" :
                     hasOrder ? "bg-success/15 text-success font-extrabold border border-success/30" :
                     "text-foreground hover:bg-muted/50"
                   }`}
+                  style={isToday(day) && inMonth ? { background: "linear-gradient(135deg, hsl(230 60% 55%), hsl(250 55% 62%))" } : undefined}
                 >
                   <span className="text-sm font-bold">{format(day, "d")}</span>
                   {hasOrder && inMonth && (
-                    <span className={`w-1.5 h-1.5 rounded-full absolute bottom-1 ${isToday(day) ? "bg-primary-foreground" : "bg-success-foreground"}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full absolute bottom-1 ${isToday(day) ? "bg-white" : "bg-success-foreground"}`} />
                   )}
                 </div>
               );
