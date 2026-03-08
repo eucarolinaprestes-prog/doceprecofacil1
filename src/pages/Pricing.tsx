@@ -614,15 +614,15 @@ const Pricing = () => {
             <p className="text-sm text-muted-foreground">Vamos calcular o custo do seu tempo e gastos fixos</p>
           </div>
 
-          <div className={`p-4 rounded-xl ${salaryConfigured ? "bg-success/10 border border-success/20" : "bg-secondary border border-warning/30"}`}>
+          <div className={`p-4 rounded-xl ${salaryConfigured ? "bg-primary/10 border border-primary/20" : "bg-secondary border border-warning/30"}`}>
             {salaryConfigured ? (
               <>
-                <p className="text-sm text-foreground">✅ Valor da sua hora: <strong className="text-success text-lg">R$ {hourlyRate.toFixed(2)}</strong></p>
+                <p className="text-sm text-foreground">Valor da sua hora: <strong className="text-primary text-lg">R$ {hourlyRate.toFixed(2)}</strong></p>
                 <Hint>Esse valor foi calculado com base no salário que você configurou nas Configurações</Hint>
               </>
             ) : (
               <>
-                <p className="text-sm text-muted-foreground">⚠️ Configure seu salário nas Configurações → Financeiro</p>
+                <p className="text-sm text-foreground">⚠️ Configure seu salário nas Configurações → Financeiro</p>
                 <Hint>Sem o salário configurado, a mão de obra não será incluída no cálculo</Hint>
               </>
             )}
