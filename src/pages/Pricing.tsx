@@ -6,7 +6,7 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Lightbulb, BookOpen, Pencil, Copy } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Lightbulb, BookOpen, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,7 +16,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 type PricingMode = "select" | "product" | "recipe";
 
 const stepLabelsProduct = ["Produto", "Ingredientes", "Mão de Obra", "Estratégia", "Salvar"];
-const stepLabelsRecipe = ["Receita", "Ingredientes", "Resumo"];
+const stepLabelsRecipe = ["Ingredientes", "Resumo"];
 const categories = ["Massa", "Recheio", "Bolo", "Fatias", "Cupcakes", "Salgados", "Doces", "Outros"];
 const recipeCategories = ["Massa", "Recheio", "Cobertura", "Mousse", "Calda", "Creme", "Outros"];
 const saleTypes = [
@@ -285,14 +285,13 @@ const Pricing = () => {
 
   const stepLabels = mode === "product" ? stepLabelsProduct : stepLabelsRecipe;
 
-  /** Item row: name | qty | value on ONE line, small actions below */
-  const ItemRow = ({ item, type }: { item: SelectedItem; type: "ingredient" | "packaging" }) => {
+  /** Inline item row render (not a sub-component, to preserve focus) */
+  const renderItemRow = (item: SelectedItem, type: "ingredient" | "packaging") => {
     const isEditing = editingId === item.id;
     const cost = item.cost_per_unit * (Number(item.quantity_used) || 0);
 
     return (
-      <div className="bg-secondary/40 p-3 rounded-xl space-y-1.5">
-        {/* Main row: name | qty unit | R$ value */}
+      <div key={item.id} className="bg-secondary/40 p-3 rounded-xl space-y-1.5">
         <div className="flex items-center gap-2">
           {isEditing ? (
             <Input
@@ -305,32 +304,26 @@ const Pricing = () => {
           ) : (
             <span className="text-sm font-semibold flex-1 min-w-0 truncate">{item.name}</span>
           )}
-          <Input
+          <input
             inputMode="decimal"
             placeholder="Qtd"
-            value={item.quantity_used || ""}
+            value={item.quantity_used}
             onChange={(e) => updateSelectedQty(item.id, e.target.value, type)}
-            className="w-[72px] h-9 rounded-lg text-sm text-center bg-background shrink-0"
+            className="w-[72px] h-9 rounded-lg text-sm text-center bg-background border border-input shrink-0 outline-none focus:ring-2 focus:ring-ring"
           />
           <span className="text-xs text-muted-foreground shrink-0 w-6">{item.unit}</span>
           <span className="text-sm font-bold text-primary shrink-0 min-w-[70px] text-right">
             R$ {cost.toFixed(2)}
           </span>
         </div>
-
-        {/* Small action buttons */}
         <div className="flex items-center gap-3 pl-0.5">
           <button onClick={() => setEditingId(isEditing ? null : item.id)} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary transition-colors">
             <Pencil className="w-3 h-3" /> Editar
-          </button>
-          <button onClick={() => duplicateSelected(item, type)} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary transition-colors">
-            <Copy className="w-3 h-3" /> Copiar
           </button>
           <button onClick={() => removeSelected(item.id, type)} className="flex items-center gap-1 text-[11px] text-destructive/70 hover:text-destructive transition-colors">
             <Trash2 className="w-3 h-3" /> Remover
           </button>
         </div>
-
       </div>
     );
   };
@@ -396,40 +389,12 @@ const Pricing = () => {
           </div>
         </div>
 
-        {/* Step 0: Name + Category (merged) */}
+        {/* Step 0: Name + Ingredients + Yield (all in one) */}
         {step === 0 && (
           <div className="space-y-5">
-            <h2 className="text-xl font-extrabold text-foreground">Dados da Receita</h2>
-
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-primary">Nome da receita *</label>
               <Input placeholder="Ex: Massa de chocolate" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-semibold text-primary">Categoria *</label>
-              <div className="flex flex-wrap gap-2">
-                {recipeCategories.map(c => (
-                  <button key={c} onClick={() => setRecipeCategory(c)}
-                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${recipeCategory === c ? "bg-success text-success-foreground shadow-md" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}>
-                    {c}
-                  </button>
-                ))}
-              </div>
-              {recipeCategory === "Outros" && (
-                <div className="mt-2">
-                  <Input placeholder="Digite o nome da categoria..." value={customRecipeCategory} onChange={(e) => setCustomRecipeCategory(e.target.value)} className="h-12 rounded-xl" />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Step 1: Ingredients + Yield */}
-        {step === 1 && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-xl font-extrabold text-foreground">Ingredientes da receita</h2>
             </div>
 
             <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
@@ -440,12 +405,10 @@ const Pricing = () => {
             </Select>
 
             {selectedIngredients.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground py-4">Nenhum ingrediente adicionado ainda. Toque no botão acima para começar!</p>
+              <p className="text-center text-sm text-muted-foreground py-4">Nenhum ingrediente adicionado ainda</p>
             )}
 
-            {selectedIngredients.map(item => (
-              <ItemRow key={item.id} item={item} type="ingredient" />
-            ))}
+            {selectedIngredients.map(item => renderItemRow(item, "ingredient"))}
 
             {/* Yield / Rendimento */}
             <Card className="border border-primary/20 bg-primary/5">
@@ -453,12 +416,12 @@ const Pricing = () => {
                 <h3 className="text-base font-bold text-foreground">📏 Rendimento da receita</h3>
                 <Hint>Ex: 2 kg de recheio, 3 discos, 500 ml de calda</Hint>
                 <div className="flex gap-2">
-                  <Input
-                    type="number"
+                  <input
+                    inputMode="decimal"
                     placeholder="Ex: 2"
                     value={recipeYieldQty}
                     onChange={(e) => setRecipeYieldQty(e.target.value)}
-                    className="h-12 rounded-xl flex-1"
+                    className="h-12 rounded-xl flex-1 border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
                   />
                   <div className="flex-1">
                     <Select value={recipeYieldUnit} onValueChange={setRecipeYieldUnit}>
@@ -493,17 +456,15 @@ const Pricing = () => {
           </div>
         )}
 
-        {/* Step 2: Summary */}
-        {step === 2 && (
+        {/* Step 1: Summary */}
+        {step === 1 && (
           <div className="space-y-5">
             <div className="text-center">
               <p className="text-3xl">📋</p>
               <h2 className="text-xl font-extrabold text-foreground mt-2">Resumo da Receita</h2>
-              <Hint>Confira se tudo está certo antes de salvar!</Hint>
             </div>
             <Card className="border border-border"><CardContent className="p-5 space-y-3">
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Receita</span><span className="font-bold">{recipeName}</span></div>
-              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Categoria</span><span className="font-bold">{recipeCategory === "Outros" && customRecipeCategory.trim() ? customRecipeCategory.trim() : recipeCategory}</span></div>
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Ingredientes</span><span className="font-bold">{selectedIngredients.length}</span></div>
               {recipeYieldQty && (
                 <div className="flex justify-between text-sm"><span className="text-muted-foreground">Rendimento</span><span className="font-bold">{recipeYieldQty} {finalRecipeYieldUnit}</span></div>
@@ -527,8 +488,8 @@ const Pricing = () => {
           </div>
         )}
 
-        {step < 2 && (
-          <Button onClick={goNext} disabled={step === 0 ? !(recipeName.trim() && recipeCategory) : false} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
+        {step < 1 && (
+          <Button onClick={goNext} disabled={!recipeName.trim()} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
             Próximo <ChevronRight className="w-5 h-5" />
           </Button>
         )}
@@ -655,9 +616,7 @@ const Pricing = () => {
               <p className="text-center text-sm text-muted-foreground py-3">Nenhum ingrediente adicionado ainda. Toque em "+ Estoque" ou "+ Avulso" acima!</p>
             )}
 
-            {selectedIngredients.map(item => (
-              <ItemRow key={item.id} item={item} type="ingredient" />
-            ))}
+            {selectedIngredients.map(item => renderItemRow(item, "ingredient"))}
           </div>
 
           <div className="space-y-3">
@@ -693,9 +652,7 @@ const Pricing = () => {
               <p className="text-center text-sm text-muted-foreground py-3">Nenhuma embalagem adicionada. Toque em "+ Estoque" ou "+ Avulso" acima!</p>
             )}
 
-            {selectedPackaging.map(item => (
-              <ItemRow key={item.id} item={item} type="packaging" />
-            ))}
+            {selectedPackaging.map(item => renderItemRow(item, "packaging"))}
           </div>
 
           <div className="bg-secondary p-4 rounded-xl flex justify-between items-center">
