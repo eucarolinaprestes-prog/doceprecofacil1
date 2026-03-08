@@ -167,28 +167,6 @@ const Dashboard = () => {
         </button>
       </div>
 
-      {/* Atividades recentes */}
-      {recentActivity.length > 0 && (
-        <Card className="card-elevated">
-          <CardContent className="p-4">
-            <p className="text-sm font-bold text-foreground mb-3">🕐 Atividades recentes</p>
-            <div className="space-y-3">
-              {recentActivity.map((a, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${a.type === "income" ? "bg-success/10" : a.type === "expense" ? "bg-destructive/10" : "bg-primary/10"}`}>
-                    {a.type === "income" ? <ArrowUpRight className="w-4 h-4 text-success" /> : a.type === "expense" ? <ArrowDownRight className="w-4 h-4 text-destructive" /> : <ShoppingBag className="w-4 h-4 text-primary" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-semibold truncate ${a.type === "income" ? "text-success" : a.type === "expense" ? "text-destructive" : "text-foreground"}`}>{a.text}</p>
-                    <p className="text-xs text-muted-foreground">{a.sub} {a.date ? `• ${new Date(a.date).toLocaleDateString("pt-BR")}` : ""}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Calendário mensal */}
       <Card className="card-elevated border border-primary/20 overflow-hidden">
         <div className="gradient-primary px-4 py-3 flex items-center justify-between">
@@ -275,6 +253,28 @@ const Dashboard = () => {
           })()}
         </CardContent>
       </Card>
+
+      {/* Atividades recentes */}
+      {recentActivity.length > 0 && (
+        <Card className="card-elevated">
+          <CardContent className="p-4">
+            <p className="text-sm font-bold text-foreground mb-3">🕐 Atividades recentes</p>
+            <div className="space-y-3">
+              {recentActivity.map((a, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${a.type === "income" ? "bg-success/10" : a.type === "expense" ? "bg-destructive/10" : "bg-primary/10"}`}>
+                    {a.type === "income" ? <ArrowUpRight className="w-4 h-4 text-success" /> : a.type === "expense" ? <ArrowDownRight className="w-4 h-4 text-destructive" /> : <ShoppingBag className="w-4 h-4 text-primary" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={`text-sm font-semibold truncate ${a.type === "income" ? "text-success" : a.type === "expense" ? "text-destructive" : "text-foreground"}`}>{a.text}</p>
+                    <p className="text-xs text-muted-foreground">{a.sub} {a.date ? `• ${new Date(a.date).toLocaleDateString("pt-BR")}` : ""}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Alertas de estoque baixo */}
       {lowStockItems.length > 0 && (
