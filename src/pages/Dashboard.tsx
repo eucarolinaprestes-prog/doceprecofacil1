@@ -181,8 +181,8 @@ const Dashboard = () => {
               {format(calendarMonth, "MMMM yyyy", { locale: ptBR })}
             </p>
           </div>
-          <button onClick={() => setCalendarMonth(m => addMonths(m, 1))} className="w-8 h-8 rounded-full bg-rose-900/10 flex items-center justify-center hover:bg-rose-900/20 transition-colors">
-            <ChevronRight className="w-4 h-4 text-rose-900" />
+          <button onClick={() => setCalendarMonth(m => addMonths(m, 1))} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
+            <ChevronRight className="w-4 h-4 text-white" />
           </button>
         </div>
         <CardContent className="p-4">
