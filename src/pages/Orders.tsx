@@ -89,9 +89,9 @@ const Orders = () => {
   const cardPercent = feeCard.enabled ? Number(feeCard.value) || 0 : 0;
   const finalValue = (baseVal + extraFees) * (1 + cardPercent / 100);
 
-  const handleCreate = async () => {
+  const handleSave = async () => {
     if (!user) return;
-    const { error } = await supabase.from("orders").insert({
+    const data = {
       user_id: user.id,
       client_id: clientId || null,
       event_date: eventDate || null,
@@ -109,12 +109,45 @@ const Orders = () => {
       fee_decoration: feeDecoration.enabled ? Number(feeDecoration.value) || 0 : 0,
       fee_delivery: feeDelivery.enabled ? Number(feeDelivery.value) || 0 : 0,
       fee_card_percent: cardPercent,
-    });
-    if (error) { toast({ title: "Erro ao criar", variant: "destructive" }); return; }
-    toast({ title: "Encomenda criada! 🎉" });
+    };
+
+    let error;
+    if (editingOrder) {
+      ({ error } = await supabase.from("orders").update(data).eq("id", editingOrder.id));
+    } else {
+      ({ error } = await supabase.from("orders").insert(data));
+    }
+    if (error) { toast({ title: "Erro ao salvar", variant: "destructive" }); return; }
+    toast({ title: editingOrder ? "Encomenda atualizada! ✅" : "Encomenda criada! 🎉" });
     setDialogOpen(false);
+    setEditingOrder(null);
     resetForm();
     fetchData();
+  };
+
+  const openEditDialog = (o: any) => {
+    setEditingOrder(o);
+    setClientId(o.client_id || "");
+    setEventDate(o.event_date ? o.event_date.split("T")[0] : "");
+    setEventTime(o.event_date && o.event_date.includes("T") ? o.event_date.split("T")[1]?.substring(0, 5) : "");
+    setStatus(o.status || "pending");
+    setOrderCategory(o.category || "");
+    setSize(o.size || "");
+    setDough(o.dough || "");
+    setFilling(o.filling || "");
+    setTopping(o.topping || "");
+    setTotalValue(String(o.total_value || ""));
+    setPaymentPercent(String(o.payment_percent || "100"));
+    setPaymentMethod(o.payment_method || "pix");
+    setDeliveryType(o.delivery_type || "pickup");
+    setNotes(o.notes || "");
+    setObservation(o.observation || "");
+    setFeePackaging({ enabled: !!o.fee_packaging, value: String(o.fee_packaging || "") });
+    setFeeTopper({ enabled: !!o.fee_topper, value: String(o.fee_topper || "") });
+    setFeeDecoration({ enabled: !!o.fee_decoration, value: String(o.fee_decoration || "") });
+    setFeeDelivery({ enabled: !!o.fee_delivery, value: String(o.fee_delivery || "") });
+    setFeeCard({ enabled: !!o.fee_card_percent, value: String(o.fee_card_percent || "") });
+    setDialogOpen(true);
   };
 
   const resetForm = () => {
