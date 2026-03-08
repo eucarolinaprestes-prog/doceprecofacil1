@@ -286,7 +286,7 @@ const Pricing = () => {
         await supabase.from("recipes").insert({ ...payload, user_id: user.id } as any);
         toast({ title: "Receita salva com sucesso! 🎉" });
       }
-      navigate("/supplies?tab=recipes");
+      navigate("/recipes");
     } catch { toast({ title: "Erro ao salvar", variant: "destructive" }); }
     finally { setSaving(false); }
   };
