@@ -197,13 +197,17 @@ const Supplies = () => {
             <div className="grid gap-3">
               {recipes.map((r) => {
                 const ingCount = Array.isArray(r.ingredients_json) ? r.ingredients_json.length : 0;
+                const yieldInfo = r.yield_quantity && r.yield_unit ? `${r.yield_quantity} ${r.yield_unit}` : null;
+                const costPerUnit = yieldInfo && Number(r.yield_quantity) > 0 ? Number(r.total_cost || 0) / Number(r.yield_quantity) : null;
                 return (
                   <Card key={r.id} className="card-elevated">
                     <CardContent className="p-4 flex items-center justify-between">
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-foreground truncate">{r.name}</p>
                         <p className="text-xs text-muted-foreground">{r.category} • {ingCount} ingrediente(s)</p>
+                        {yieldInfo && <p className="text-xs text-muted-foreground">Rendimento: {yieldInfo}</p>}
                         <p className="text-sm font-bold text-success">Custo: R$ {Number(r.total_cost || 0).toFixed(2)}</p>
+                        {costPerUnit !== null && <p className="text-xs font-bold text-primary">R$ {costPerUnit.toFixed(2)} por {r.yield_unit}</p>}
                       </div>
                       <div className="flex gap-1 shrink-0">
                         <Button variant="ghost" size="icon" onClick={() => openEditRecipe(r)}><Pencil className="w-4 h-4 text-primary" /></Button>
