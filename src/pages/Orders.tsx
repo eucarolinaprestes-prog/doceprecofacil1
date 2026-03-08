@@ -245,9 +245,10 @@ const Orders = () => {
     return msg;
   };
 
-  const openWhatsAppPreview = (order: any) => {
-    setWhatsappPreview(buildMessage(order));
-    setWhatsappOrder(order);
+  const sendWhatsAppDirect = (order: any) => {
+    const msg = buildMessage(order);
+    const phone = order.clients?.whatsapp?.replace(/\D/g, "") || "";
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
   const sendWhatsApp = () => {
