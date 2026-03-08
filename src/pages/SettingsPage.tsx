@@ -91,9 +91,6 @@ const SettingsPage = () => {
         setAddress(p.address || "");
         setWhatsapp(p.whatsapp || "");
         setLogoUrl(p.logo_url || "");
-        if (Number(p.desired_salary) > 0) setDesiredSalary(String(p.desired_salary));
-        if (Number(p.work_days_per_week) > 0) setWorkDays(String(p.work_days_per_week));
-        if (Number(p.work_hours_per_day) > 0) setWorkHours(String(p.work_hours_per_day));
       }
       const { data: fc } = await supabase.from("fixed_costs").select("*").eq("user_id", user.id);
       setFixedCosts(fc?.map((c) => ({ id: c.id, category: c.category, amount: Number(c.amount), frequency: "mensal" })) || []);
@@ -221,7 +218,7 @@ const SettingsPage = () => {
           <Card className="card-elevated">
             <CardContent className="p-5 space-y-4">
               <div>
-                <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">👩‍🍳 Descubra o valor da sua hora</h3>
+                <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">👩‍🍳 Descubra o valor da sua Hora Trabalhada</h3>
                 <p className="text-xs text-muted-foreground">Esse valor será usado automaticamente na precificação</p>
               </div>
 
