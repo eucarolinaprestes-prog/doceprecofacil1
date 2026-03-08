@@ -177,40 +177,71 @@ const Orders = () => {
     const clientName = order.clients?.name || "Cliente";
     const clientAddr = order.clients?.address || "";
     const confAddr = profile?.address || "";
-    
-    let msg = `✅ *Confirmação de Pedido*\n\n`;
-    msg += `👤 Cliente: ${clientName}\n`;
-    msg += `📋 ${order.category || ""}\n`;
-    if (order.size) msg += `📏 Tamanho: ${order.size}\n`;
-    if (order.filling) msg += `🍰 Recheio: ${order.filling}\n`;
-    if (order.topping) msg += `🎨 Cobertura: ${order.topping}\n`;
-    msg += `📅 Data: ${order.event_date ? new Date(order.event_date).toLocaleDateString("pt-BR") : "A definir"}\n`;
-    msg += `💰 Total: R$ ${Number(order.total_value || 0).toFixed(2)}\n`;
-    msg += `💳 Pagamento: ${order.payment_method?.toUpperCase() || "PIX"} - ${order.payment_percent || 100}%\n`;
+    const storeName = profile?.store_name || "";
+    const dateStr = order.event_date ? new Date(order.event_date).toLocaleDateString("pt-BR") : "a definir";
+    const timeStr = order.event_date && order.event_date.includes("T") ? new Date(order.event_date).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
+    const totalStr = `R$ ${Number(order.total_value || 0).toFixed(2)}`;
 
-    if (order.delivery_type === "pickup" && confAddr) {
-      msg += `\n📍 *Retirada no endereço:*\n${confAddr}\n`;
-    } else if (order.delivery_type === "delivery" && clientAddr) {
-      msg += `\n📍 *Entrega no endereço:*\n${clientAddr}\n`;
+    const details = [];
+    if (order.category) details.push(`📋 *Produto:* ${order.category}`);
+    if (order.size) details.push(`📏 *Tamanho:* ${order.size}`);
+    if (order.dough) details.push(`🍞 *Massa:* ${order.dough}`);
+    if (order.filling) details.push(`🍰 *Recheio:* ${order.filling}`);
+    if (order.topping) details.push(`🎨 *Cobertura:* ${order.topping}`);
+    details.push(`📅 *Data:* ${dateStr}${timeStr ? ` às ${timeStr}` : ""}`);
+    details.push(`💰 *Valor total:* ${totalStr}`);
+    details.push(`💳 *Pagamento:* ${order.payment_method?.toUpperCase() || "PIX"}`);
+    const detailsStr = details.join("\n");
+
+    const deliveryInfo = order.delivery_type === "pickup" && confAddr
+      ? `\n\n📍 *Local de retirada:*\n${confAddr}`
+      : order.delivery_type === "delivery" && clientAddr
+      ? `\n\n📍 *Endereço de entrega:*\n${clientAddr}`
+      : "";
+
+    if (order.status === "pending" || order.status === "scheduled") {
+      // Orçamento
+      let msg = `Olá, ${clientName}! 😊\n\n`;
+      msg += `Tudo bem? Segue o orçamento do seu pedido:\n\n`;
+      msg += detailsStr;
+      if (order.observation) msg += `\n📝 *Observação:* ${order.observation}`;
+      msg += deliveryInfo;
+      msg += `\n\nAssim que confirmar com o pagamento, me envia o comprovante para eu agendar a produção, tá? 💕`;
+      msg += `\n\nQualquer dúvida, estou à disposição! 🙏`;
+      return msg;
     }
 
-    if (order.notes) msg += `\n📝 ${order.notes}\n`;
-
-    // Payment warning
-    if (order.payment_percent < 100) {
-      msg += `\n⚠️ *Informamos que a encomenda somente será entregue após o pagamento total do pedido.*\n`;
+    if (order.status === "production") {
+      // Agendado / em produção
+      let msg = `Olá, ${clientName}! 😊\n\n`;
+      msg += `Passando para confirmar que o seu pedido foi agendado e já está em produção! 🎉\n\n`;
+      msg += detailsStr;
+      msg += deliveryInfo;
+      msg += `\n\nEstou preparando tudo com muito carinho pra você! 💕`;
+      msg += `\n\nQualquer novidade, te aviso por aqui! 😘`;
+      return msg;
     }
 
-    // Care instructions
-    msg += `\n✨ Olá ${clientName}, seu pedido foi finalizado com muito carinho!\n`;
-    msg += `\n🚗 *Dicas importantes para transporte:*\n`;
-    msg += `• Transportar sempre em superfície plana\n`;
-    msg += `• Evitar sol e calor\n`;
-    msg += `• Não colocar objetos sobre a caixa\n`;
-    msg += `• Manter refrigerado se necessário\n`;
+    if (order.status === "finished" || order.status === "delivered") {
+      // Finalizado
+      let msg = `Olá, ${clientName}! 😊\n\n`;
+      msg += `Que alegria! Seu pedido ficou pronto e foi feito com muito amor e carinho! ✨🎂\n\n`;
+      msg += detailsStr;
+      msg += deliveryInfo;
+      msg += `\n\n🚗 *Dicas importantes para o transporte:*\n`;
+      msg += `• Transportar sempre em superfície plana\n`;
+      msg += `• Evitar sol e calor\n`;
+      msg += `• Não colocar objetos sobre a caixa\n`;
+      msg += `• Manter refrigerado se necessário\n`;
+      msg += `\n⚠️ *Após a retirada ou entrega, não nos responsabilizamos por danos causados durante transporte inadequado ou armazenamento incorreto.*`;
+      msg += `\n\nEspero que você ame! Me manda uma foto depois? 📸💕`;
+      return msg;
+    }
 
-    msg += `\n⚠️ *Após a retirada ou entrega do produto, não nos responsabilizamos por danos causados durante transporte inadequado ou armazenamento incorreto.*`;
-
+    // Fallback genérico
+    let msg = `Olá, ${clientName}! 😊\n\n`;
+    msg += detailsStr;
+    msg += deliveryInfo;
     return msg;
   };
 
