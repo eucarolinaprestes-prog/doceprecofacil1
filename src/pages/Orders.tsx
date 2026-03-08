@@ -444,7 +444,7 @@ const Orders = () => {
             </div>
 
             <Button onClick={handleCreate} className="w-full rounded-xl h-14 btn-3d font-bold gap-2 text-base">
-              <ShoppingBag className="w-5 h-5" /> Criar Pedido
+              <Cake className="w-5 h-5" /> Criar Pedido
             </Button>
           </div>
         </DialogContent>
