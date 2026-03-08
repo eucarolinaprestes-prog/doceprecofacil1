@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trash2, Copy, Pencil, Package } from "lucide-react";
+import { Trash2, Copy, Pencil, Cake } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -43,7 +43,7 @@ const Products = () => {
     <div className="space-y-6">
       <div className="text-center space-y-2">
         <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center mx-auto shadow-lg">
-          <Package className="w-7 h-7 text-white" />
+          <Cake className="w-7 h-7 text-white" />
         </div>
         <h1 className="text-2xl font-extrabold text-foreground">Produtos</h1>
         <p className="text-sm text-muted-foreground">Seus produtos precificados</p>
@@ -55,7 +55,7 @@ const Products = () => {
 
       {products.length === 0 ? (
         <EmptyState
-          icon={Package}
+          icon={Cake}
           title="Nenhum produto ainda"
           description="Precifique seu primeiro produto para vê-lo aqui."
           actionLabel="Precificar agora"
@@ -85,7 +85,7 @@ const Products = () => {
                     <img src={p.photo_url} alt={p.name} className="w-full h-40 rounded-xl object-cover shadow-sm" />
                   ) : (
                     <div className="w-full h-28 rounded-xl bg-secondary flex items-center justify-center">
-                      <Package className="w-10 h-10 text-muted-foreground" />
+                      <Cake className="w-10 h-10 text-muted-foreground" />
                     </div>
                   )}
 
