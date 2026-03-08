@@ -563,7 +563,7 @@ const Pricing = () => {
         <div className="space-y-5">
           <div>
             <h2 className="text-xl font-extrabold text-foreground">O que você quer precificar?</h2>
-            <p className="text-sm text-muted-foreground">Preencha os dados do seu produto para calcular o preço ideal</p>
+            <p className="text-sm text-muted-foreground">Preencha os dados do seu produto</p>
           </div>
 
           <div className="flex justify-center">
@@ -576,18 +576,15 @@ const Pricing = () => {
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-primary">Nome do Produto *</label>
             <Input placeholder="Ex: Bolo de Chocolate" value={productName} onChange={(e) => setProductName(e.target.value)} className="h-12 rounded-xl" />
-            <Hint>Digite o nome do produto que você vai vender, como "Bolo de cenoura com cobertura"</Hint>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-primary">Descrição (opcional)</label>
             <Input placeholder="Descrição curta" value={productDesc} onChange={(e) => setProductDesc(e.target.value)} className="h-12 rounded-xl" />
-            <Hint>Uma breve descrição ajuda a lembrar detalhes do produto depois</Hint>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-primary">Categoria *</label>
-            <Hint>Selecione a categoria do seu produto. Toque no botão que melhor combina!</Hint>
             <div className="flex flex-wrap gap-2">
               {categories.map(c => (
                 <button key={c} onClick={() => setCategory(c)}
@@ -597,16 +594,12 @@ const Pricing = () => {
               ))}
             </div>
             {category === "Outros" && (
-              <>
-                <Input placeholder="Especifique a categoria..." value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} className="h-12 rounded-xl mt-2" />
-                <Hint>Digite o nome da categoria que melhor descreve seu produto</Hint>
-              </>
+              <Input placeholder="Especifique a categoria..." value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} className="h-12 rounded-xl mt-2" />
             )}
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-primary">Tipo de Venda *</label>
-            <Hint>Como você vende esse produto? Por unidade, fatias, porções ou por kg?</Hint>
             <div className="flex flex-wrap gap-2">
               {saleTypes.map(t => (
                 <button key={t.value} onClick={() => setSaleType(t.value)}
@@ -620,7 +613,7 @@ const Pricing = () => {
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-primary">Rendimento *</label>
             <Input type="number" placeholder="Ex: 12" value={yieldQty} onChange={(e) => setYieldQty(e.target.value)} className="h-12 rounded-xl" />
-            <Hint>Quantas unidades/fatias/porções essa receita rende? Ex: um bolo rende 12 fatias</Hint>
+            <Hint>Quantas unidades/fatias essa receita rende?</Hint>
           </div>
         </div>
       )}
