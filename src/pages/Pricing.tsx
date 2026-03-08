@@ -331,9 +331,6 @@ const Pricing = () => {
           </button>
         </div>
 
-        {item.quantity_used === 0 && !isEditing && (
-          <Hint>Coloque a quantidade que você usa nessa receita</Hint>
-        )}
       </div>
     );
   };
