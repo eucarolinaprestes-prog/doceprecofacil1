@@ -57,6 +57,7 @@ const Pricing = () => {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
   const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   // Product step 0
   const [productName, setProductName] = useState("");
@@ -149,6 +150,40 @@ const Pricing = () => {
               id: item.id || `loaded-${Date.now()}-${Math.random()}`,
               name: item.name,
               unit: item.unit,
+              cost_per_unit: Number(item.cost_per_unit) || 0,
+              quantity_used: String(Number(item.quantity_used) || 0),
+              isManual: true,
+            })));
+          }
+        }
+      }
+
+      // Check if editing a product from URL params
+      if (editType === "product" && editId) {
+        const { data: product } = await supabase.from("products").select("*").eq("id", editId).single();
+        if (product) {
+          setEditingProductId(editId);
+          setMode("product");
+          setStep(0);
+          setProductName(product.name);
+          setProductDesc(product.description || "");
+          setSaleType(product.yield_unit || "");
+          if (product.photo_url) setProductPhotoPreview(product.photo_url);
+          setPrepTime(String(product.preparation_time || ""));
+          setProfitMargin([Number(product.profit_margin) || 30]);
+          if (Array.isArray(product.ingredients_json)) {
+            setSelectedIngredients((product.ingredients_json as any[]).map((item: any) => ({
+              id: item.id || `loaded-${Date.now()}-${Math.random()}`,
+              name: item.name, unit: item.unit,
+              cost_per_unit: Number(item.cost_per_unit) || 0,
+              quantity_used: String(Number(item.quantity_used) || 0),
+              isManual: true,
+            })));
+          }
+          if (Array.isArray(product.packaging_json)) {
+            setSelectedPackaging((product.packaging_json as any[]).map((item: any) => ({
+              id: item.id || `loaded-${Date.now()}-${Math.random()}`,
+              name: item.name, unit: item.unit,
               cost_per_unit: Number(item.cost_per_unit) || 0,
               quantity_used: String(Number(item.quantity_used) || 0),
               isManual: true,
@@ -262,16 +297,22 @@ const Pricing = () => {
           photoUrl = urlData.publicUrl;
         }
       }
-      await supabase.from("products").insert({
-        user_id: user.id, name: productName, description: productDesc,
+      const payload = {
+        name: productName, description: productDesc,
         category: "",
         yield_quantity: 1, yield_unit: finalSaleType,
         preparation_time: Number(prepTime) || 0, total_cost: baseCost,
         suggested_price: suggestedPrice, profit_margin: profitMargin[0],
         ingredients_json: selectedIngredients as any, packaging_json: selectedPackaging as any,
         photo_url: photoUrl || "",
-      });
-      toast({ title: "Produto salvo com sucesso! 🎉" });
+      };
+      if (editingProductId) {
+        await supabase.from("products").update(payload).eq("id", editingProductId);
+        toast({ title: "Produto atualizado com sucesso! 🎉" });
+      } else {
+        await supabase.from("products").insert({ ...payload, user_id: user.id });
+        toast({ title: "Produto salvo com sucesso! 🎉" });
+      }
       navigate("/products");
     } catch { toast({ title: "Erro ao salvar", variant: "destructive" }); }
     finally { setSaving(false); }
@@ -848,7 +889,7 @@ const Pricing = () => {
           </CardContent></Card>
 
           <Button onClick={handleSaveProduct} disabled={saving} className="w-full rounded-2xl h-14 text-lg font-bold btn-3d gap-2">
-            <CheckCircle2 className="w-6 h-6" /> {saving ? "Salvando..." : "SALVAR PRODUTO"}
+            <CheckCircle2 className="w-6 h-6" /> {saving ? "Salvando..." : editingProductId ? "ATUALIZAR PRODUTO" : "SALVAR PRODUTO"}
           </Button>
         </div>
       )}
