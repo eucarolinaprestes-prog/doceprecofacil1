@@ -219,7 +219,7 @@ const Orders = () => {
           <Cake className="w-7 h-7 text-white" />
         </div>
         <h1 className="text-2xl font-extrabold text-foreground">Encomendas</h1>
-        <p className="text-sm text-muted-foreground">Gerencie todos os seus pedidos em um só lugar 📦</p>
+        <p className="text-sm text-muted-foreground">Gerencie todos os seus pedidos em um só lugar</p>
       </div>
 
       <Button onClick={() => setDialogOpen(true)} className="w-full rounded-xl h-14 btn-3d font-bold text-base gap-2">
