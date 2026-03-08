@@ -5,6 +5,12 @@ import type { User, Session } from "@supabase/supabase-js";
 interface Profile {
   name: string;
   store_name: string | null;
+  address: string | null;
+  whatsapp: string | null;
+  logo_url: string | null;
+  desired_salary: number | null;
+  work_days_per_week: number | null;
+  work_hours_per_day: number | null;
 }
 
 interface AuthContextType {
@@ -17,6 +23,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -30,10 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from("profiles")
-      .select("name, store_name")
+      .select("name, store_name, address, whatsapp, logo_url, desired_salary, work_days_per_week, work_hours_per_day")
       .eq("user_id", userId)
       .single();
     if (data) setProfile(data);
+  };
+
+  const refreshProfile = async () => {
+    if (user) await fetchProfile(user.id);
   };
 
   useEffect(() => {
@@ -89,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, isAuthenticated: !!session, isLoading, signUp, signIn, signOut, resetPassword }}>
+    <AuthContext.Provider value={{ user, profile, session, isAuthenticated: !!session, isLoading, signUp, signIn, signOut, resetPassword, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

@@ -142,7 +142,9 @@ export type Database = {
           category: string | null
           cost_per_unit: number | null
           created_at: string
+          current_stock: number | null
           id: string
+          min_stock: number | null
           name: string
           quantity_purchased: number
           supplier: string | null
@@ -155,7 +157,9 @@ export type Database = {
           category?: string | null
           cost_per_unit?: number | null
           created_at?: string
+          current_stock?: number | null
           id?: string
+          min_stock?: number | null
           name: string
           quantity_purchased?: number
           supplier?: string | null
@@ -168,7 +172,9 @@ export type Database = {
           category?: string | null
           cost_per_unit?: number | null
           created_at?: string
+          current_stock?: number | null
           id?: string
+          min_stock?: number | null
           name?: string
           quantity_purchased?: number
           supplier?: string | null
@@ -241,12 +247,19 @@ export type Database = {
           category: string | null
           client_id: string | null
           created_at: string
+          delivery_address: string | null
           delivery_type: string | null
           dough: string | null
           event_date: string | null
+          fee_card_percent: number | null
+          fee_decoration: number | null
+          fee_delivery: number | null
+          fee_packaging: number | null
+          fee_topper: number | null
           filling: string | null
           id: string
           notes: string | null
+          observation: string | null
           payment_method: string | null
           payment_percent: number | null
           product_id: string | null
@@ -261,12 +274,19 @@ export type Database = {
           category?: string | null
           client_id?: string | null
           created_at?: string
+          delivery_address?: string | null
           delivery_type?: string | null
           dough?: string | null
           event_date?: string | null
+          fee_card_percent?: number | null
+          fee_decoration?: number | null
+          fee_delivery?: number | null
+          fee_packaging?: number | null
+          fee_topper?: number | null
           filling?: string | null
           id?: string
           notes?: string | null
+          observation?: string | null
           payment_method?: string | null
           payment_percent?: number | null
           product_id?: string | null
@@ -281,12 +301,19 @@ export type Database = {
           category?: string | null
           client_id?: string | null
           created_at?: string
+          delivery_address?: string | null
           delivery_type?: string | null
           dough?: string | null
           event_date?: string | null
+          fee_card_percent?: number | null
+          fee_decoration?: number | null
+          fee_delivery?: number | null
+          fee_packaging?: number | null
+          fee_topper?: number | null
           filling?: string | null
           id?: string
           notes?: string | null
+          observation?: string | null
           payment_method?: string | null
           payment_percent?: number | null
           product_id?: string | null
@@ -319,7 +346,9 @@ export type Database = {
           category: string | null
           cost_per_unit: number | null
           created_at: string
+          current_stock: number | null
           id: string
+          min_stock: number | null
           name: string
           quantity_purchased: number
           supplier: string | null
@@ -332,7 +361,9 @@ export type Database = {
           category?: string | null
           cost_per_unit?: number | null
           created_at?: string
+          current_stock?: number | null
           id?: string
+          min_stock?: number | null
           name: string
           quantity_purchased?: number
           supplier?: string | null
@@ -345,7 +376,9 @@ export type Database = {
           category?: string | null
           cost_per_unit?: number | null
           created_at?: string
+          current_stock?: number | null
           id?: string
+          min_stock?: number | null
           name?: string
           quantity_purchased?: number
           supplier?: string | null

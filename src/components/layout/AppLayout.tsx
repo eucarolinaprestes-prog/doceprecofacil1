@@ -9,12 +9,13 @@ import {
   Package,
   ShoppingCart,
   BookOpen,
-  Info,
   Crown,
   Settings,
   LogOut,
   Menu,
   Bell,
+  Wallet,
+  Box,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -24,12 +25,12 @@ import logo from "@/assets/logo.png";
 
 const sidebarNav = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-  { label: "Preços", icon: Calculator, path: "/pricing" },
   { label: "Produtos", icon: Package, path: "/products" },
   { label: "Encomendas", icon: ShoppingBag, path: "/orders" },
   { label: "Clientes", icon: Users, path: "/clients" },
-  { label: "Insumos e Embalagens", icon: Package, path: "/supplies" },
-  { label: "Financeiro", icon: DollarSign, path: "/business-info" },
+  { label: "Insumos", icon: Package, path: "/supplies" },
+  { label: "Embalagens", icon: Box, path: "/packaging" },
+  { label: "Suas Finanças", icon: Wallet, path: "/finance" },
   { label: "Calculadora de Compras", icon: ShoppingCart, path: "/shopping" },
   { label: "Cardápio Digital", icon: BookOpen, path: "/menu" },
   { label: "Planos", icon: Crown, path: "/plans" },
@@ -40,7 +41,7 @@ const bottomNav = [
   { label: "Painel", icon: LayoutDashboard, path: "/" },
   { label: "Preços", icon: DollarSign, path: "/pricing", highlight: true },
   { label: "Encomendas", icon: ShoppingBag, path: "/orders" },
-  { label: "Saldo", icon: DollarSign, path: "/finance" },
+  { label: "Finanças", icon: Wallet, path: "/finance" },
 ];
 
 interface AppLayoutProps {
@@ -68,7 +69,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
       className={cn(
         "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors w-full text-left",
         isActive(item.path)
-          ? "bg-primary text-primary-foreground"
+          ? "bg-success text-success-foreground"
           : "text-muted-foreground hover:bg-secondary hover:text-foreground"
       )}
     >
@@ -79,7 +80,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header - matching reference */}
+      {/* Header */}
       <header className="sticky top-0 z-40 bg-card/80 backdrop-blur-md border-b border-border px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Sheet open={open} onOpenChange={setOpen}>
@@ -138,7 +139,6 @@ const AppLayout = ({ children }: AppLayoutProps) => {
           </nav>
         </aside>
 
-        {/* Content */}
         <main className="flex-1 pb-20 md:pb-6 overflow-auto">
           <div className="container max-w-4xl py-4 md:py-6 px-4">
             {children}
@@ -146,7 +146,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         </main>
       </div>
 
-      {/* Mobile bottom nav - matching reference */}
+      {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-card/95 backdrop-blur-md border-t border-border flex justify-around items-end py-2 px-1">
         {bottomNav.map((item) => (
           <button
@@ -154,18 +154,18 @@ const AppLayout = ({ children }: AppLayoutProps) => {
             onClick={() => navigate(item.path)}
             className={cn(
               "flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg text-xs transition-colors min-w-0",
-              isActive(item.path) ? "text-primary font-bold" : "text-muted-foreground"
+              isActive(item.path) ? "text-success font-bold" : "text-muted-foreground"
             )}
           >
             {item.highlight ? (
               <div className={cn(
                 "w-12 h-12 rounded-full flex items-center justify-center -mt-5 shadow-lg",
-                isActive(item.path) ? "bg-primary" : "bg-primary"
+                "bg-primary"
               )}>
                 <item.icon className="w-6 h-6 text-primary-foreground" />
               </div>
             ) : (
-              <item.icon className={cn("w-5 h-5", isActive(item.path) && "text-primary")} />
+              <item.icon className={cn("w-5 h-5", isActive(item.path) && "text-success")} />
             )}
             <span className="truncate">{item.label}</span>
           </button>

@@ -7,19 +7,19 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { DollarSign, TrendingUp, TrendingDown, Trash2, Wallet, CreditCard, Smartphone } from "lucide-react";
+import { TrendingUp, TrendingDown, Trash2, Wallet, CreditCard, Smartphone } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
 
 const incomeCategories = ["Bolos", "Encomendas", "Fatias", "Doces", "Salgados", "Cupcakes", "Outros"];
 const expenseCategories = ["Ingredientes", "Embalagens", "Luz", "Gás", "Uber/99", "Aplicativos", "Entregador", "Compras", "Outros"];
-const COLORS = ["hsl(350, 50%, 52%)", "hsl(30, 60%, 58%)", "hsl(152, 70%, 42%)", "hsl(280, 50%, 55%)", "hsl(200, 60%, 50%)", "hsl(38, 92%, 50%)", "hsl(0, 84%, 60%)"];
+const COLORS = ["hsl(152, 70%, 38%)", "hsl(30, 60%, 58%)", "hsl(340, 75%, 55%)", "hsl(280, 50%, 55%)", "hsl(200, 60%, 50%)", "hsl(38, 92%, 50%)", "hsl(0, 84%, 60%)"];
 
 const paymentMethods = [
-  { value: "pix", label: "Pix", icon: Smartphone, color: "bg-success/10 border-success/30 text-success" },
-  { value: "debito", label: "Débito", icon: CreditCard, color: "bg-primary/10 border-primary/30 text-primary" },
-  { value: "credito", label: "Crédito", icon: CreditCard, color: "bg-accent/10 border-accent/30 text-accent" },
+  { value: "pix", label: "Pix", icon: Smartphone },
+  { value: "debito", label: "Débito", icon: CreditCard },
+  { value: "credito", label: "Crédito", icon: CreditCard },
 ];
 
 const Finance = () => {
@@ -73,7 +73,6 @@ const Finance = () => {
   const totalExpense = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const balance = totalIncome - totalExpense;
 
-  // Category chart data
   const expenseByCategory = expenses.reduce((acc: Record<string, number>, e) => {
     const cat = e.category || "Outros";
     acc[cat] = (acc[cat] || 0) + Number(e.amount);
@@ -105,7 +104,7 @@ const Finance = () => {
         <Card className="card-elevated border-destructive/20">
           <CardContent className="p-4 text-center">
             <TrendingDown className="w-6 h-6 mx-auto mb-1 text-destructive" />
-            <p className="text-xs text-muted-foreground">Saídas</p>
+            <p className="text-xs text-muted-foreground">Lançamentos</p>
             <p className="text-xl font-extrabold text-destructive">R$ {totalExpense.toFixed(2)}</p>
           </CardContent>
         </Card>
@@ -122,10 +121,10 @@ const Finance = () => {
       </Card>
 
       <div className="flex gap-3">
-        <Button onClick={() => setDialogType("income")} className="rounded-xl flex-1 h-12 btn-3d bg-success hover:bg-success/90 text-success-foreground font-bold">
+        <Button onClick={() => setDialogType("income")} className="rounded-xl flex-1 h-12 font-bold bg-success hover:bg-success/90 text-success-foreground" style={{ boxShadow: "0 4px 0 0 hsl(152 70% 28%), 0 6px 12px -2px hsl(152 70% 38% / 0.3)" }}>
           + Entrada
         </Button>
-        <Button onClick={() => setDialogType("expense")} className="rounded-xl flex-1 h-12 font-bold bg-destructive hover:bg-destructive/90 text-destructive-foreground" style={{ boxShadow: "0 4px 0 0 hsl(0 62% 22%), 0 6px 12px -2px hsl(0 62% 30% / 0.3)" }}>
+        <Button onClick={() => setDialogType("expense")} className="rounded-xl flex-1 h-12 font-bold bg-destructive hover:bg-destructive/90 text-destructive-foreground" style={{ boxShadow: "0 4px 0 0 hsl(0 62% 42%), 0 6px 12px -2px hsl(0 62% 50% / 0.3)" }}>
           + Saída
         </Button>
       </div>
@@ -182,8 +181,8 @@ const Finance = () => {
                   <div className="grid grid-cols-3 gap-2">
                     {paymentMethods.map(pm => (
                       <button key={pm.value} onClick={() => setPaymentMethod(pm.value)}
-                        className={`p-3 rounded-xl border-2 text-center transition-all ${paymentMethod === pm.value ? pm.color + " border-current font-bold shadow-md scale-105" : "border-border bg-secondary/30 text-muted-foreground"}`}
-                        style={paymentMethod === pm.value ? { boxShadow: "0 3px 0 0 currentColor, 0 4px 8px -2px currentColor" } : {}}>
+                        className={`p-3 rounded-xl border-2 text-center transition-all ${paymentMethod === pm.value ? "bg-success/10 border-success text-success font-bold shadow-md scale-105" : "border-border bg-secondary/30 text-muted-foreground"}`}
+                        style={paymentMethod === pm.value ? { boxShadow: "0 3px 0 0 hsl(152 70% 28%)" } : {}}>
                         <pm.icon className="w-5 h-5 mx-auto mb-1" />
                         <span className="text-xs font-medium">{pm.label}</span>
                       </button>
@@ -223,7 +222,7 @@ const Finance = () => {
                   <div>
                     <p className="font-bold text-success">+ R$ {Number(i.amount).toFixed(2)}</p>
                     <p className="text-xs text-muted-foreground">{i.category} • {new Date(i.date).toLocaleDateString("pt-BR")}</p>
-                    {i.payment_method && <p className="text-xs text-muted-foreground capitalize">{i.payment_method}</p>}
+                    {i.payment_method && <p className="text-xs text-muted-foreground uppercase">{i.payment_method}</p>}
                   </div>
                   <Button variant="ghost" size="icon" onClick={async () => { await supabase.from("financial_income").delete().eq("id", i.id); fetchData(); }}>
                     <Trash2 className="w-4 h-4 text-destructive" />

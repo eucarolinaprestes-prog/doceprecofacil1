@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Package, Trash2, Pencil, Copy, Milk } from "lucide-react";
+import { Box, Trash2, Pencil, Copy } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
-const ingredientUnits = ["g", "ml", "kg", "l"];
+const packagingUnits = ["unidade", "pacote", "caixa fechada"];
 
-const Supplies = () => {
+const Packaging = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [items, setItems] = useState<any[]>([]);
@@ -21,7 +21,7 @@ const Supplies = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
 
   const [name, setName] = useState("");
-  const [unit, setUnit] = useState("g");
+  const [unit, setUnit] = useState("unidade");
   const [totalCost, setTotalCost] = useState("");
   const [quantityPurchased, setQuantityPurchased] = useState("");
   const [supplier, setSupplier] = useState("");
@@ -31,7 +31,7 @@ const Supplies = () => {
   const fetchItems = async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase.from("ingredients").select("*").eq("user_id", user.id).order("name");
+    const { data } = await supabase.from("packaging").select("*").eq("user_id", user.id).order("name");
     setItems(data || []);
     setLoading(false);
   };
@@ -39,7 +39,7 @@ const Supplies = () => {
   useEffect(() => { fetchItems(); }, [user]);
 
   const resetForm = () => {
-    setName(""); setUnit("g"); setTotalCost(""); setQuantityPurchased("");
+    setName(""); setUnit("unidade"); setTotalCost(""); setQuantityPurchased("");
     setSupplier(""); setEditingId(null); setCurrentStock(""); setMinStock("");
   };
 
@@ -61,47 +61,47 @@ const Supplies = () => {
       min_stock: Number(minStock) || 0,
     };
     if (editingId) {
-      await supabase.from("ingredients").update(payload).eq("id", editingId);
+      await supabase.from("packaging").update(payload).eq("id", editingId);
       toast({ title: "Atualizado! ✅" });
     } else {
-      await supabase.from("ingredients").insert(payload);
+      await supabase.from("packaging").insert(payload);
       toast({ title: "Adicionado! ✅" });
     }
     setDialogOpen(false); resetForm(); fetchItems();
   };
 
   const handleDelete = async (id: string) => {
-    await supabase.from("ingredients").delete().eq("id", id);
+    await supabase.from("packaging").delete().eq("id", id);
     toast({ title: "Excluído" }); fetchItems();
   };
 
   const handleDuplicate = async (item: any) => {
     const { id, created_at, updated_at, ...rest } = item;
-    await supabase.from("ingredients").insert({ ...rest, name: `${rest.name} (cópia)` });
+    await supabase.from("packaging").insert({ ...rest, name: `${rest.name} (cópia)` });
     toast({ title: "Duplicado! ✅" }); fetchItems();
   };
 
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center mx-auto shadow-lg">
-          <Milk className="w-7 h-7 text-white" />
+        <div className="w-14 h-14 rounded-2xl gradient-gold flex items-center justify-center mx-auto shadow-lg">
+          <Box className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-2xl font-extrabold text-foreground">Insumos</h1>
-        <p className="text-sm text-muted-foreground">Cadastre seus ingredientes para usar na precificação 🧁</p>
+        <h1 className="text-2xl font-extrabold text-foreground">Embalagens</h1>
+        <p className="text-sm text-muted-foreground">Cadastre suas embalagens para usar na precificação 📦</p>
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
         <DialogTrigger asChild>
-          <Button className="w-full rounded-xl h-12 btn-3d text-base font-bold gap-2">+ Adicionar ingrediente</Button>
+          <Button className="w-full rounded-xl h-12 btn-3d text-base font-bold gap-2">+ Adicionar embalagem</Button>
         </DialogTrigger>
         <DialogContent>
-          <DialogHeader><DialogTitle>{editingId ? "Editar" : "Novo"} ingrediente</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editingId ? "Editar" : "Nova"} embalagem</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <Input placeholder="Ex: Farinha de trigo" value={name} onChange={(e) => setName(e.target.value)} className="h-12 rounded-xl" />
+            <Input placeholder="Ex: Caixa kraft" value={name} onChange={(e) => setName(e.target.value)} className="h-12 rounded-xl" />
             <Select value={unit} onValueChange={setUnit}>
               <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
-              <SelectContent>{ingredientUnits.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+              <SelectContent>{packagingUnits.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
             </Select>
             <div className="grid grid-cols-2 gap-3">
               <Input type="number" step="0.01" placeholder="Valor pago (R$)" value={totalCost} onChange={(e) => setTotalCost(e.target.value)} className="h-12 rounded-xl" />
@@ -120,7 +120,7 @@ const Supplies = () => {
       {loading ? (
         <div className="text-center py-16 text-muted-foreground">Carregando...</div>
       ) : items.length === 0 ? (
-        <EmptyState icon={Package} title="Nenhum ingrediente cadastrado" description="Cadastre seus insumos para usar na precificação." actionLabel="Adicionar" onAction={() => setDialogOpen(true)} />
+        <EmptyState icon={Box} title="Nenhuma embalagem cadastrada" description="Cadastre suas embalagens para usar na precificação." actionLabel="Adicionar" onAction={() => setDialogOpen(true)} />
       ) : (
         <div className="grid gap-3">
           {items.map((item) => {
@@ -149,4 +149,4 @@ const Supplies = () => {
   );
 };
 
-export default Supplies;
+export default Packaging;
