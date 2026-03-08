@@ -193,11 +193,14 @@ const Orders = () => {
     details.push(`💳 *Pagamento:* ${order.payment_method?.toUpperCase() || "PIX"}`);
     const detailsStr = details.join("\n");
 
-    const deliveryInfo = order.delivery_type === "pickup" && confAddr
-      ? `\n\n📍 *Local de retirada:*\n${confAddr}`
-      : order.delivery_type === "delivery" && clientAddr
-      ? `\n\n📍 *Endereço de entrega:*\n${clientAddr}`
-      : "";
+    let deliveryInfo = "";
+    if (order.delivery_type === "pickup" && confAddr) {
+      deliveryInfo = `\n\n📍 *Retirada no endereço:*\n${confAddr}`;
+      if (timeStr) deliveryInfo += `\n🕐 *Horário para retirada:* ${timeStr}`;
+    } else if (order.delivery_type === "delivery" && clientAddr) {
+      deliveryInfo = `\n\n📍 *O pedido será entregue no endereço:*\n${clientAddr}`;
+      if (timeStr) deliveryInfo += `\n🕐 *Previsão de entrega:* ${timeStr}`;
+    }
 
     if (order.status === "pending" || order.status === "scheduled") {
       // Orçamento
