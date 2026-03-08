@@ -50,9 +50,13 @@ const SettingsPage = () => {
   const [fixedCosts, setFixedCosts] = useState<CostItem[]>([]);
   const [variableCosts, setVariableCosts] = useState<CostItem[]>([]);
   const [newFixedName, setNewFixedName] = useState("");
+  const [newFixedCategory, setNewFixedCategory] = useState("");
+  const [newFixedCustomName, setNewFixedCustomName] = useState("");
   const [newFixedAmount, setNewFixedAmount] = useState("");
   const [newFixedFreq, setNewFixedFreq] = useState("mensal");
   const [newVarName, setNewVarName] = useState("");
+  const [newVarCategory, setNewVarCategory] = useState("");
+  const [newVarCustomName, setNewVarCustomName] = useState("");
   const [newVarAmount, setNewVarAmount] = useState("");
   const [newVarFreq, setNewVarFreq] = useState("mensal");
 
