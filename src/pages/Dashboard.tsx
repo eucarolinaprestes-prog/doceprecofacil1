@@ -21,6 +21,7 @@ const Dashboard = () => {
   const [lowStockItems, setLowStockItems] = useState<any[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(today);
   const [dialogType, setDialogType] = useState<"income" | "expense" | null>(null);
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const fetchData = () => {
     if (!user) return;
