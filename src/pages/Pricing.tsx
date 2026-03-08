@@ -290,6 +290,9 @@ const Pricing = () => {
                 </button>
               ))}
             </div>
+            {recipeCategory === "Outros" && (
+              <Input placeholder="Especifique a categoria..." value={customRecipeCategory} onChange={(e) => setCustomRecipeCategory(e.target.value)} className="h-12 rounded-xl" />
+            )}
           </div>
         )}
 
