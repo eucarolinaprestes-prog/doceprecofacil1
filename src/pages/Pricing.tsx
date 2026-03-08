@@ -254,16 +254,21 @@ const Pricing = () => {
     setSaving(true);
     try {
       const finalCat = recipeCategory === "Outros" && customRecipeCategory.trim() ? customRecipeCategory.trim() : recipeCategory;
-      await supabase.from("recipes").insert({
-        user_id: user.id,
+      const payload = {
         name: recipeName,
         category: finalCat,
         ingredients_json: selectedIngredients as any,
         total_cost: ingredientsCost,
         yield_quantity: recipeYieldNum,
         yield_unit: finalRecipeYieldUnit,
-      } as any);
-      toast({ title: "Receita salva com sucesso! 🎉" });
+      };
+      if (editingRecipeId) {
+        await supabase.from("recipes").update(payload).eq("id", editingRecipeId);
+        toast({ title: "Receita atualizada com sucesso! 🎉" });
+      } else {
+        await supabase.from("recipes").insert({ ...payload, user_id: user.id } as any);
+        toast({ title: "Receita salva com sucesso! 🎉" });
+      }
       navigate("/supplies?tab=recipes");
     } catch { toast({ title: "Erro ao salvar", variant: "destructive" }); }
     finally { setSaving(false); }
