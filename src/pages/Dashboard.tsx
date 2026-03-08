@@ -188,7 +188,7 @@ const Dashboard = () => {
         <CardContent className="p-4">
           <div className="grid grid-cols-7 gap-1 mb-3">
             {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(d => (
-              <div key={d} className="text-center text-[10px] font-extrabold text-primary/70 uppercase tracking-wider">{d}</div>
+              <div key={d} className="text-center text-[10px] font-extrabold text-indigo-500/70 uppercase tracking-wider">{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1.5">
