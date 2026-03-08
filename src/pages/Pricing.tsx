@@ -387,11 +387,21 @@ const Pricing = () => {
     setRecipePhotoPreview(URL.createObjectURL(file));
   };
 
+  const [stepError, setStepError] = useState<string | null>(null);
+
   const goNext = () => {
-    if (mode === "product" && canAdvanceProduct()) setStep(step + 1);
+    const error = getStepError();
+    if (error) {
+      setStepError(error);
+      toast({ title: error, variant: "destructive" });
+      return;
+    }
+    setStepError(null);
+    if (mode === "product") setStep(step + 1);
     if (mode === "recipe") setStep(step + 1);
   };
   const goBack = () => {
+    setStepError(null);
     if (step === 0) { setMode("select"); return; }
     setStep(Math.max(0, step - 1));
   };
