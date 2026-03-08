@@ -285,15 +285,31 @@ const SettingsPage = () => {
                 <div className="space-y-2">
                   {fixedCosts.map((cost, idx) => (
                     <div key={idx} className="flex items-center gap-2 bg-secondary/40 p-3 rounded-xl">
-                      <span className="text-sm font-medium text-foreground flex-1 truncate">{cost.category}</span>
-                      <span className="text-xs text-muted-foreground">{cost.frequency}</span>
-                      <span className="text-sm font-bold text-primary">R$ {cost.amount.toFixed(2)}</span>
-                      <button onClick={() => setFixedCosts(fixedCosts.filter((_, i) => i !== idx))} className="text-destructive p-1"><Trash2 className="w-4 h-4" /></button>
+                      {editingFixedIdx === idx ? (
+                        <>
+                          <Input value={editCategory} onChange={e => setEditCategory(e.target.value)} className="h-9 rounded-lg flex-1 text-sm" />
+                          <CurrencyInput value={editAmount} onValueChange={setEditAmount} className="h-9 rounded-lg w-28 text-sm" />
+                          <button onClick={() => {
+                            const updated = [...fixedCosts];
+                            updated[idx] = { ...updated[idx], category: editCategory, amount: Number(editAmount) };
+                            setFixedCosts(updated);
+                            setEditingFixedIdx(null);
+                          }} className="text-success p-1"><CheckCircle2 className="w-4 h-4" /></button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-sm font-medium text-foreground flex-1 truncate">{cost.category}</span>
+                          <span className="text-xs text-muted-foreground">{cost.frequency}</span>
+                          <span className="text-sm font-bold text-primary">R$ {cost.amount.toFixed(2)}</span>
+                          <button onClick={() => { setEditingFixedIdx(idx); setEditCategory(cost.category); setEditAmount(String(cost.amount)); }} className="text-primary p-1"><Pencil className="w-4 h-4" /></button>
+                          <button onClick={() => setFixedCosts(fixedCosts.filter((_, i) => i !== idx))} className="text-destructive p-1"><Trash2 className="w-4 h-4" /></button>
+                        </>
+                      )}
                     </div>
                   ))}
-                  <div className="flex justify-between items-center bg-primary/10 p-3 rounded-xl">
-                    <span className="text-sm font-bold">Total mensal</span>
-                    <span className="text-lg font-extrabold text-primary">R$ {fixedTotal.toFixed(2)}</span>
+                  <div className="flex justify-between items-center bg-success p-3 rounded-xl">
+                    <span className="text-sm font-bold text-success-foreground">Total mensal</span>
+                    <span className="text-lg font-extrabold text-success-foreground">R$ {fixedTotal.toFixed(2)}</span>
                   </div>
                 </div>
               )}
