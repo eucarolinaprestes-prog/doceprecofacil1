@@ -21,6 +21,7 @@ import DigitalMenu from "@/pages/DigitalMenu";
 import BusinessInfo from "@/pages/BusinessInfo";
 import Plans from "@/pages/Plans";
 import SettingsPage from "@/pages/SettingsPage";
+import AccountSettings from "@/pages/AccountSettings";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -58,7 +59,7 @@ const AppRoutes = () => (
     <Route path="/menu" element={<ProtectedRoute><DigitalMenu /></ProtectedRoute>} />
     <Route path="/business-info" element={<ProtectedRoute><BusinessInfo /></ProtectedRoute>} />
     <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
-    <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+    <Route path="/settings" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

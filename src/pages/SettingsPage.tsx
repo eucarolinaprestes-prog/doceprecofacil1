@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Trash2, CheckCircle2, Settings, Target } from "lucide-react";
+import { Camera, Trash2, CheckCircle2, Building2, Target } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -155,16 +155,15 @@ const SettingsPage = () => {
     <div className="space-y-6 pb-6">
       <div className="text-center space-y-2">
         <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center mx-auto shadow-lg">
-          <Settings className="w-7 h-7 text-white" />
+          <Building2 className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-2xl font-extrabold text-foreground">Configurações</h1>
+        <h1 className="text-2xl font-extrabold text-foreground">Informações da Empresa</h1>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 w-full h-12 rounded-xl">
+        <TabsList className="grid grid-cols-2 w-full h-12 rounded-xl">
           <TabsTrigger value="profile" className="rounded-xl font-bold text-xs">Perfil</TabsTrigger>
           <TabsTrigger value="financial" className="rounded-xl font-bold text-xs">Financeiro</TabsTrigger>
-          <TabsTrigger value="notifications" className="rounded-xl font-bold text-xs">Notificações</TabsTrigger>
         </TabsList>
 
         {/* PROFILE TAB */}
@@ -333,28 +332,10 @@ const SettingsPage = () => {
           </Card>
         </TabsContent>
 
-        {/* NOTIFICATIONS TAB */}
-        <TabsContent value="notifications" className="space-y-4 mt-4">
-          <Card className="card-elevated">
-            <CardContent className="p-5 space-y-4">
-              {[
-                { label: "Lembretes de encomendas", icon: "📦" },
-                { label: "Lembretes de produção", icon: "👩‍🍳" },
-                { label: "Alertas de estoque baixo", icon: "⚠️" },
-                { label: "Resumo semanal", icon: "📊" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between">
-                  <span className="text-sm text-foreground">{item.icon} {item.label}</span>
-                  <Switch />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
 
       <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl h-14 btn-3d font-bold text-base gap-2">
-        <CheckCircle2 className="w-5 h-5" /> {saving ? "Salvando..." : "Salvar Configurações"}
+        <CheckCircle2 className="w-5 h-5" /> {saving ? "Salvando..." : "Salvar Informações"}
       </Button>
     </div>
   );

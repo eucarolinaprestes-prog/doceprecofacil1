@@ -1,5 +1,5 @@
-import { Navigate } from "react-router-dom";
+import SettingsPage from "./SettingsPage";
 
-// BusinessInfo redirects to Settings (financial tab)
-const BusinessInfo = () => <Navigate to="/settings" replace />;
+// BusinessInfo renders the company information page (formerly SettingsPage)
+const BusinessInfo = () => <SettingsPage />;
 export default BusinessInfo;
