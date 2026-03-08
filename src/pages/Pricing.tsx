@@ -6,7 +6,7 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Lightbulb, BookOpen, Pencil, Camera } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Lightbulb, BookOpen, Pencil, Camera, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -17,13 +17,12 @@ type PricingMode = "select" | "product" | "recipe";
 
 const stepLabelsProduct = ["Produto", "Ingredientes", "Mão de Obra", "Estratégia", "Salvar"];
 const stepLabelsRecipe = ["Receita", "Ingredientes", "Rendimento", "Resumo"];
-const categories = ["Massa", "Recheio", "Bolo", "Fatias", "Cupcakes", "Salgados", "Doces", "Outros"];
-const recipeCategories = ["Massa", "Recheio", "Cobertura", "Mousse", "Calda", "Creme", "Outros"];
 const saleTypes = [
   { value: "unidade(s)", label: "Unidade" },
   { value: "fatia(s)", label: "Fatias" },
   { value: "porção(ões)", label: "Porções" },
-  { value: "kg", label: "Kg" },
+  { value: "kg", label: "Quilos" },
+  { value: "outros", label: "Outros" },
 ];
 const yieldUnits = [
   { value: "kg", label: "Kg" },
@@ -34,8 +33,10 @@ const yieldUnits = [
   { value: "disco(s)", label: "Disco(s)" },
   { value: "outros", label: "Outros" },
 ];
+const recipeCategories = ["Massa", "Recheio", "Cobertura", "Mousse", "Calda", "Creme", "Outros"];
 
 interface StockItem { id: string; name: string; unit: string; cost_per_unit: number; quantity_purchased: number; total_cost: number; }
+interface RecipeItem { id: string; name: string; total_cost: number; yield_quantity: number; yield_unit: string; }
 interface SelectedItem { id: string; name: string; unit: string; cost_per_unit: number; quantity_used: string; isManual?: boolean; }
 
 const CHART_COLORS = ["hsl(340, 75%, 55%)", "hsl(40, 80%, 55%)", "hsl(152, 70%, 38%)"];
@@ -60,10 +61,10 @@ const Pricing = () => {
   // Product step 0
   const [productName, setProductName] = useState("");
   const [productDesc, setProductDesc] = useState("");
-  const [category, setCategory] = useState("");
-  const [customCategory, setCustomCategory] = useState("");
   const [saleType, setSaleType] = useState("");
-  const [yieldQty, setYieldQty] = useState("");
+  const [customSaleType, setCustomSaleType] = useState("");
+  const [productPhotoPreview, setProductPhotoPreview] = useState("");
+  const [productPhotoFile, setProductPhotoFile] = useState<File | null>(null);
 
   // Recipe
   const [recipeName, setRecipeName] = useState("");
@@ -78,12 +79,11 @@ const Pricing = () => {
   // Step 1 shared
   const [stockIngredients, setStockIngredients] = useState<StockItem[]>([]);
   const [stockPackaging, setStockPackaging] = useState<StockItem[]>([]);
+  const [savedRecipes, setSavedRecipes] = useState<RecipeItem[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<SelectedItem[]>([]);
   const [selectedPackaging, setSelectedPackaging] = useState<SelectedItem[]>([]);
   const [showIngManual, setShowIngManual] = useState(false);
-  const [showPkgManual, setShowPkgManual] = useState(false);
   const [manualIng, setManualIng] = useState({ name: "", qty: "", unit: "g", cost: "" });
-  const [manualPkg, setManualPkg] = useState({ name: "", qty: "", unit: "un", cost: "" });
   const [editingId, setEditingId] = useState<string | null>(null);
 
   // Step 2 product
@@ -96,20 +96,25 @@ const Pricing = () => {
   // Step 3 product
   const [profitMargin, setProfitMargin] = useState([30]);
   const [ifoodEnabled, setIfoodEnabled] = useState(false);
-  const [ifoodFee, setIfoodFee] = useState("12");
+  const [ifoodFee, setIfoodFee] = useState("");
   const [deliveryEnabled, setDeliveryEnabled] = useState(false);
   const [deliveryFee, setDeliveryFee] = useState("");
   const [cardEnabled, setCardEnabled] = useState(false);
-  const [cardFee, setCardFee] = useState("3");
+  const [cardFee, setCardFee] = useState("");
+  const [otherFeeEnabled, setOtherFeeEnabled] = useState(false);
+  const [otherFeeName, setOtherFeeName] = useState("");
+  const [otherFeeValue, setOtherFeeValue] = useState("");
+  const [otherFeeType, setOtherFeeType] = useState<"percent" | "fixed">("percent");
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [{ data: profileData }, { data: ing }, { data: pkg }, { data: fc }] = await Promise.all([
+      const [{ data: profileData }, { data: ing }, { data: pkg }, { data: fc }, { data: rec }] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user.id).single(),
         supabase.from("ingredients").select("*").eq("user_id", user.id).order("name"),
         supabase.from("packaging").select("*").eq("user_id", user.id).order("name"),
         supabase.from("fixed_costs").select("*").eq("user_id", user.id),
+        supabase.from("recipes").select("*").eq("user_id", user.id).order("name"),
       ]);
       if (profileData) {
         const salary = Number(profileData.desired_salary) || 0;
@@ -120,6 +125,10 @@ const Pricing = () => {
       setStockIngredients(ing?.map((i: any) => ({ id: i.id, name: i.name, unit: i.unit, cost_per_unit: Number(i.cost_per_unit) || 0, quantity_purchased: i.quantity_purchased, total_cost: i.total_cost })) || []);
       setStockPackaging(pkg?.map((p: any) => ({ id: p.id, name: p.name, unit: p.unit, cost_per_unit: Number(p.cost_per_unit) || 0, quantity_purchased: p.quantity_purchased, total_cost: p.total_cost })) || []);
       setTotalFixedCosts(fc?.reduce((s: number, c: any) => s + Number(c.amount), 0) || 0);
+      setSavedRecipes(rec?.map((r: any) => ({
+        id: r.id, name: r.name, total_cost: Number(r.total_cost) || 0,
+        yield_quantity: Number(r.yield_quantity) || 1, yield_unit: r.yield_unit || "un",
+      })) || []);
 
       // Check if editing a recipe from URL params
       const editType = searchParams.get("edit");
@@ -158,6 +167,16 @@ const Pricing = () => {
     type === "ingredient" ? setSelectedIngredients([...list, newItem]) : setSelectedPackaging([...list, newItem]);
   };
 
+  const addFromRecipe = (recipe: RecipeItem) => {
+    if (selectedIngredients.find(i => i.id === recipe.id)) return;
+    const costPerUnit = recipe.total_cost / recipe.yield_quantity;
+    const newItem: SelectedItem = {
+      id: recipe.id, name: recipe.name, unit: recipe.yield_unit,
+      cost_per_unit: costPerUnit, quantity_used: "", isManual: true,
+    };
+    setSelectedIngredients([...selectedIngredients, newItem]);
+  };
+
   const addManualIngredient = () => {
     if (!manualIng.name.trim() || !manualIng.cost) return;
     setSelectedIngredients([...selectedIngredients, {
@@ -167,17 +186,6 @@ const Pricing = () => {
     }]);
     setManualIng({ name: "", qty: "", unit: "g", cost: "" });
     setShowIngManual(false);
-  };
-
-  const addManualPackaging = () => {
-    if (!manualPkg.name.trim() || !manualPkg.cost) return;
-    setSelectedPackaging([...selectedPackaging, {
-      id: `manual-${Date.now()}`, name: manualPkg.name, unit: manualPkg.unit,
-      cost_per_unit: Number(manualPkg.cost) / (Number(manualPkg.qty) || 1),
-      quantity_used: manualPkg.qty || "1", isManual: true,
-    }]);
-    setManualPkg({ name: "", qty: "", unit: "un", cost: "" });
-    setShowPkgManual(false);
   };
 
   const updateSelectedQty = (id: string, qty: string, type: "ingredient" | "packaging") => {
@@ -190,12 +198,6 @@ const Pricing = () => {
     const setter = type === "ingredient" ? setSelectedIngredients : setSelectedPackaging;
     const list = type === "ingredient" ? selectedIngredients : selectedPackaging;
     setter(list.map(i => i.id === id ? { ...i, name } : i));
-  };
-
-  const duplicateSelected = (item: SelectedItem, type: "ingredient" | "packaging") => {
-    const setter = type === "ingredient" ? setSelectedIngredients : setSelectedPackaging;
-    const list = type === "ingredient" ? selectedIngredients : selectedPackaging;
-    setter([...list, { ...item, id: `copy-${Date.now()}`, name: `${item.name} (cópia)`, isManual: true }]);
   };
 
   const removeSelected = (id: string, type: "ingredient" | "packaging") => {
@@ -214,10 +216,14 @@ const Pricing = () => {
   let suggestedPrice = baseCost + profitValue;
   const deliveryValue = deliveryEnabled ? Number(deliveryFee) || 0 : 0;
   suggestedPrice += deliveryValue;
-  if (ifoodEnabled) suggestedPrice = suggestedPrice / (1 - Number(ifoodFee) / 100);
-  if (cardEnabled) suggestedPrice = suggestedPrice / (1 - Number(cardFee) / 100);
+  if (ifoodEnabled && Number(ifoodFee) > 0) suggestedPrice = suggestedPrice / (1 - Number(ifoodFee) / 100);
+  if (cardEnabled && Number(cardFee) > 0) suggestedPrice = suggestedPrice / (1 - Number(cardFee) / 100);
+  if (otherFeeEnabled && Number(otherFeeValue) > 0) {
+    if (otherFeeType === "percent") suggestedPrice = suggestedPrice / (1 - Number(otherFeeValue) / 100);
+    else suggestedPrice += Number(otherFeeValue);
+  }
   const finalProfit = suggestedPrice - baseCost - deliveryValue;
-  const pricePerUnit = Number(yieldQty) > 1 ? suggestedPrice / Number(yieldQty) : suggestedPrice;
+  const finalSaleType = saleType === "outros" && customSaleType.trim() ? customSaleType.trim() : saleType;
 
   // Recipe cost per yield unit
   const recipeYieldNum = Number(recipeYieldQty) || 1;
@@ -231,20 +237,39 @@ const Pricing = () => {
   ].filter(d => d.value > 0);
 
   const canAdvanceProduct = () => {
-    if (step === 0) return productName.trim() && category && saleType && yieldQty;
+    if (step === 0) return productName.trim() && saleType;
     return true;
+  };
+
+  const handleProductPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setProductPhotoFile(file);
+    setProductPhotoPreview(URL.createObjectURL(file));
   };
 
   const handleSaveProduct = async () => {
     if (!user) return;
     setSaving(true);
     try {
+      let photoUrl = productPhotoPreview;
+      if (productPhotoFile) {
+        const fileExt = productPhotoFile.name.split(".").pop();
+        const filePath = `products/${user.id}/${Date.now()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from("uploads").upload(filePath, productPhotoFile);
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(filePath);
+          photoUrl = urlData.publicUrl;
+        }
+      }
       await supabase.from("products").insert({
-        user_id: user.id, name: productName, description: productDesc, category: category === "Outros" && customCategory.trim() ? customCategory.trim() : category,
-        yield_quantity: Number(yieldQty) || 1, yield_unit: saleType,
+        user_id: user.id, name: productName, description: productDesc,
+        category: "",
+        yield_quantity: 1, yield_unit: finalSaleType,
         preparation_time: Number(prepTime) || 0, total_cost: baseCost,
         suggested_price: suggestedPrice, profit_margin: profitMargin[0],
         ingredients_json: selectedIngredients as any, packaging_json: selectedPackaging as any,
+        photo_url: photoUrl || "",
       });
       toast({ title: "Produto salvo com sucesso! 🎉" });
       navigate("/products");
@@ -257,8 +282,6 @@ const Pricing = () => {
     setSaving(true);
     try {
       let photoUrl = recipePhotoPreview;
-
-      // Upload photo if new file selected
       if (recipePhotoFile) {
         const fileExt = recipePhotoFile.name.split(".").pop();
         const filePath = `recipes/${user.id}/${Date.now()}.${fileExt}`;
@@ -268,16 +291,12 @@ const Pricing = () => {
           photoUrl = urlData.publicUrl;
         }
       }
-
       const finalCat = recipeCategory === "Outros" && customRecipeCategory.trim() ? customRecipeCategory.trim() : recipeCategory;
       const payload = {
-        name: recipeName,
-        category: finalCat,
+        name: recipeName, category: finalCat,
         ingredients_json: selectedIngredients as any,
-        total_cost: ingredientsCost,
-        yield_quantity: recipeYieldNum,
-        yield_unit: finalRecipeYieldUnit,
-        photo_url: photoUrl,
+        total_cost: ingredientsCost, yield_quantity: recipeYieldNum,
+        yield_unit: finalRecipeYieldUnit, photo_url: photoUrl,
       };
       if (editingRecipeId) {
         await supabase.from("recipes").update(payload).eq("id", editingRecipeId);
@@ -309,36 +328,20 @@ const Pricing = () => {
 
   const stepLabels = mode === "product" ? stepLabelsProduct : stepLabelsRecipe;
 
-  /** Inline item row render (not a sub-component, to preserve focus) */
   const renderItemRow = (item: SelectedItem, type: "ingredient" | "packaging") => {
     const isEditing = editingId === item.id;
     const cost = item.cost_per_unit * (Number(item.quantity_used) || 0);
-
     return (
       <div key={item.id} className="bg-secondary/40 p-3 rounded-xl space-y-1.5">
         <div className="flex items-center gap-2">
           {isEditing ? (
-            <Input
-              value={item.name}
-              onChange={(e) => updateSelectedName(item.id, e.target.value, type)}
-              className="h-9 rounded-lg text-sm flex-1 min-w-0 bg-background"
-              autoFocus
-              onBlur={() => setEditingId(null)}
-            />
+            <Input value={item.name} onChange={(e) => updateSelectedName(item.id, e.target.value, type)} className="h-9 rounded-lg text-sm flex-1 min-w-0 bg-background" autoFocus onBlur={() => setEditingId(null)} />
           ) : (
             <span className="text-sm font-semibold flex-1 min-w-0 truncate">{item.name}</span>
           )}
-          <input
-            inputMode="decimal"
-            placeholder="Qtd"
-            value={item.quantity_used}
-            onChange={(e) => updateSelectedQty(item.id, e.target.value, type)}
-            className="w-[72px] h-9 rounded-lg text-sm text-center bg-background border border-input shrink-0 outline-none focus:ring-2 focus:ring-ring"
-          />
+          <input inputMode="decimal" placeholder="Qtd" value={item.quantity_used} onChange={(e) => updateSelectedQty(item.id, e.target.value, type)} className="w-[72px] h-9 rounded-lg text-sm text-center bg-background border border-input shrink-0 outline-none focus:ring-2 focus:ring-ring" />
           <span className="text-xs text-muted-foreground shrink-0 w-6">{item.unit}</span>
-          <span className="text-sm font-bold text-primary shrink-0 min-w-[70px] text-right">
-            R$ {cost.toFixed(2)}
-          </span>
+          <span className="text-sm font-bold text-primary shrink-0 min-w-[70px] text-right">R$ {cost.toFixed(2)}</span>
         </div>
         <div className="flex items-center gap-3 pl-0.5">
           <button onClick={() => setEditingId(isEditing ? null : item.id)} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary transition-colors">
@@ -360,30 +363,16 @@ const Pricing = () => {
           <h1 className="text-2xl font-extrabold text-foreground">O que você quer precificar?</h1>
           <p className="text-sm text-muted-foreground">Escolha uma opção abaixo para começar</p>
         </div>
-
         <div className="grid gap-4">
-          <button
-            onClick={() => { setMode("recipe"); setStep(0); }}
-            className="rounded-2xl p-6 flex items-center gap-4 gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
-            style={{ boxShadow: "0 6px 0 0 hsl(340 75% 38%), 0 10px 20px -4px hsl(340 75% 55% / 0.4)" }}
-          >
-            <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-              <BookOpen className="w-7 h-7" />
-            </div>
+          <button onClick={() => { setMode("recipe"); setStep(0); }} className="rounded-2xl p-6 flex items-center gap-4 gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all active:scale-[0.98]" style={{ boxShadow: "0 6px 0 0 hsl(340 75% 38%), 0 10px 20px -4px hsl(340 75% 55% / 0.4)" }}>
+            <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0"><BookOpen className="w-7 h-7" /></div>
             <div className="text-left">
               <p className="text-lg font-extrabold">Precificar Receitas</p>
               <p className="text-sm opacity-80">Massa, recheio, cobertura separados</p>
             </div>
           </button>
-
-          <button
-            onClick={() => { setMode("product"); setStep(0); }}
-            className="rounded-2xl p-6 flex items-center gap-4 gradient-gold text-white shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
-            style={{ boxShadow: "0 6px 0 0 hsl(30 60% 40%), 0 10px 20px -4px hsl(30 60% 58% / 0.4)" }}
-          >
-            <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-7 h-7" />
-            </div>
+          <button onClick={() => { setMode("product"); setStep(0); }} className="rounded-2xl p-6 flex items-center gap-4 gradient-gold text-white shadow-lg hover:shadow-xl transition-all active:scale-[0.98]" style={{ boxShadow: "0 6px 0 0 hsl(30 60% 40%), 0 10px 20px -4px hsl(30 60% 58% / 0.4)" }}>
+            <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0"><CheckCircle2 className="w-7 h-7" /></div>
             <div className="text-left">
               <p className="text-lg font-extrabold">Precificar Produto Final</p>
               <p className="text-sm opacity-80">Bolo, doce, salgado com custo completo</p>
@@ -398,40 +387,23 @@ const Pricing = () => {
   if (mode === "recipe") {
     return (
       <div className="space-y-5 pb-6">
-        {/* Progress */}
         <div className="flex items-center gap-3">
-          <button onClick={goBack} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-            <ChevronLeft className="w-5 h-5 text-muted-foreground" />
-          </button>
+          <button onClick={goBack} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"><ChevronLeft className="w-5 h-5 text-muted-foreground" /></button>
           <div className="flex-1">
-            <div className="flex gap-1.5">
-              {stepLabels.map((_, i) => (
-                <div key={i} className={`h-1.5 flex-1 rounded-full transition-all ${i <= step ? "bg-primary" : "bg-muted"}`} />
-              ))}
-            </div>
+            <div className="flex gap-1.5">{stepLabels.map((_, i) => (<div key={i} className={`h-1.5 flex-1 rounded-full transition-all ${i <= step ? "bg-primary" : "bg-muted"}`} />))}</div>
             <p className="text-xs text-muted-foreground mt-1 text-center">{stepLabels[step]} • Etapa {step + 1} de {stepLabels.length}</p>
           </div>
         </div>
 
-        {/* Step 0: Nome + Foto */}
         {step === 0 && (
           <div className="space-y-5">
             <h2 className="text-xl font-extrabold text-foreground">Dados da Receita</h2>
-
             <label className="block cursor-pointer">
               <div className="w-full h-36 rounded-2xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center gap-2 bg-secondary/20 hover:bg-secondary/40 transition-colors overflow-hidden relative">
-                {recipePhotoPreview ? (
-                  <img src={recipePhotoPreview} alt="Foto da receita" className="w-full h-full object-cover" />
-                ) : (
-                  <>
-                    <Camera className="w-8 h-8 text-primary/50" />
-                    <span className="text-sm text-primary/60 font-medium">Toque para adicionar foto</span>
-                  </>
-                )}
+                {recipePhotoPreview ? (<img src={recipePhotoPreview} alt="Foto da receita" className="w-full h-full object-cover" />) : (<><Camera className="w-8 h-8 text-primary/50" /><span className="text-sm text-primary/60 font-medium">Toque para adicionar foto</span></>)}
               </div>
               <input type="file" accept="image/*" onChange={handleRecipePhoto} className="hidden" />
             </label>
-
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-primary">Nome da receita *</label>
               <Input placeholder="Ex: Massa de chocolate" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
@@ -439,24 +411,15 @@ const Pricing = () => {
           </div>
         )}
 
-        {/* Step 1: Ingredientes */}
         {step === 1 && (
           <div className="space-y-5">
             <h2 className="text-xl font-extrabold text-foreground">Ingredientes da receita</h2>
-
             <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
-              <SelectTrigger className="h-12 rounded-xl bg-success/10 border-success/30 text-success font-bold">
-                <span>+ Adicionar ingrediente do estoque</span>
-              </SelectTrigger>
+              <SelectTrigger className="h-12 rounded-xl bg-success/10 border-success/30 text-success font-bold"><span>+ Adicionar ingrediente do estoque</span></SelectTrigger>
               <SelectContent>{stockIngredients.map(i => <SelectItem key={i.id} value={i.id}>{i.name} (R$ {i.cost_per_unit.toFixed(4)}/{i.unit})</SelectItem>)}</SelectContent>
             </Select>
-
-            {selectedIngredients.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground py-4">Nenhum ingrediente adicionado ainda</p>
-            )}
-
+            {selectedIngredients.length === 0 && (<p className="text-center text-sm text-muted-foreground py-4">Nenhum ingrediente adicionado ainda</p>)}
             {selectedIngredients.map(item => renderItemRow(item, "ingredient"))}
-
             <div className="bg-secondary p-4 rounded-xl flex justify-between items-center">
               <span className="font-bold text-foreground">Custo dos ingredientes</span>
               <span className="text-xl font-extrabold text-primary">R$ {ingredientsCost.toFixed(2)}</span>
@@ -464,26 +427,16 @@ const Pricing = () => {
           </div>
         )}
 
-        {/* Step 2: Rendimento */}
         {step === 2 && (
           <div className="space-y-5">
             <h2 className="text-xl font-extrabold text-foreground">Rendimento da receita</h2>
             <Hint>Ex: 2 kg de recheio, 3 discos, 500 ml de calda</Hint>
-
             <div className="flex gap-2">
-              <input
-                inputMode="decimal"
-                placeholder="Ex: 2"
-                value={recipeYieldQty}
-                onChange={(e) => setRecipeYieldQty(e.target.value)}
-                className="h-12 rounded-xl flex-1 border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-              />
+              <input inputMode="decimal" placeholder="Ex: 2" value={recipeYieldQty} onChange={(e) => setRecipeYieldQty(e.target.value)} className="h-12 rounded-xl flex-1 border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring" />
               <div className="flex-1">
                 <Select value={recipeYieldUnit} onValueChange={setRecipeYieldUnit}>
                   <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Medida..." /></SelectTrigger>
-                  <SelectContent>
-                    {yieldUnits.map(u => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}
-                  </SelectContent>
+                  <SelectContent>{yieldUnits.map(u => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
             </div>
@@ -493,7 +446,6 @@ const Pricing = () => {
                 <Hint>Ex: bandeja, forma, porção...</Hint>
               </div>
             )}
-
             <div className="bg-success/10 border border-success/20 p-4 rounded-xl space-y-2">
               <div className="flex justify-between items-center">
                 <span className="font-bold text-foreground">Custo total da receita</span>
@@ -509,21 +461,16 @@ const Pricing = () => {
           </div>
         )}
 
-        {/* Step 3: Resumo */}
         {step === 3 && (
           <div className="space-y-5">
             <div className="text-center">
-              {recipePhotoPreview && (
-                <img src={recipePhotoPreview} alt="Foto" className="w-20 h-20 rounded-2xl object-cover mx-auto mb-3 shadow-md" />
-              )}
+              {recipePhotoPreview && (<img src={recipePhotoPreview} alt="Foto" className="w-20 h-20 rounded-2xl object-cover mx-auto mb-3 shadow-md" />)}
               <h2 className="text-xl font-extrabold text-foreground">Resumo da Receita</h2>
             </div>
             <Card className="border border-border"><CardContent className="p-5 space-y-3">
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Receita</span><span className="font-bold">{recipeName}</span></div>
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Ingredientes</span><span className="font-bold">{selectedIngredients.length}</span></div>
-              {recipeYieldQty && (
-                <div className="flex justify-between text-sm"><span className="text-muted-foreground">Rendimento</span><span className="font-bold">{recipeYieldQty} {finalRecipeYieldUnit}</span></div>
-              )}
+              {recipeYieldQty && (<div className="flex justify-between text-sm"><span className="text-muted-foreground">Rendimento</span><span className="font-bold">{recipeYieldQty} {finalRecipeYieldUnit}</span></div>)}
               <div className="border-t border-border my-2" />
               <div className="flex justify-between items-center">
                 <span className="font-extrabold">Custo Total</span>
@@ -536,7 +483,6 @@ const Pricing = () => {
                 </div>
               )}
             </CardContent></Card>
-
             <Button onClick={handleSaveRecipe} disabled={saving} className="w-full rounded-2xl h-14 text-lg font-bold bg-success hover:bg-success/90 text-success-foreground gap-2" style={{ boxShadow: "0 4px 0 0 hsl(152 70% 28%), 0 6px 12px -2px hsl(152 70% 38% / 0.3)" }}>
               <CheckCircle2 className="w-6 h-6" /> {saving ? "Salvando..." : editingRecipeId ? "ATUALIZAR RECEITA" : "SALVAR RECEITA"}
             </Button>
@@ -555,35 +501,32 @@ const Pricing = () => {
   // ============ PRODUCT MODE ============
   return (
     <div className="space-y-5 pb-6">
-      {/* Progress */}
       <div className="flex items-center gap-3">
-        <button onClick={goBack} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-          <ChevronLeft className="w-5 h-5 text-muted-foreground" />
-        </button>
+        <button onClick={goBack} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"><ChevronLeft className="w-5 h-5 text-muted-foreground" /></button>
         <div className="flex-1">
-          <div className="flex gap-1.5">
-            {stepLabels.map((_, i) => (
-              <div key={i} className={`h-1.5 flex-1 rounded-full transition-all ${i <= step ? "bg-primary" : "bg-muted"}`} />
-            ))}
-          </div>
+          <div className="flex gap-1.5">{stepLabels.map((_, i) => (<div key={i} className={`h-1.5 flex-1 rounded-full transition-all ${i <= step ? "bg-primary" : "bg-muted"}`} />))}</div>
           <p className="text-xs text-muted-foreground mt-1 text-center">{stepLabels[step]} • Etapa {step + 1} de {stepLabels.length}</p>
         </div>
       </div>
 
-      {/* STEP 0: Product */}
+      {/* STEP 0: Product info + photo + sale type */}
       {step === 0 && (
         <div className="space-y-5">
           <div>
-            <h2 className="text-xl font-extrabold text-foreground">O que você quer precificar?</h2>
+            <h2 className="text-xl font-extrabold text-foreground">Dados do Produto</h2>
             <p className="text-sm text-muted-foreground">Preencha os dados do seu produto</p>
           </div>
 
-          <div className="flex justify-center">
-            <div className="w-28 h-28 rounded-2xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center gap-2 bg-secondary/20 cursor-pointer hover:bg-secondary/40 transition-colors">
-              <Upload className="w-6 h-6 text-primary/50" />
-              <span className="text-xs text-primary/60 font-medium">Foto</span>
+          <label className="block cursor-pointer">
+            <div className="w-full h-36 rounded-2xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center gap-2 bg-secondary/20 hover:bg-secondary/40 transition-colors overflow-hidden relative">
+              {productPhotoPreview ? (
+                <img src={productPhotoPreview} alt="Foto do produto" className="w-full h-full object-cover" />
+              ) : (
+                <><Camera className="w-8 h-8 text-primary/50" /><span className="text-sm text-primary/60 font-medium">Toque para adicionar foto</span></>
+              )}
             </div>
-          </div>
+            <input type="file" accept="image/*" onChange={handleProductPhoto} className="hidden" />
+          </label>
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-primary">Nome do Produto *</label>
@@ -596,21 +539,6 @@ const Pricing = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-primary">Categoria *</label>
-            <div className="flex flex-wrap gap-2">
-              {categories.map(c => (
-                <button key={c} onClick={() => setCategory(c)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${category === c ? "bg-success text-success-foreground shadow-md" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}>
-                  {c}
-                </button>
-              ))}
-            </div>
-            {category === "Outros" && (
-              <Input placeholder="Especifique a categoria..." value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} className="h-12 rounded-xl mt-2" />
-            )}
-          </div>
-
-          <div className="space-y-1.5">
             <label className="text-sm font-semibold text-primary">Tipo de Venda *</label>
             <div className="flex flex-wrap gap-2">
               {saleTypes.map(t => (
@@ -620,17 +548,14 @@ const Pricing = () => {
                 </button>
               ))}
             </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-primary">Rendimento *</label>
-            <Input type="number" placeholder="Ex: 12" value={yieldQty} onChange={(e) => setYieldQty(e.target.value)} className="h-12 rounded-xl" />
-            <Hint>Quantas unidades/fatias essa receita rende?</Hint>
+            {saleType === "outros" && (
+              <Input placeholder="Especifique o tipo de venda..." value={customSaleType} onChange={(e) => setCustomSaleType(e.target.value)} className="h-12 rounded-xl mt-2" />
+            )}
           </div>
         </div>
       )}
 
-      {/* STEP 1: Ingredients */}
+      {/* STEP 1: Ingredients (stock + recipes) & Packaging (stock only) */}
       {step === 1 && (
         <div className="space-y-5">
           <div>
@@ -639,73 +564,34 @@ const Pricing = () => {
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-foreground">🥄 Ingredientes</h3>
-              <div className="flex gap-2">
-                <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
-                  <SelectTrigger className="h-9 rounded-full bg-secondary text-primary text-xs font-bold border-0 px-4 w-auto"><span>+ Estoque</span></SelectTrigger>
-                  <SelectContent>{stockIngredients.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
-                </Select>
-                <button onClick={() => setShowIngManual(!showIngManual)} className="h-9 rounded-full bg-muted text-muted-foreground text-xs font-bold px-4">+ Avulso</button>
-              </div>
+            <h3 className="text-base font-bold text-foreground">🥄 Ingredientes</h3>
+            <div className="flex flex-wrap gap-2">
+              <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
+                <SelectTrigger className="h-9 rounded-full bg-secondary text-primary text-xs font-bold border-0 px-4 w-auto"><span>+ Estoque</span></SelectTrigger>
+                <SelectContent>{stockIngredients.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
+              </Select>
+              <Select onValueChange={(id) => { const recipe = savedRecipes.find(r => r.id === id); if (recipe) addFromRecipe(recipe); }}>
+                <SelectTrigger className="h-9 rounded-full bg-primary/10 text-primary text-xs font-bold border-0 px-4 w-auto"><span>+ Receitas</span></SelectTrigger>
+                <SelectContent>{savedRecipes.map(r => <SelectItem key={r.id} value={r.id}>{r.name} (R$ {(r.total_cost / r.yield_quantity).toFixed(2)}/{r.yield_unit})</SelectItem>)}</SelectContent>
+              </Select>
             </div>
 
-
-            {showIngManual && (
-              <Card className="border border-border"><CardContent className="p-4 space-y-3">
-                <Input placeholder="Nome do ingrediente" value={manualIng.name} onChange={(e) => setManualIng({ ...manualIng, name: e.target.value })} className="h-11 rounded-xl" />
-                <div className="flex gap-2">
-                  <Input type="number" placeholder="Qtd comprada" value={manualIng.qty} onChange={(e) => setManualIng({ ...manualIng, qty: e.target.value })} className="h-11 rounded-xl flex-1" />
-                  <Select value={manualIng.unit} onValueChange={(v) => setManualIng({ ...manualIng, unit: v })}>
-                    <SelectTrigger className="h-11 rounded-xl w-20"><SelectValue /></SelectTrigger>
-                    <SelectContent>{["g", "ml", "kg", "l"].map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
-                  </Select>
-                  <CurrencyInput placeholder="R$ total" value={manualIng.cost} onValueChange={(v) => setManualIng({ ...manualIng, cost: v })} className="h-11 rounded-xl flex-1" />
-                </div>
-                <Button onClick={addManualIngredient} className="w-full rounded-xl h-10 font-bold">Adicionar</Button>
-              </CardContent></Card>
+            {selectedIngredients.length === 0 && (
+              <p className="text-center text-sm text-muted-foreground py-3">Nenhum ingrediente adicionado ainda</p>
             )}
-
-            {selectedIngredients.length === 0 && !showIngManual && (
-              <p className="text-center text-sm text-muted-foreground py-3">Nenhum ingrediente adicionado ainda. Toque em "+ Estoque" ou "+ Avulso" acima!</p>
-            )}
-
             {selectedIngredients.map(item => renderItemRow(item, "ingredient"))}
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-foreground">📦 Embalagens</h3>
-              <div className="flex gap-2">
-                <Select onValueChange={(id) => { const item = stockPackaging.find(i => i.id === id); if (item) addFromStock(item, "packaging"); }}>
-                  <SelectTrigger className="h-9 rounded-full bg-secondary text-primary text-xs font-bold border-0 px-4 w-auto"><span>+ Estoque</span></SelectTrigger>
-                  <SelectContent>{stockPackaging.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
-                </Select>
-                <button onClick={() => setShowPkgManual(!showPkgManual)} className="h-9 rounded-full bg-muted text-muted-foreground text-xs font-bold px-4">+ Avulso</button>
-              </div>
-            </div>
+            <h3 className="text-base font-bold text-foreground">📦 Embalagens</h3>
+            <Select onValueChange={(id) => { const item = stockPackaging.find(i => i.id === id); if (item) addFromStock(item, "packaging"); }}>
+              <SelectTrigger className="h-9 rounded-full bg-secondary text-primary text-xs font-bold border-0 px-4 w-auto"><span>+ Estoque</span></SelectTrigger>
+              <SelectContent>{stockPackaging.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
+            </Select>
 
-            <Hint>Embalagens usadas nesse produto</Hint>
-
-            {showPkgManual && (
-              <Card className="border border-border"><CardContent className="p-4 space-y-3">
-                <Input placeholder="Nome da embalagem" value={manualPkg.name} onChange={(e) => setManualPkg({ ...manualPkg, name: e.target.value })} className="h-11 rounded-xl" />
-                <div className="flex gap-2">
-                  <Input type="number" placeholder="Qtd" value={manualPkg.qty} onChange={(e) => setManualPkg({ ...manualPkg, qty: e.target.value })} className="h-11 rounded-xl flex-1" />
-                  <Select value={manualPkg.unit} onValueChange={(v) => setManualPkg({ ...manualPkg, unit: v })}>
-                    <SelectTrigger className="h-11 rounded-xl w-24"><SelectValue /></SelectTrigger>
-                    <SelectContent>{["un", "pacote", "caixa"].map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
-                  </Select>
-                  <CurrencyInput placeholder="R$ total" value={manualPkg.cost} onValueChange={(v) => setManualPkg({ ...manualPkg, cost: v })} className="h-11 rounded-xl flex-1" />
-                </div>
-                <Button onClick={addManualPackaging} className="w-full rounded-xl h-10 font-bold">Adicionar</Button>
-              </CardContent></Card>
+            {selectedPackaging.length === 0 && (
+              <p className="text-center text-sm text-muted-foreground py-3">Nenhuma embalagem adicionada</p>
             )}
-
-            {selectedPackaging.length === 0 && !showPkgManual && (
-              <p className="text-center text-sm text-muted-foreground py-3">Nenhuma embalagem adicionada. Toque em "+ Estoque" ou "+ Avulso" acima!</p>
-            )}
-
             {selectedPackaging.map(item => renderItemRow(item, "packaging"))}
           </div>
 
@@ -724,10 +610,10 @@ const Pricing = () => {
             <p className="text-sm text-muted-foreground">Vamos calcular o custo do seu tempo e gastos fixos</p>
           </div>
 
-          <div className={`p-4 rounded-xl ${salaryConfigured ? "bg-secondary" : "bg-secondary border border-warning/30"}`}>
+          <div className={`p-4 rounded-xl ${salaryConfigured ? "bg-success/10 border border-success/20" : "bg-secondary border border-warning/30"}`}>
             {salaryConfigured ? (
               <>
-                <p className="text-sm text-muted-foreground">✅ Valor da sua hora: <strong className="text-primary">R$ {hourlyRate.toFixed(2)}</strong></p>
+                <p className="text-sm text-foreground">✅ Valor da sua hora: <strong className="text-success text-lg">R$ {hourlyRate.toFixed(2)}</strong></p>
                 <Hint>Esse valor foi calculado com base no salário que você configurou nas Configurações</Hint>
               </>
             ) : (
@@ -755,7 +641,7 @@ const Pricing = () => {
             </div>
           </div>
 
-          <div className="bg-secondary p-4 rounded-xl space-y-2">
+          <div className="bg-success/10 border border-success/20 p-4 rounded-xl space-y-2">
             {[
               ["Ingredientes", ingredientsCost],
               ["Embalagem", packagingCost],
@@ -767,9 +653,9 @@ const Pricing = () => {
                 <span className="font-bold">R$ {(val as number).toFixed(2)}</span>
               </div>
             ))}
-            <div className="border-t border-border pt-2 flex justify-between">
+            <div className="border-t border-success/20 pt-2 flex justify-between">
               <span className="font-bold">Custo Total</span>
-              <span className="text-xl font-extrabold text-primary">R$ {baseCost.toFixed(2)}</span>
+              <span className="text-xl font-extrabold text-success">R$ {baseCost.toFixed(2)}</span>
             </div>
           </div>
         </div>
@@ -802,36 +688,86 @@ const Pricing = () => {
             </div>
           </div>
 
-          <Card className="border border-border"><CardContent className="p-4 space-y-3">
+          <Card className="border border-border"><CardContent className="p-4 space-y-4">
             <p className="font-bold text-sm">Custos Adicionais (opcional)</p>
-            <Hint>Ative somente se você vender por aplicativo, fizer entrega ou aceitar cartão</Hint>
-            {[
-              { label: "iFood / Uber Eats", enabled: ifoodEnabled, setEnabled: setIfoodEnabled, value: ifoodFee, setValue: setIfoodFee, suffix: "%", hint: "Taxa cobrada pelo aplicativo de delivery (geralmente 12%)" },
-              { label: "Delivery próprio", enabled: deliveryEnabled, setEnabled: setDeliveryEnabled, value: deliveryFee, setValue: setDeliveryFee, suffix: "R$", hint: "Valor que você gasta com entrega (gasolina, entregador...)" },
-              { label: "Maquininha (cartão)", enabled: cardEnabled, setEnabled: setCardEnabled, value: cardFee, setValue: setCardFee, suffix: "%", hint: "Taxa da maquininha de cartão (geralmente 2% a 5%)" },
-            ].map(fee => (
-              <div key={fee.label}>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">{fee.label}</span>
-                  <Switch checked={fee.enabled} onCheckedChange={fee.setEnabled} />
-                </div>
-                {fee.enabled && (
-                  <div className="mt-1 space-y-1">
-                    <div className="flex items-center gap-2 pl-4">
-                      <Input type="number" value={fee.value} onChange={(e) => fee.setValue(e.target.value)} className="w-20 h-9 rounded-lg text-sm text-center" />
-                      <span className="text-xs text-muted-foreground">{fee.suffix}</span>
-                    </div>
-                    <div className="pl-4"><Hint>{fee.hint}</Hint></div>
-                  </div>
-                )}
+
+            {/* iFood */}
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">iFood / Uber Eats</span>
+                <Switch checked={ifoodEnabled} onCheckedChange={setIfoodEnabled} />
               </div>
-            ))}
+              {ifoodEnabled && (
+                <div className="mt-1 space-y-1 pl-4">
+                  <div className="flex items-center gap-2">
+                    <Input type="number" placeholder="Ex: 12" value={ifoodFee} onChange={(e) => setIfoodFee(e.target.value)} className="w-20 h-9 rounded-lg text-sm text-center" />
+                    <span className="text-xs text-muted-foreground">%</span>
+                  </div>
+                  <Hint>Taxa cobrada pelo aplicativo de delivery, geralmente a partir de 12%</Hint>
+                </div>
+              )}
+            </div>
+
+            {/* Delivery próprio */}
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Delivery próprio</span>
+                <Switch checked={deliveryEnabled} onCheckedChange={setDeliveryEnabled} />
+              </div>
+              {deliveryEnabled && (
+                <div className="mt-1 space-y-1 pl-4">
+                  <div className="flex items-center gap-2">
+                    <Input type="number" placeholder="Ex: 10" value={deliveryFee} onChange={(e) => setDeliveryFee(e.target.value)} className="w-20 h-9 rounded-lg text-sm text-center" />
+                    <span className="text-xs text-muted-foreground">R$</span>
+                  </div>
+                  <Hint>Valor que você gasta com entrega (gasolina, entregador...)</Hint>
+                </div>
+              )}
+            </div>
+
+            {/* Maquininha */}
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Maquininha (cartão)</span>
+                <Switch checked={cardEnabled} onCheckedChange={setCardEnabled} />
+              </div>
+              {cardEnabled && (
+                <div className="mt-1 space-y-1 pl-4">
+                  <div className="flex items-center gap-2">
+                    <Input type="number" placeholder="Ex: 3" value={cardFee} onChange={(e) => setCardFee(e.target.value)} className="w-20 h-9 rounded-lg text-sm text-center" />
+                    <span className="text-xs text-muted-foreground">%</span>
+                  </div>
+                  <Hint>Taxa da maquininha de cartão, geralmente de 2% a 5%</Hint>
+                </div>
+              )}
+            </div>
+
+            {/* Outros */}
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm">Outros</span>
+                <Switch checked={otherFeeEnabled} onCheckedChange={setOtherFeeEnabled} />
+              </div>
+              {otherFeeEnabled && (
+                <div className="mt-1 space-y-2 pl-4">
+                  <Input placeholder="Nome do custo" value={otherFeeName} onChange={(e) => setOtherFeeName(e.target.value)} className="h-9 rounded-lg text-sm" />
+                  <div className="flex items-center gap-2">
+                    <Input type="number" placeholder="Valor" value={otherFeeValue} onChange={(e) => setOtherFeeValue(e.target.value)} className="w-20 h-9 rounded-lg text-sm text-center" />
+                    <div className="flex gap-1">
+                      <button onClick={() => setOtherFeeType("percent")} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${otherFeeType === "percent" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>%</button>
+                      <button onClick={() => setOtherFeeType("fixed")} className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${otherFeeType === "fixed" ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>R$</button>
+                    </div>
+                  </div>
+                  <Hint>Adicione qualquer custo extra que não se encaixa nas opções acima</Hint>
+                </div>
+              )}
+            </div>
           </CardContent></Card>
 
           <div className="rounded-2xl p-6 text-center bg-success text-success-foreground shadow-lg" style={{ boxShadow: "0 4px 0 0 hsl(152 70% 28%), 0 6px 12px -2px hsl(152 70% 38% / 0.3)" }}>
             <p className="text-sm font-medium opacity-90">Preço Final de Venda</p>
             <p className="text-4xl font-extrabold mt-1">R$ {suggestedPrice.toFixed(2)}</p>
-            <p className="text-sm opacity-70 mt-1">R$ {pricePerUnit.toFixed(2)} por {saleType || "unidade"}</p>
+            <p className="text-sm opacity-70 mt-1">por {finalSaleType || "unidade"}</p>
           </div>
 
           {chartData.length > 0 && (
@@ -858,25 +794,52 @@ const Pricing = () => {
         </div>
       )}
 
-      {/* STEP 4: Save */}
+      {/* STEP 4: Summary + Tips */}
       {step === 4 && (
         <div className="space-y-5">
           <div className="text-center">
-            <p className="text-3xl">🍰</p>
-            <h2 className="text-xl font-extrabold text-foreground mt-2">Resumo do Produto</h2>
+            {productPhotoPreview && (<img src={productPhotoPreview} alt="Foto" className="w-20 h-20 rounded-2xl object-cover mx-auto mb-3 shadow-md" />)}
+            <h2 className="text-xl font-extrabold text-foreground">Resumo do Produto</h2>
             <Hint>Confira todos os dados antes de salvar. Tudo certo? Toque em Salvar!</Hint>
           </div>
 
           <Card className="border border-border"><CardContent className="p-5 space-y-3">
             <div className="flex justify-between text-sm"><span className="text-muted-foreground">Produto</span><span className="font-bold">{productName}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Categoria</span><span className="font-bold">{category}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Rendimento</span><span className="font-bold">{yieldQty} {saleType}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Tipo de venda</span><span className="font-bold">{finalSaleType}</span></div>
             <div className="border-t border-border my-2" />
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Custo Total</span><span className="font-bold">R$ {baseCost.toFixed(2)}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Custo Total</span><span className="font-bold text-success">R$ {baseCost.toFixed(2)}</span></div>
             <div className="flex justify-between text-sm"><span className="text-muted-foreground">Lucro ({profitMargin[0]}%)</span><span className="font-bold text-success">R$ {profitValue.toFixed(2)}</span></div>
             <div className="flex justify-between items-center">
               <span className="font-extrabold">Preço de Venda</span>
               <span className="text-2xl font-extrabold text-success">R$ {suggestedPrice.toFixed(2)}</span>
+            </div>
+          </CardContent></Card>
+
+          {/* Dicas */}
+          <Card className="border border-success/30 bg-success/5"><CardContent className="p-5 space-y-3">
+            <div className="flex items-center gap-2 mb-1">
+              <Star className="w-5 h-5 text-success" />
+              <h3 className="font-extrabold text-foreground">Parabéns, você precificou! 🎉</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">Agora tenha atenção em como dividir esse valor:</p>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm bg-background p-3 rounded-xl">
+                <span className="text-muted-foreground">💰 Custos (insumos + fixos)</span>
+                <span className="font-bold">R$ {baseCost.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm bg-background p-3 rounded-xl">
+                <span className="text-muted-foreground">👩‍🍳 Pró-labore (sua hora)</span>
+                <span className="font-bold">R$ {laborCost.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-sm bg-background p-3 rounded-xl">
+                <span className="text-muted-foreground">📈 Lucro da empresa</span>
+                <span className="font-bold text-success">R$ {(profitValue - laborCost > 0 ? profitValue - laborCost : profitValue).toFixed(2)}</span>
+              </div>
+            </div>
+            <div className="space-y-1.5 pt-2">
+              <p className="text-xs text-muted-foreground">💡 <strong>Dica:</strong> Separe o lucro da empresa do seu pró-labore. O lucro da empresa deve ser reinvestido no negócio.</p>
+              <p className="text-xs text-muted-foreground">💡 <strong>Dica:</strong> Reserve pelo menos 10% do faturamento para um fundo de emergência.</p>
+              <p className="text-xs text-muted-foreground">💡 <strong>Dica:</strong> Nunca cobre abaixo do custo total, mesmo para amigos e família. Ofereça descontos pequenos no lucro.</p>
             </div>
           </CardContent></Card>
 
