@@ -72,6 +72,8 @@ const Pricing = () => {
   const [recipeYieldQty, setRecipeYieldQty] = useState("");
   const [recipeYieldUnit, setRecipeYieldUnit] = useState("");
   const [customRecipeYieldUnit, setCustomRecipeYieldUnit] = useState("");
+  const [recipePhotoPreview, setRecipePhotoPreview] = useState("");
+  const [recipePhotoFile, setRecipePhotoFile] = useState<File | null>(null);
 
   // Step 1 shared
   const [stockIngredients, setStockIngredients] = useState<StockItem[]>([]);
