@@ -208,7 +208,7 @@ const Dashboard = () => {
                     hasOrder ? "bg-success/15 text-success font-extrabold border border-success/30" :
                     "text-foreground hover:bg-muted/50"
                   }`}
-                  style={isToday(day) && inMonth ? { background: "linear-gradient(135deg, hsl(340 30% 75%), hsl(350 25% 80%))" } : undefined}
+                  style={isToday(day) && inMonth ? { background: "linear-gradient(135deg, hsl(340 70% 58%), hsl(340 65% 65%))" } : undefined}
                 >
                   <span className="text-sm font-bold">{format(day, "d")}</span>
                   {hasOrder && inMonth && (
