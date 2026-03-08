@@ -81,15 +81,9 @@ const Plans = () => {
                     <span className="font-medium">{f}</span>
                   </div>
                 ))}
-                {plan.current ? (
-                  <Button disabled className="w-full rounded-xl mt-3 h-12 text-base font-bold bg-success/20 text-success cursor-not-allowed border border-success/30">
-                    ✅ PLANO ATUAL
-                  </Button>
-                ) : (
-                  <Button className={`w-full rounded-xl mt-3 h-12 text-base font-bold ${plan.btnClass} animate-pulse`}>
-                    ASSINAR AGORA
-                  </Button>
-                )}
+                <Button className={`w-full rounded-xl mt-3 h-12 text-base font-bold ${plan.btnClass}`}>
+                  ASSINAR AGORA
+                </Button>
               </CardContent>
             </Card>
           );
