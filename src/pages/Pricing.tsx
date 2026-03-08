@@ -568,11 +568,11 @@ const Pricing = () => {
               <h3 className="text-base font-bold text-foreground">🥄 Ingredientes</h3>
               <div className="flex gap-2">
                 <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
-                  <SelectTrigger className="h-8 rounded-full bg-success/15 text-success text-xs font-bold border-0 px-3 w-auto"><span>+ Estoque</span></SelectTrigger>
+                  <SelectTrigger className="h-8 rounded-full bg-primary/15 text-foreground text-xs font-bold border-0 px-3 w-auto"><span>+ Estoque</span></SelectTrigger>
                   <SelectContent>{stockIngredients.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
                 </Select>
                 <Select onValueChange={(id) => { const recipe = savedRecipes.find(r => r.id === id); if (recipe) addFromRecipe(recipe); }}>
-                  <SelectTrigger className="h-8 rounded-full bg-[hsl(210,80%,55%)]/15 text-[hsl(210,80%,45%)] text-xs font-bold border-0 px-3 w-auto"><span>+ Receitas</span></SelectTrigger>
+                  <SelectTrigger className="h-8 rounded-full bg-primary/15 text-foreground text-xs font-bold border-0 px-3 w-auto"><span>+ Receitas</span></SelectTrigger>
                   <SelectContent>{savedRecipes.map(r => <SelectItem key={r.id} value={r.id}>{r.name} (R$ {(r.total_cost / r.yield_quantity).toFixed(2)}/{r.yield_unit})</SelectItem>)}</SelectContent>
                 </Select>
               </div>
@@ -588,7 +588,7 @@ const Pricing = () => {
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-foreground">📦 Embalagens</h3>
               <Select onValueChange={(id) => { const item = stockPackaging.find(i => i.id === id); if (item) addFromStock(item, "packaging"); }}>
-                <SelectTrigger className="h-8 rounded-full bg-success/15 text-success text-xs font-bold border-0 px-3 w-auto"><span>+ Estoque</span></SelectTrigger>
+                <SelectTrigger className="h-8 rounded-full bg-primary/15 text-foreground text-xs font-bold border-0 px-3 w-auto"><span>+ Estoque</span></SelectTrigger>
                 <SelectContent>{stockPackaging.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
@@ -614,15 +614,15 @@ const Pricing = () => {
             <p className="text-sm text-muted-foreground">Vamos calcular o custo do seu tempo e gastos fixos</p>
           </div>
 
-          <div className={`p-4 rounded-xl ${salaryConfigured ? "bg-success/10 border border-success/20" : "bg-secondary border border-warning/30"}`}>
+          <div className={`p-4 rounded-xl ${salaryConfigured ? "bg-primary/10 border border-primary/20" : "bg-secondary border border-warning/30"}`}>
             {salaryConfigured ? (
               <>
-                <p className="text-sm text-foreground">✅ Valor da sua hora: <strong className="text-success text-lg">R$ {hourlyRate.toFixed(2)}</strong></p>
+                <p className="text-sm text-foreground">Valor da sua hora: <strong className="text-primary text-lg">R$ {hourlyRate.toFixed(2)}</strong></p>
                 <Hint>Esse valor foi calculado com base no salário que você configurou nas Configurações</Hint>
               </>
             ) : (
               <>
-                <p className="text-sm text-muted-foreground">⚠️ Configure seu salário nas Configurações → Financeiro</p>
+                <p className="text-sm text-foreground">⚠️ Configure seu salário nas Configurações → Financeiro</p>
                 <Hint>Sem o salário configurado, a mão de obra não será incluída no cálculo</Hint>
               </>
             )}
@@ -674,11 +674,11 @@ const Pricing = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-success/10 border border-success/20 p-4 rounded-xl text-center">
-              <p className="text-xs font-bold text-success">Lucro</p>
-              <p className="text-2xl font-extrabold text-success">R$ {profitValue.toFixed(2)}</p>
+            <div className="bg-success p-4 rounded-xl text-center shadow-md">
+              <p className="text-xs font-bold text-success-foreground/80">Lucro</p>
+              <p className="text-2xl font-extrabold text-success-foreground">R$ {profitValue.toFixed(2)}</p>
             </div>
-            <div className="bg-primary p-4 rounded-xl text-center">
+            <div className="bg-primary p-4 rounded-xl text-center shadow-md">
               <p className="text-xs font-bold text-primary-foreground/80">Margem</p>
               <p className="text-3xl font-extrabold text-primary-foreground">{profitMargin[0]}%</p>
             </div>
