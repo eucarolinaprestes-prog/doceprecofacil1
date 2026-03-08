@@ -682,9 +682,7 @@ const Pricing = () => {
               <p className="text-center text-sm text-muted-foreground py-3">Nenhuma embalagem adicionada. Toque em "+ Estoque" ou "+ Avulso" acima!</p>
             )}
 
-            {selectedPackaging.map(item => (
-              <ItemRow key={item.id} item={item} type="packaging" />
-            ))}
+            {selectedPackaging.map(item => renderItemRow(item, "packaging"))}
           </div>
 
           <div className="bg-secondary p-4 rounded-xl flex justify-between items-center">
