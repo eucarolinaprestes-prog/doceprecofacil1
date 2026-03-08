@@ -17,8 +17,8 @@ type PricingMode = "select" | "product" | "recipe";
 
 const stepLabelsProduct = ["Produto", "Ingredientes", "Mão de Obra", "Estratégia", "Salvar"];
 const stepLabelsRecipe = ["Nome", "Categoria", "Ingredientes", "Resumo"];
-const categories = ["Massa", "Recheio", "Bolo", "Fatias", "Cupcakes", "Salgados", "Doces"];
-const recipeCategories = ["Massa", "Recheio", "Cobertura", "Mousse", "Calda", "Creme", "Outro"];
+const categories = ["Massa", "Recheio", "Bolo", "Fatias", "Cupcakes", "Salgados", "Doces", "Outros"];
+const recipeCategories = ["Massa", "Recheio", "Cobertura", "Mousse", "Calda", "Creme", "Outros"];
 const saleTypes = [
   { value: "unidade(s)", label: "Unidade" },
   { value: "fatia(s)", label: "Fatias" },
