@@ -360,12 +360,14 @@ const Orders = () => {
 
       {/* Status tabs */}
       <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-        <TabsList className="grid grid-cols-5 w-full h-12 rounded-xl">
-          <TabsTrigger value="pending" className="rounded-xl font-bold text-[9px] px-0.5">Pendentes ({pendingCount})</TabsTrigger>
-          <TabsTrigger value="scheduled" className="rounded-xl font-bold text-[9px] px-0.5">Agendados ({scheduledCount})</TabsTrigger>
-          <TabsTrigger value="production" className="rounded-xl font-bold text-[9px] px-0.5">Produção ({productionCount})</TabsTrigger>
-          <TabsTrigger value="finished" className="rounded-xl font-bold text-[9px] px-0.5">Finalizado ({finishedCount})</TabsTrigger>
-          <TabsTrigger value="delivered" className="rounded-xl font-bold text-[9px] px-0.5">Entregues ({deliveredCount})</TabsTrigger>
+        <TabsList className="grid grid-cols-3 w-full h-auto gap-2 rounded-xl p-1.5 bg-secondary/50">
+          <TabsTrigger value="pending" className="rounded-xl font-bold text-xs py-2.5">Pendentes ({pendingCount})</TabsTrigger>
+          <TabsTrigger value="scheduled" className="rounded-xl font-bold text-xs py-2.5">Agendados ({scheduledCount})</TabsTrigger>
+          <TabsTrigger value="production" className="rounded-xl font-bold text-xs py-2.5">Produção ({productionCount})</TabsTrigger>
+        </TabsList>
+        <TabsList className="grid grid-cols-2 w-full h-auto gap-2 rounded-xl p-1.5 bg-secondary/50 mt-2">
+          <TabsTrigger value="finished" className="rounded-xl font-bold text-xs py-2.5">Finalizado ({finishedCount})</TabsTrigger>
+          <TabsTrigger value="delivered" className="rounded-xl font-bold text-xs py-2.5">Entregues ({deliveredCount})</TabsTrigger>
         </TabsList>
       </Tabs>
 
