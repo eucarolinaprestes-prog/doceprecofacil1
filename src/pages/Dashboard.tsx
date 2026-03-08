@@ -164,34 +164,6 @@ const Dashboard = () => {
         </Card>
       )}
 
-      {/* Calendário semanal */}
-      <Card className="card-elevated">
-        <CardContent className="p-4">
-          <p className="text-sm font-bold text-foreground mb-3">📅 Semana atual</p>
-          <div className="grid grid-cols-7 gap-2">
-            {weekDays.map((day) => {
-              const dateStr = format(day, "yyyy-MM-dd");
-              const hasOrder = orderDates[dateStr];
-              return (
-                <div
-                  key={day.toISOString()}
-                  className={`flex flex-col items-center py-3 px-1 rounded-xl text-xs font-medium ${
-                    isToday(day)
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : hasOrder
-                      ? "bg-success/10 text-success border border-success/20"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  <span className="capitalize text-[10px]">{format(day, "EEE", { locale: ptBR })}</span>
-                  <span className="text-lg font-extrabold">{format(day, "d")}</span>
-                  {hasOrder && <span className="w-1.5 h-1.5 rounded-full bg-success mt-0.5" />}
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
