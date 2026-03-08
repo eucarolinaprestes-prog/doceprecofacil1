@@ -38,6 +38,8 @@ const FinanceDialog = ({ type, onClose, onSaved }: FinanceDialogProps) => {
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const finalCategory = category === "Outros" && customCategory.trim() ? customCategory.trim() : category;
+
   const handleSave = async () => {
     if (!user || !amount || !category) return;
     setSaving(true);
