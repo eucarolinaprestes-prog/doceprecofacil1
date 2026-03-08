@@ -466,7 +466,7 @@ const Pricing = () => {
                     <SelectTrigger className="h-11 rounded-xl w-20"><SelectValue /></SelectTrigger>
                     <SelectContent>{["g", "ml", "kg", "l"].map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
                   </Select>
-                  <Input type="number" placeholder="R$" value={manualIng.cost} onChange={(e) => setManualIng({ ...manualIng, cost: e.target.value })} className="h-11 rounded-xl flex-1" />
+                  <CurrencyInput placeholder="R$" value={manualIng.cost} onValueChange={(v) => setManualIng({ ...manualIng, cost: v })} className="h-11 rounded-xl flex-1" />
                 </div>
                 <Button onClick={addManualIngredient} className="w-full rounded-xl h-10 font-bold">Adicionar</Button>
               </CardContent></Card>
