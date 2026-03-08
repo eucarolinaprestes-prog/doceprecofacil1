@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,7 +19,10 @@ const packagingUnits = ["unidade", "pacote", "caixa fechada"];
 const Supplies = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("ingredients");
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "ingredients";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [ingredients, setIngredients] = useState<any[]>([]);
   const [packagingItems, setPackagingItems] = useState<any[]>([]);
   const [recipes, setRecipes] = useState<any[]>([]);
@@ -26,10 +30,7 @@ const Supplies = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogType, setDialogType] = useState<"ingredient" | "packaging">("ingredient");
-  const [recipeDialogOpen, setRecipeDialogOpen] = useState(false);
-  const [editingRecipe, setEditingRecipe] = useState<any>(null);
-  const [recipeName, setRecipeName] = useState("");
-  const [recipeCategory, setRecipeCategory] = useState("");
+
 
   const [name, setName] = useState("");
   const [unit, setUnit] = useState("g");
@@ -118,19 +119,12 @@ const Supplies = () => {
   };
 
   const openEditRecipe = (r: any) => {
-    setEditingRecipe(r);
-    setRecipeName(r.name);
-    setRecipeCategory(r.category || "");
-    setRecipeDialogOpen(true);
+    // Navigate to pricing page in recipe mode with pre-filled data
+    navigate(`/pricing?edit=recipe&id=${r.id}`);
   };
 
   const handleSaveRecipe = async () => {
-    if (!editingRecipe || !recipeName.trim()) return;
-    await supabase.from("recipes").update({ name: recipeName.trim(), category: recipeCategory }).eq("id", editingRecipe.id);
-    toast({ title: "Receita atualizada! ✅" });
-    setRecipeDialogOpen(false);
-    setEditingRecipe(null);
-    fetchAll();
+    // No longer needed - editing happens in Pricing page
   };
 
   const renderItemList = (items: any[], table: "ingredients" | "packaging", type: "ingredient" | "packaging") => {
@@ -200,13 +194,17 @@ const Supplies = () => {
             <div className="grid gap-3">
               {recipes.map((r) => {
                 const ingCount = Array.isArray(r.ingredients_json) ? r.ingredients_json.length : 0;
+                const yieldInfo = r.yield_quantity && r.yield_unit ? `${r.yield_quantity} ${r.yield_unit}` : null;
+                const costPerUnit = yieldInfo && Number(r.yield_quantity) > 0 ? Number(r.total_cost || 0) / Number(r.yield_quantity) : null;
                 return (
                   <Card key={r.id} className="card-elevated">
                     <CardContent className="p-4 flex items-center justify-between">
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-foreground truncate">{r.name}</p>
                         <p className="text-xs text-muted-foreground">{r.category} • {ingCount} ingrediente(s)</p>
+                        {yieldInfo && <p className="text-xs text-muted-foreground">Rendimento: {yieldInfo}</p>}
                         <p className="text-sm font-bold text-success">Custo: R$ {Number(r.total_cost || 0).toFixed(2)}</p>
+                        {costPerUnit !== null && <p className="text-xs font-bold text-primary">R$ {costPerUnit.toFixed(2)} por {r.yield_unit}</p>}
                       </div>
                       <div className="flex gap-1 shrink-0">
                         <Button variant="ghost" size="icon" onClick={() => openEditRecipe(r)}><Pencil className="w-4 h-4 text-primary" /></Button>
@@ -246,17 +244,6 @@ const Supplies = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Recipe Edit Dialog */}
-      <Dialog open={recipeDialogOpen} onOpenChange={(o) => { setRecipeDialogOpen(o); if (!o) setEditingRecipe(null); }}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Editar Receita</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <Input placeholder="Nome da receita" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
-            <Input placeholder="Categoria (opcional)" value={recipeCategory} onChange={(e) => setRecipeCategory(e.target.value)} className="h-12 rounded-xl" />
-            <Button onClick={handleSaveRecipe} className="w-full rounded-xl h-12 btn-3d font-bold">Atualizar</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

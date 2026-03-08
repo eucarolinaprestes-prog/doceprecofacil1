@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Info, BookOpen
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 type PricingMode = "select" | "product" | "recipe";
@@ -41,19 +41,21 @@ interface SelectedItem { id: string; name: string; unit: string; cost_per_unit: 
 const CHART_COLORS = ["hsl(340, 75%, 55%)", "hsl(40, 80%, 55%)", "hsl(152, 70%, 38%)"];
 
 const Hint = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-xs text-muted-foreground flex items-start gap-1.5 mt-1">
-    <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-primary/60" />
-    <span>{children}</span>
-  </p>
+  <div className="flex items-start gap-2 mt-1.5 p-2.5 rounded-xl bg-primary/8 border border-primary/15">
+    <Info className="w-4 h-4 shrink-0 mt-0.5 text-primary" />
+    <p className="text-xs font-medium text-primary/80 leading-relaxed">{children}</p>
+  </div>
 );
 
 const Pricing = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [mode, setMode] = useState<PricingMode>("select");
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [editingRecipeId, setEditingRecipeId] = useState<string | null>(null);
 
   // Product step 0
   const [productName, setProductName] = useState("");
@@ -116,6 +118,32 @@ const Pricing = () => {
       setStockIngredients(ing?.map((i: any) => ({ id: i.id, name: i.name, unit: i.unit, cost_per_unit: Number(i.cost_per_unit) || 0, quantity_purchased: i.quantity_purchased, total_cost: i.total_cost })) || []);
       setStockPackaging(pkg?.map((p: any) => ({ id: p.id, name: p.name, unit: p.unit, cost_per_unit: Number(p.cost_per_unit) || 0, quantity_purchased: p.quantity_purchased, total_cost: p.total_cost })) || []);
       setTotalFixedCosts(fc?.reduce((s: number, c: any) => s + Number(c.amount), 0) || 0);
+
+      // Check if editing a recipe from URL params
+      const editType = searchParams.get("edit");
+      const editId = searchParams.get("id");
+      if (editType === "recipe" && editId) {
+        const { data: recipe } = await supabase.from("recipes").select("*").eq("id", editId).single();
+        if (recipe) {
+          setEditingRecipeId(editId);
+          setMode("recipe");
+          setStep(0);
+          setRecipeName(recipe.name);
+          setRecipeCategory(recipe.category || "");
+          setRecipeYieldQty(String(recipe.yield_quantity || ""));
+          setRecipeYieldUnit(recipe.yield_unit || "");
+          if (Array.isArray(recipe.ingredients_json)) {
+            setSelectedIngredients((recipe.ingredients_json as any[]).map((item: any) => ({
+              id: item.id || `loaded-${Date.now()}-${Math.random()}`,
+              name: item.name,
+              unit: item.unit,
+              cost_per_unit: Number(item.cost_per_unit) || 0,
+              quantity_used: Number(item.quantity_used) || 0,
+              isManual: true,
+            })));
+          }
+        }
+      }
     };
     load();
   }, [user]);
@@ -226,17 +254,22 @@ const Pricing = () => {
     setSaving(true);
     try {
       const finalCat = recipeCategory === "Outros" && customRecipeCategory.trim() ? customRecipeCategory.trim() : recipeCategory;
-      await supabase.from("recipes").insert({
-        user_id: user.id,
+      const payload = {
         name: recipeName,
         category: finalCat,
         ingredients_json: selectedIngredients as any,
         total_cost: ingredientsCost,
         yield_quantity: recipeYieldNum,
         yield_unit: finalRecipeYieldUnit,
-      } as any);
-      toast({ title: "Receita salva com sucesso! 🎉" });
-      navigate("/supplies");
+      };
+      if (editingRecipeId) {
+        await supabase.from("recipes").update(payload).eq("id", editingRecipeId);
+        toast({ title: "Receita atualizada com sucesso! 🎉" });
+      } else {
+        await supabase.from("recipes").insert({ ...payload, user_id: user.id } as any);
+        toast({ title: "Receita salva com sucesso! 🎉" });
+      }
+      navigate("/supplies?tab=recipes");
     } catch { toast({ title: "Erro ao salvar", variant: "destructive" }); }
     finally { setSaving(false); }
   };
@@ -376,7 +409,7 @@ const Pricing = () => {
 
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-primary">Nome da receita *</label>
-              <Input placeholder="Ex: Massa de chocolate belga" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
+              <Input placeholder="Ex: Massa de chocolate" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
               <Hint>Dê um nome claro para identificar essa receita depois, ex: "Ganache de chocolate meio amargo"</Hint>
             </div>
 
@@ -499,7 +532,7 @@ const Pricing = () => {
             </CardContent></Card>
 
             <Button onClick={handleSaveRecipe} disabled={saving} className="w-full rounded-2xl h-14 text-lg font-bold bg-success hover:bg-success/90 text-success-foreground gap-2" style={{ boxShadow: "0 4px 0 0 hsl(152 70% 28%), 0 6px 12px -2px hsl(152 70% 38% / 0.3)" }}>
-              <CheckCircle2 className="w-6 h-6" /> {saving ? "Salvando..." : "SALVAR RECEITA"}
+              <CheckCircle2 className="w-6 h-6" /> {saving ? "Salvando..." : editingRecipeId ? "ATUALIZAR RECEITA" : "SALVAR RECEITA"}
             </Button>
           </div>
         )}
