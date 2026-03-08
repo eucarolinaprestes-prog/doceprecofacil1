@@ -240,10 +240,10 @@ const Orders = () => {
       return msg;
     }
 
-    // === EM PRODUÇÃO / AGENDADO ===
+    // === AGENDADO (em produção) ===
     if (order.status === "production") {
       let msg = `Olá, ${clientName}! 😊\n\n`;
-      msg += `Ótima notícia! Seu pedido foi confirmado e já está em produção! 🎉\n\n`;
+      msg += `Ótima notícia! Seu pedido foi confirmado e agendado! 🎉\n\n`;
       msg += `Confira os detalhes:\n\n`;
       msg += detailsStr;
       msg += extrasStr;
