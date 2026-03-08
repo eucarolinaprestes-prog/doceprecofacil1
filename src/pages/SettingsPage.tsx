@@ -262,7 +262,7 @@ const SettingsPage = () => {
                   <Input placeholder="Especifique o custo..." value={newFixedCustomName} onChange={(e) => setNewFixedCustomName(e.target.value)} className="h-11 rounded-xl" />
                 )}
                 <div className="flex gap-2">
-                  <Input type="number" placeholder="Valor (R$)" value={newFixedAmount} onChange={(e) => setNewFixedAmount(e.target.value)} className="h-11 rounded-xl flex-1" />
+                  <CurrencyInput placeholder="Valor (R$)" value={newFixedAmount} onValueChange={setNewFixedAmount} className="h-11 rounded-xl flex-1" />
                   <Select value={newFixedFreq} onValueChange={setNewFixedFreq}>
                     <SelectTrigger className="h-11 rounded-xl w-28"><SelectValue /></SelectTrigger>
                     <SelectContent>{frequencies.map(f => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}</SelectContent>
