@@ -354,7 +354,7 @@ const SettingsPage = () => {
       </Tabs>
 
       <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl h-14 btn-3d font-bold text-base gap-2">
-        <CheckCircle2 className="w-5 h-5" /> {saving ? "Salvando..." : "Salvar Configurações"}
+        <CheckCircle2 className="w-5 h-5" /> {saving ? "Salvando..." : "Salvar Informações"}
       </Button>
     </div>
   );
