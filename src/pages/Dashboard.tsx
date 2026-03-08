@@ -168,27 +168,27 @@ const Dashboard = () => {
       </div>
 
       {/* Calendário mensal */}
-      <Card className="card-elevated border border-indigo-200 overflow-hidden">
-        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "linear-gradient(135deg, hsl(230 60% 55%), hsl(250 55% 62%))" }}>
-          <button onClick={() => setCalendarMonth(m => subMonths(m, 1))} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
-            <ChevronLeft className="w-4 h-4 text-white" />
+      <Card className="card-elevated border border-rose-200 overflow-hidden">
+        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "linear-gradient(135deg, hsl(340 30% 75%), hsl(350 25% 80%))" }}>
+          <button onClick={() => setCalendarMonth(m => subMonths(m, 1))} className="w-8 h-8 rounded-full bg-rose-900/10 flex items-center justify-center hover:bg-rose-900/20 transition-colors">
+            <ChevronLeft className="w-4 h-4 text-rose-900" />
           </button>
           <div className="text-center">
-            <p className="text-sm font-extrabold text-white flex items-center gap-2">
+            <p className="text-sm font-extrabold text-rose-900 flex items-center gap-2">
               <CalendarDays className="w-4 h-4" /> Calendário de Encomendas
             </p>
-            <p className="text-xs text-white/80 font-semibold capitalize mt-0.5">
+            <p className="text-xs text-rose-800/70 font-semibold capitalize mt-0.5">
               {format(calendarMonth, "MMMM yyyy", { locale: ptBR })}
             </p>
           </div>
-          <button onClick={() => setCalendarMonth(m => addMonths(m, 1))} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
-            <ChevronRight className="w-4 h-4 text-white" />
+          <button onClick={() => setCalendarMonth(m => addMonths(m, 1))} className="w-8 h-8 rounded-full bg-rose-900/10 flex items-center justify-center hover:bg-rose-900/20 transition-colors">
+            <ChevronRight className="w-4 h-4 text-rose-900" />
           </button>
         </div>
         <CardContent className="p-4">
           <div className="grid grid-cols-7 gap-1 mb-3">
             {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(d => (
-              <div key={d} className="text-center text-[10px] font-extrabold text-indigo-500/70 uppercase tracking-wider">{d}</div>
+              <div key={d} className="text-center text-[10px] font-extrabold text-rose-400 uppercase tracking-wider">{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-1.5">
@@ -208,7 +208,7 @@ const Dashboard = () => {
                     hasOrder ? "bg-success/15 text-success font-extrabold border border-success/30" :
                     "text-foreground hover:bg-muted/50"
                   }`}
-                  style={isToday(day) && inMonth ? { background: "linear-gradient(135deg, hsl(230 60% 55%), hsl(250 55% 62%))" } : undefined}
+                  style={isToday(day) && inMonth ? { background: "linear-gradient(135deg, hsl(340 30% 75%), hsl(350 25% 80%))" } : undefined}
                 >
                   <span className="text-sm font-bold">{format(day, "d")}</span>
                   {hasOrder && inMonth && (
