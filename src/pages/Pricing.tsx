@@ -172,7 +172,7 @@ const Pricing = () => {
     setSaving(true);
     try {
       await supabase.from("products").insert({
-        user_id: user.id, name: productName, description: productDesc, category,
+        user_id: user.id, name: productName, description: productDesc, category: category === "Outros" && customCategory.trim() ? customCategory.trim() : category,
         yield_quantity: Number(yieldQty) || 1, yield_unit: saleType,
         preparation_time: Number(prepTime) || 0, total_cost: baseCost,
         suggested_price: suggestedPrice, profit_margin: profitMargin[0],
