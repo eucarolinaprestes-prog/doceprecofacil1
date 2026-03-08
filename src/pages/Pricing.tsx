@@ -329,7 +329,7 @@ const Pricing = () => {
       const payload = {
         name: productName, description: productDesc,
         category: "",
-        yield_quantity: 1, yield_unit: finalSaleType,
+        yield_quantity: Number(productYieldQty) || 1, yield_unit: finalSaleType,
         preparation_time: Number(prepTime) || 0, total_cost: baseCost,
         suggested_price: suggestedPrice, profit_margin: profitMargin[0],
         ingredients_json: selectedIngredients as any, packaging_json: selectedPackaging as any,
