@@ -169,7 +169,7 @@ const Dashboard = () => {
 
       {/* Calendário mensal */}
       <Card className="card-elevated border border-rose-200 overflow-hidden">
-        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "linear-gradient(135deg, hsl(340 30% 75%), hsl(350 25% 80%))" }}>
+        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "linear-gradient(135deg, hsl(340 70% 58%), hsl(340 65% 65%))" }}>
           <button onClick={() => setCalendarMonth(m => subMonths(m, 1))} className="w-8 h-8 rounded-full bg-rose-900/10 flex items-center justify-center hover:bg-rose-900/20 transition-colors">
             <ChevronLeft className="w-4 h-4 text-rose-900" />
           </button>
