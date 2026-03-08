@@ -25,10 +25,12 @@ import logo from "@/assets/logo.png";
 
 const sidebarNav = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-  { label: "Produtos", icon: Package, path: "/products" },
+  { label: "Informações da Empresa", icon: Building2, path: "/business-info" },
+  { label: "Precificação", icon: DollarSign, path: "/pricing" },
+  { label: "Produtos", icon: Cake, path: "/products" },
+  { label: "Receitas", icon: BookOpen, path: "/supplies" },
+  { label: "Cadastro de Clientes", icon: Users, path: "/clients" },
   { label: "Encomendas", icon: ShoppingBag, path: "/orders" },
-  { label: "Clientes", icon: Users, path: "/clients" },
-  { label: "Insumos", icon: Package, path: "/supplies" },
   { label: "Suas Finanças", icon: Wallet, path: "/finance" },
   { label: "Calculadora de Compras", icon: ShoppingCart, path: "/shopping" },
   { label: "Planos", icon: Crown, path: "/plans" },
