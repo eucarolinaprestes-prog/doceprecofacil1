@@ -57,7 +57,7 @@ const Dashboard = () => {
       >
         <div className="text-left">
           <p className="text-lg font-extrabold">Oi, {displayName}! 👋</p>
-          <p className="text-sm font-bold opacity-90 mt-0.5">Vamos precificar hoje?</p>
+          <p className="text-base font-extrabold opacity-95 mt-1 tracking-wide uppercase">🧁 Vamos precificar hoje?</p>
         </div>
         <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
           <Calculator className="w-7 h-7 text-primary-foreground" />
