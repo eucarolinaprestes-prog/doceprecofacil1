@@ -501,6 +501,8 @@ export type Database = {
           total_cost: number | null
           updated_at: string
           user_id: string
+          yield_quantity: number | null
+          yield_unit: string | null
         }
         Insert: {
           category?: string | null
@@ -511,6 +513,8 @@ export type Database = {
           total_cost?: number | null
           updated_at?: string
           user_id: string
+          yield_quantity?: number | null
+          yield_unit?: string | null
         }
         Update: {
           category?: string | null
@@ -521,6 +525,8 @@ export type Database = {
           total_cost?: number | null
           updated_at?: string
           user_id?: string
+          yield_quantity?: number | null
+          yield_unit?: string | null
         }
         Relationships: []
       }
