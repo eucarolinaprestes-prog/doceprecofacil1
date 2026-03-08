@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Users, Trash2, MessageCircle } from "lucide-react";
+import { Users, Trash2, MessageCircle, Pencil } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,6 +15,7 @@ const Clients = () => {
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
   const [address, setAddress] = useState("");
@@ -28,13 +29,31 @@ const Clients = () => {
 
   useEffect(() => { fetchClients(); }, [user]);
 
-  const handleCreate = async () => {
+  const resetForm = () => { setName(""); setWhatsapp(""); setAddress(""); setEditingId(null); };
+
+  const openCreate = () => { resetForm(); setDialogOpen(true); };
+
+  const openEdit = (c: any) => {
+    setEditingId(c.id);
+    setName(c.name || "");
+    setWhatsapp(c.whatsapp || "");
+    setAddress(c.address || "");
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
     if (!user || !name.trim()) return;
-    const { error } = await supabase.from("clients").insert({ user_id: user.id, name: name.trim(), whatsapp, address });
-    if (error) { toast({ title: "Erro", variant: "destructive" }); return; }
-    toast({ title: "Cliente adicionado!" });
+    if (editingId) {
+      const { error } = await supabase.from("clients").update({ name: name.trim(), whatsapp, address }).eq("id", editingId);
+      if (error) { toast({ title: "Erro ao atualizar", variant: "destructive" }); return; }
+      toast({ title: "Cliente atualizado!" });
+    } else {
+      const { error } = await supabase.from("clients").insert({ user_id: user.id, name: name.trim(), whatsapp, address });
+      if (error) { toast({ title: "Erro ao salvar", variant: "destructive" }); return; }
+      toast({ title: "Cliente adicionado!" });
+    }
     setDialogOpen(false);
-    setName(""); setWhatsapp(""); setAddress("");
+    resetForm();
     fetchClients();
   };
 
@@ -50,22 +69,22 @@ const Clients = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Clientes</h1>
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogTrigger asChild><Button className="rounded-xl">+ Novo cliente</Button></DialogTrigger>
+        <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
+          <DialogTrigger asChild><Button className="rounded-xl" onClick={openCreate}>+ Novo cliente</Button></DialogTrigger>
           <DialogContent>
-            <DialogHeader><DialogTitle>Novo cliente</DialogTitle></DialogHeader>
+            <DialogHeader><DialogTitle>{editingId ? "Editar cliente" : "Novo cliente"}</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <Input placeholder="Nome" value={name} onChange={(e) => setName(e.target.value)} className="h-12 rounded-xl" />
               <Input placeholder="WhatsApp" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="h-12 rounded-xl" />
               <Input placeholder="Endereço" value={address} onChange={(e) => setAddress(e.target.value)} className="h-12 rounded-xl" />
-              <Button onClick={handleCreate} className="w-full rounded-xl h-12">Salvar</Button>
+              <Button onClick={handleSave} className="w-full rounded-xl h-12">{editingId ? "Atualizar" : "Salvar"}</Button>
             </div>
           </DialogContent>
         </Dialog>
       </div>
 
       {clients.length === 0 ? (
-        <EmptyState icon={Users} title="Nenhum cliente cadastrado" description="Adicione seus clientes para organizar suas encomendas." actionLabel="Adicionar cliente" onAction={() => setDialogOpen(true)} />
+        <EmptyState icon={Users} title="Nenhum cliente cadastrado" description="Adicione seus clientes para organizar suas encomendas." actionLabel="Adicionar cliente" onAction={openCreate} />
       ) : (
         <div className="grid gap-3">
           {clients.map((c) => (
@@ -77,6 +96,9 @@ const Clients = () => {
                   {c.address && <p className="text-sm text-muted-foreground">{c.address}</p>}
                 </div>
                 <div className="flex gap-1">
+                  <Button variant="ghost" size="icon" onClick={() => openEdit(c)}>
+                    <Pencil className="w-4 h-4 text-primary" />
+                  </Button>
                   {c.whatsapp && (
                     <Button variant="ghost" size="icon" onClick={() => window.open(`https://wa.me/${c.whatsapp.replace(/\D/g, "")}`, "_blank")}>
                       <MessageCircle className="w-4 h-4 text-success" />
