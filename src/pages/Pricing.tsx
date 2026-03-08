@@ -532,7 +532,7 @@ const Pricing = () => {
             </CardContent></Card>
 
             <Button onClick={handleSaveRecipe} disabled={saving} className="w-full rounded-2xl h-14 text-lg font-bold bg-success hover:bg-success/90 text-success-foreground gap-2" style={{ boxShadow: "0 4px 0 0 hsl(152 70% 28%), 0 6px 12px -2px hsl(152 70% 38% / 0.3)" }}>
-              <CheckCircle2 className="w-6 h-6" /> {saving ? "Salvando..." : "SALVAR RECEITA"}
+              <CheckCircle2 className="w-6 h-6" /> {saving ? "Salvando..." : editingRecipeId ? "ATUALIZAR RECEITA" : "SALVAR RECEITA"}
             </Button>
           </div>
         )}
