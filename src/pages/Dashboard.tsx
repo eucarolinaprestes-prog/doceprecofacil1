@@ -31,10 +31,26 @@ const Dashboard = () => {
       supabase.from("financial_income").select("*").eq("user_id", user.id).gte("date", monthStart).lte("date", monthEnd),
       supabase.from("financial_expense").select("*").eq("user_id", user.id).gte("date", monthStart).lte("date", monthEnd),
       supabase.from("orders").select("*, clients(name)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
-    ]).then(([{ data: inc }, { data: exp }, { data: ord }]) => {
+      supabase.from("ingredients").select("id, name, current_stock, min_stock, unit").eq("user_id", user.id),
+      supabase.from("packaging").select("id, name, current_stock, min_stock, unit").eq("user_id", user.id),
+    ]).then(([{ data: inc }, { data: exp }, { data: ord }, { data: ing }, { data: pkg }]) => {
       setIncomes(inc || []);
       setExpenses(exp || []);
       setOrders(ord || []);
+
+      // Low stock alerts
+      const lowItems: any[] = [];
+      (ing || []).forEach(i => {
+        if (i.min_stock && i.min_stock > 0 && (i.current_stock || 0) <= i.min_stock) {
+          lowItems.push({ ...i, type: "ingredient" });
+        }
+      });
+      (pkg || []).forEach(p => {
+        if (p.min_stock && p.min_stock > 0 && (p.current_stock || 0) <= p.min_stock) {
+          lowItems.push({ ...p, type: "packaging" });
+        }
+      });
+      setLowStockItems(lowItems);
 
       const activity: any[] = [];
       (inc || []).slice(0, 3).forEach(i => activity.push({ type: "income", text: `Entrada: R$ ${Number(i.amount).toFixed(2)}`, sub: i.category, date: i.date }));
