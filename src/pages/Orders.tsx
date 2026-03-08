@@ -311,13 +311,19 @@ const Orders = () => {
 
   const pendingCount = orders.filter(o => o.status === "pending" || o.status === "scheduled").length;
   const productionCount = orders.filter(o => o.status === "production").length;
-  const deliveredCount = orders.filter(o => o.status === "delivered" || o.status === "finished").length;
+  const finishedCount = orders.filter(o => o.status === "finished").length;
+  const deliveredCount = orders.filter(o => o.status === "delivered").length;
 
-  const filteredOrders = statusFilter === "all" ? orders : orders.filter(o => {
+  const filteredOrders = (statusFilter === "all" ? orders : orders.filter(o => {
     if (statusFilter === "pending") return o.status === "pending" || o.status === "scheduled";
     if (statusFilter === "production") return o.status === "production";
-    if (statusFilter === "delivered") return o.status === "delivered" || o.status === "finished";
+    if (statusFilter === "finished") return o.status === "finished";
+    if (statusFilter === "delivered") return o.status === "delivered";
     return true;
+  })).sort((a, b) => {
+    const dateA = a.event_date || "";
+    const dateB = b.event_date || "";
+    return dateA.localeCompare(dateB);
   });
 
   const nextStatus: Record<string, string> = { pending: "production", scheduled: "production", production: "finished", finished: "delivered" };
@@ -340,10 +346,11 @@ const Orders = () => {
 
       {/* Status tabs */}
       <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-        <TabsList className="grid grid-cols-3 w-full h-12 rounded-xl">
-          <TabsTrigger value="pending" className="rounded-xl font-bold text-xs">Pendentes ({pendingCount})</TabsTrigger>
-          <TabsTrigger value="production" className="rounded-xl font-bold text-xs">Produção ({productionCount})</TabsTrigger>
-          <TabsTrigger value="delivered" className="rounded-xl font-bold text-xs">Entregues ({deliveredCount})</TabsTrigger>
+        <TabsList className="grid grid-cols-4 w-full h-12 rounded-xl">
+          <TabsTrigger value="pending" className="rounded-xl font-bold text-[10px] px-1">Pendentes ({pendingCount})</TabsTrigger>
+          <TabsTrigger value="production" className="rounded-xl font-bold text-[10px] px-1">Produção ({productionCount})</TabsTrigger>
+          <TabsTrigger value="finished" className="rounded-xl font-bold text-[10px] px-1">Finalização ({finishedCount})</TabsTrigger>
+          <TabsTrigger value="delivered" className="rounded-xl font-bold text-[10px] px-1">Entregues ({deliveredCount})</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -363,12 +370,19 @@ const Orders = () => {
                     <p className="font-bold text-foreground mt-1">{o.clients?.name || "Cliente"}</p>
                     <p className="text-xs text-muted-foreground">{o.category || "—"}</p>
                   </div>
-                  <p className="text-xl font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</p>
+                  <div className="text-right">
+                    <p className="text-xl font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</p>
+                    {o.event_date && (
+                      <p className="text-[10px] font-semibold text-muted-foreground mt-0.5">
+                        📅 {new Date(o.event_date).toLocaleDateString("pt-BR")}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   {nextStatus[o.status] && (
                     <Button size="sm" onClick={() => updateStatus(o.id, nextStatus[o.status])} className="rounded-xl btn-3d font-bold text-xs h-9">
-                      {o.status === "pending" || o.status === "scheduled" ? "Iniciar produção" : o.status === "production" ? "Finalizar" : "Marcar entregue"}
+                      {o.status === "pending" || o.status === "scheduled" ? "Confirmar" : o.status === "production" ? "Finalizar" : o.status === "finished" ? "Marcar entregue" : ""}
                     </Button>
                   )}
                   <Button size="sm" variant="outline" onClick={() => openWhatsAppPreview(o)} className="rounded-xl h-9 text-success border-success/30 hover:bg-success/10">
