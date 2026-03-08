@@ -680,7 +680,6 @@ const Pricing = () => {
 
             {showPkgManual && (
               <Card className="border border-border"><CardContent className="p-4 space-y-3">
-                <Hint>Adicione uma embalagem que não está no seu estoque</Hint>
                 <Input placeholder="Nome da embalagem" value={manualPkg.name} onChange={(e) => setManualPkg({ ...manualPkg, name: e.target.value })} className="h-11 rounded-xl" />
                 <div className="flex gap-2">
                   <Input type="number" placeholder="Qtd" value={manualPkg.qty} onChange={(e) => setManualPkg({ ...manualPkg, qty: e.target.value })} className="h-11 rounded-xl flex-1" />
