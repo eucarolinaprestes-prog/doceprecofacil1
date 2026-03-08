@@ -226,6 +226,43 @@ const Dashboard = () => {
         </CardContent>
       </Card>
 
+      {/* Alertas de estoque baixo */}
+      {lowStockItems.length > 0 && (
+        <Card className="card-elevated border-warning/40">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-warning" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-foreground">⚠️ Estoque baixo</p>
+                <p className="text-[10px] text-muted-foreground">{lowStockItems.length} {lowStockItems.length === 1 ? "item precisa" : "itens precisam"} de reposição</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {lowStockItems.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => navigate(`/supplies?tab=${item.type === "ingredient" ? "ingredients" : "packaging"}`)}
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-warning/10 border border-warning/20 cursor-pointer hover:bg-warning/15 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{item.name}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {item.type === "ingredient" ? "Ingrediente" : "Embalagem"}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold text-warning">{Number(item.current_stock || 0)} {item.unit}</p>
+                    <p className="text-[10px] text-muted-foreground">mín: {item.min_stock} {item.unit}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <FinanceDialog type={dialogType} onClose={() => setDialogType(null)} onSaved={fetchData} />
     </div>
   );
