@@ -25,7 +25,7 @@ const Supplies = () => {
   const [activeTab, setActiveTab] = useState(initialTab);
   const [ingredients, setIngredients] = useState<any[]>([]);
   const [packagingItems, setPackagingItems] = useState<any[]>([]);
-  const [recipes, setRecipes] = useState<any[]>([]);
+  
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
