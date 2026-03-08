@@ -402,20 +402,15 @@ const Pricing = () => {
         {/* Step 0: Name + Category (merged) */}
         {step === 0 && (
           <div className="space-y-5">
-            <div>
-              <h2 className="text-xl font-extrabold text-foreground">Dados da Receita</h2>
-              <Hint>Preencha o nome e a categoria da sua receita para começar</Hint>
-            </div>
+            <h2 className="text-xl font-extrabold text-foreground">Dados da Receita</h2>
 
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-primary">Nome da receita *</label>
               <Input placeholder="Ex: Massa de chocolate" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
-              <Hint>Dê um nome claro para identificar essa receita depois, ex: "Ganache de chocolate meio amargo"</Hint>
             </div>
 
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-primary">Categoria *</label>
-              <Hint>Escolha a categoria que melhor descreve essa receita. Isso ajuda a organizar tudo!</Hint>
               <div className="flex flex-wrap gap-2">
                 {recipeCategories.map(c => (
                   <button key={c} onClick={() => setRecipeCategory(c)}
@@ -427,7 +422,6 @@ const Pricing = () => {
               {recipeCategory === "Outros" && (
                 <div className="mt-2">
                   <Input placeholder="Digite o nome da categoria..." value={customRecipeCategory} onChange={(e) => setCustomRecipeCategory(e.target.value)} className="h-12 rounded-xl" />
-                  <Hint>Escreva aqui a categoria personalizada da sua receita</Hint>
                 </div>
               )}
             </div>
