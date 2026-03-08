@@ -24,6 +24,9 @@ const frequencies = [
   { value: "anual", label: "Anual" },
 ];
 
+const fixedCostCategories = ["Aluguel", "Luz", "Água", "Gás", "Internet", "Telefone", "Contador", "Outros"];
+const variableCostCategories = ["Ingredientes", "Embalagens", "Entregador", "Uber/99", "Aplicativos", "Marketing", "Outros"];
+
 const SettingsPage = () => {
   const { user, profile, refreshProfile } = useAuth();
   const { toast } = useToast();
