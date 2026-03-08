@@ -198,15 +198,22 @@ const Supplies = () => {
                 const costPerUnit = yieldInfo && Number(r.yield_quantity) > 0 ? Number(r.total_cost || 0) / Number(r.yield_quantity) : null;
                 return (
                   <Card key={r.id} className="card-elevated">
-                    <CardContent className="p-4 flex items-center justify-between">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      {(r as any).photo_url ? (
+                        <img src={(r as any).photo_url} alt={r.name} className="w-14 h-14 rounded-xl object-cover shrink-0 shadow-sm" />
+                      ) : (
+                        <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+                          <BookOpen className="w-6 h-6 text-muted-foreground" />
+                        </div>
+                      )}
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-foreground truncate">{r.name}</p>
-                        <p className="text-xs text-muted-foreground">{r.category} • {ingCount} ingrediente(s)</p>
+                        <p className="text-xs text-muted-foreground">{ingCount} ingrediente(s)</p>
                         {yieldInfo && <p className="text-xs text-muted-foreground">Rendimento: {yieldInfo}</p>}
                         <p className="text-sm font-bold text-success">Custo: R$ {Number(r.total_cost || 0).toFixed(2)}</p>
                         {costPerUnit !== null && <p className="text-xs font-bold text-primary">R$ {costPerUnit.toFixed(2)} por {r.yield_unit}</p>}
                       </div>
-                      <div className="flex gap-1 shrink-0">
+                      <div className="flex flex-col gap-1 shrink-0">
                         <Button variant="ghost" size="icon" onClick={() => openEditRecipe(r)}><Pencil className="w-4 h-4 text-primary" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => handleDuplicateRecipe(r)}><Copy className="w-4 h-4 text-muted-foreground" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => handleDeleteRecipe(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
