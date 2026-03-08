@@ -168,8 +168,8 @@ const Dashboard = () => {
       </div>
 
       {/* Calendário mensal */}
-      <Card className="card-elevated border border-indigo-200 overflow-hidden">
-        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "linear-gradient(135deg, hsl(230 60% 55%), hsl(250 55% 62%))" }}>
+      <Card className="card-elevated border border-rose-200 overflow-hidden">
+        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "linear-gradient(135deg, hsl(340 30% 75%), hsl(350 25% 80%))" }}>
           <button onClick={() => setCalendarMonth(m => subMonths(m, 1))} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
             <ChevronLeft className="w-4 h-4 text-white" />
           </button>
