@@ -25,6 +25,10 @@ const Supplies = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogType, setDialogType] = useState<"ingredient" | "packaging">("ingredient");
+  const [recipeDialogOpen, setRecipeDialogOpen] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState<any>(null);
+  const [recipeName, setRecipeName] = useState("");
+  const [recipeCategory, setRecipeCategory] = useState("");
 
   const [name, setName] = useState("");
   const [unit, setUnit] = useState("g");
@@ -112,6 +116,22 @@ const Supplies = () => {
     toast({ title: "Receita duplicada! ✅" }); fetchAll();
   };
 
+  const openEditRecipe = (r: any) => {
+    setEditingRecipe(r);
+    setRecipeName(r.name);
+    setRecipeCategory(r.category || "");
+    setRecipeDialogOpen(true);
+  };
+
+  const handleSaveRecipe = async () => {
+    if (!editingRecipe || !recipeName.trim()) return;
+    await supabase.from("recipes").update({ name: recipeName.trim(), category: recipeCategory }).eq("id", editingRecipe.id);
+    toast({ title: "Receita atualizada! ✅" });
+    setRecipeDialogOpen(false);
+    setEditingRecipe(null);
+    fetchAll();
+  };
+
   const renderItemList = (items: any[], table: "ingredients" | "packaging", type: "ingredient" | "packaging") => {
     if (items.length === 0) {
       return <EmptyState icon={type === "ingredient" ? Milk : Box} title={`Nenhum ${type === "ingredient" ? "ingrediente" : "embalagem"} cadastrado`} description="Comece cadastrando seus insumos." actionLabel="Adicionar" onAction={() => openNewDialog(type)} />;
@@ -188,6 +208,7 @@ const Supplies = () => {
                         <p className="text-sm font-bold text-success">Custo: R$ {Number(r.total_cost || 0).toFixed(2)}</p>
                       </div>
                       <div className="flex gap-1 shrink-0">
+                        <Button variant="ghost" size="icon" onClick={() => openEditRecipe(r)}><Pencil className="w-4 h-4 text-primary" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => handleDuplicateRecipe(r)}><Copy className="w-4 h-4 text-muted-foreground" /></Button>
                         <Button variant="ghost" size="icon" onClick={() => handleDeleteRecipe(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </div>
@@ -220,6 +241,18 @@ const Supplies = () => {
             </div>
             <Input placeholder="Fornecedor (opcional)" value={supplier} onChange={(e) => setSupplier(e.target.value)} className="h-12 rounded-xl" />
             <Button onClick={handleSave} className="w-full rounded-xl h-12 btn-3d font-bold">{editingId ? "Atualizar" : "Salvar"}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recipe Edit Dialog */}
+      <Dialog open={recipeDialogOpen} onOpenChange={(o) => { setRecipeDialogOpen(o); if (!o) setEditingRecipe(null); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Editar Receita</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <Input placeholder="Nome da receita" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
+            <Input placeholder="Categoria (opcional)" value={recipeCategory} onChange={(e) => setRecipeCategory(e.target.value)} className="h-12 rounded-xl" />
+            <Button onClick={handleSaveRecipe} className="w-full rounded-xl h-12 btn-3d font-bold">Atualizar</Button>
           </div>
         </DialogContent>
       </Dialog>
