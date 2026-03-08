@@ -370,7 +370,14 @@ const Orders = () => {
                     <p className="font-bold text-foreground mt-1">{o.clients?.name || "Cliente"}</p>
                     <p className="text-xs text-muted-foreground">{o.category || "—"}</p>
                   </div>
-                  <p className="text-xl font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</p>
+                  <div className="text-right">
+                    <p className="text-xl font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</p>
+                    {o.event_date && (
+                      <p className="text-[10px] font-semibold text-muted-foreground mt-0.5">
+                        📅 {new Date(o.event_date).toLocaleDateString("pt-BR")}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   {nextStatus[o.status] && (
