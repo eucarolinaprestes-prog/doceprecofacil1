@@ -588,7 +588,7 @@ const Pricing = () => {
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-foreground">📦 Embalagens</h3>
               <Select onValueChange={(id) => { const item = stockPackaging.find(i => i.id === id); if (item) addFromStock(item, "packaging"); }}>
-                <SelectTrigger className="h-8 rounded-full bg-success/15 text-success text-xs font-bold border-0 px-3 w-auto"><span>+ Estoque</span></SelectTrigger>
+                <SelectTrigger className="h-8 rounded-full bg-primary/15 text-foreground text-xs font-bold border-0 px-3 w-auto"><span>+ Estoque</span></SelectTrigger>
                 <SelectContent>{stockPackaging.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
