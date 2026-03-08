@@ -111,7 +111,10 @@ const Shopping = () => {
 
   const saveAll = useCallback(async () => {
     if (!user || !selectedStore || savingRef.current) return;
-    const validItems = items.filter(i => i.ingredient_name.trim());
+    
+    // Get current items from storeItems directly to avoid stale closure
+    const currentItems = storeItems[selectedStore] || [];
+    const validItems = currentItems.filter(i => i.ingredient_name.trim());
     if (validItems.length === 0) return;
 
     savingRef.current = true;
@@ -126,7 +129,8 @@ const Shopping = () => {
         await supabase.from("shopping_list").delete().in("id", todayIds as string[]);
       }
 
-      await supabase.from("shopping_list").insert(
+      // Cast to any to include 'store' column not yet in types
+      await (supabase.from("shopping_list") as any).insert(
         validItems.map(i => ({
           user_id: user.id,
           ingredient_name: i.ingredient_name,
@@ -137,7 +141,7 @@ const Shopping = () => {
         }))
       );
 
-      // Silently refresh allItems
+      // Refresh allItems
       const { data } = await supabase
         .from("shopping_list")
         .select("*")
@@ -156,7 +160,7 @@ const Shopping = () => {
     } finally {
       savingRef.current = false;
     }
-  }, [items, user, selectedStore, allItems]);
+  }, [storeItems, user, selectedStore, allItems]);
 
   const handleBlur = () => {
     setTimeout(() => saveAll(), 400);
