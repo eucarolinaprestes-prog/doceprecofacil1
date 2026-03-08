@@ -488,8 +488,8 @@ const Pricing = () => {
           </div>
         )}
 
-        {step < 2 && (
-          <Button onClick={goNext} disabled={step === 0 ? !(recipeName.trim() && recipeCategory) : false} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
+        {step < 1 && (
+          <Button onClick={goNext} disabled={!recipeName.trim()} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
             Próximo <ChevronRight className="w-5 h-5" />
           </Button>
         )}
