@@ -382,7 +382,7 @@ const Orders = () => {
                 <div className="flex gap-2 flex-wrap">
                   {nextStatus[o.status] && (
                     <Button size="sm" onClick={() => updateStatus(o.id, nextStatus[o.status])} className="rounded-xl btn-3d font-bold text-xs h-9">
-                      {o.status === "pending" || o.status === "scheduled" ? "Iniciar produção" : o.status === "production" ? "Finalizar" : "Marcar entregue"}
+                      {o.status === "pending" || o.status === "scheduled" ? "Confirmar" : o.status === "production" ? "Finalizar" : o.status === "finished" ? "Marcar entregue" : ""}
                     </Button>
                   )}
                   <Button size="sm" variant="outline" onClick={() => openWhatsAppPreview(o)} className="rounded-xl h-9 text-success border-success/30 hover:bg-success/10">
