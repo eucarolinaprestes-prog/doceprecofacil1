@@ -43,6 +43,7 @@ const Pricing = () => {
   const [productName, setProductName] = useState("");
   const [productDesc, setProductDesc] = useState("");
   const [category, setCategory] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
   const [saleType, setSaleType] = useState("");
   const [yieldQty, setYieldQty] = useState("");
 
