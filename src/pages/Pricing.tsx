@@ -433,7 +433,7 @@ const Pricing = () => {
           <div className="space-y-5">
             <div>
               <h2 className="text-xl font-extrabold text-foreground">Ingredientes da receita</h2>
-              <Hint>Selecione os ingredientes do seu estoque e informe a quantidade usada nessa receita</Hint>
+              <Hint>Informe a quantidade de cada ingrediente usado</Hint>
             </div>
 
             <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
