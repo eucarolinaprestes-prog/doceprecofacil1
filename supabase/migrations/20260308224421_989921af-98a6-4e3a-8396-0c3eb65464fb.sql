@@ -1,0 +1,1 @@
+ALTER TABLE public.shopping_list ADD COLUMN store TEXT DEFAULT NULL;
