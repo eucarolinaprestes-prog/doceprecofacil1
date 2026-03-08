@@ -116,6 +116,22 @@ const Supplies = () => {
     toast({ title: "Receita duplicada! ✅" }); fetchAll();
   };
 
+  const openEditRecipe = (r: any) => {
+    setEditingRecipe(r);
+    setRecipeName(r.name);
+    setRecipeCategory(r.category || "");
+    setRecipeDialogOpen(true);
+  };
+
+  const handleSaveRecipe = async () => {
+    if (!editingRecipe || !recipeName.trim()) return;
+    await supabase.from("recipes").update({ name: recipeName.trim(), category: recipeCategory }).eq("id", editingRecipe.id);
+    toast({ title: "Receita atualizada! ✅" });
+    setRecipeDialogOpen(false);
+    setEditingRecipe(null);
+    fetchAll();
+  };
+
   const renderItemList = (items: any[], table: "ingredients" | "packaging", type: "ingredient" | "packaging") => {
     if (items.length === 0) {
       return <EmptyState icon={type === "ingredient" ? Milk : Box} title={`Nenhum ${type === "ingredient" ? "ingrediente" : "embalagem"} cadastrado`} description="Comece cadastrando seus insumos." actionLabel="Adicionar" onAction={() => openNewDialog(type)} />;
