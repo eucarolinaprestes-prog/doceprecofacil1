@@ -494,8 +494,8 @@ const Orders = () => {
               </div>
             </div>
 
-            <Button onClick={handleCreate} className="w-full rounded-xl h-14 btn-3d font-bold gap-2 text-base">
-              <Cake className="w-5 h-5" /> Criar Pedido
+            <Button onClick={handleSave} className="w-full rounded-xl h-14 btn-3d font-bold gap-2 text-base">
+              <Cake className="w-5 h-5" /> {editingOrder ? "Salvar Alterações" : "Criar Pedido"}
             </Button>
           </div>
         </DialogContent>
