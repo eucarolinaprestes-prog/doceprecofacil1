@@ -96,7 +96,7 @@ const Finance = () => {
     <div className="space-y-6">
       <div className="text-center space-y-2">
         <div className="w-14 h-14 rounded-2xl gradient-gold flex items-center justify-center mx-auto shadow-lg">
-          <Wallet className="w-7 h-7 text-white" />
+          <Wallet className="w-7 h-7 text-yellow-950" />
         </div>
         <h1 className="text-2xl font-extrabold text-foreground">Suas Finanças</h1>
         <p className="text-sm text-muted-foreground">Controle suas entradas e saídas de forma simples 💰</p>

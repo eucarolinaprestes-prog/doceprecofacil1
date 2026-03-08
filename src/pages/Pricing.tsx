@@ -451,8 +451,8 @@ const Pricing = () => {
               <p className="text-sm opacity-80">Massa, recheio, cobertura separados</p>
             </div>
           </button>
-          <button onClick={() => { setMode("product"); setStep(0); }} className="rounded-2xl p-6 flex items-center gap-4 gradient-gold text-white shadow-lg hover:shadow-xl transition-all active:scale-[0.98]" style={{ boxShadow: "0 6px 0 0 hsl(30 60% 40%), 0 10px 20px -4px hsl(30 60% 58% / 0.4)" }}>
-            <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0"><CheckCircle2 className="w-7 h-7" /></div>
+          <button onClick={() => { setMode("product"); setStep(0); }} className="rounded-2xl p-6 flex items-center gap-4 gradient-gold text-yellow-950 shadow-lg hover:shadow-xl transition-all active:scale-[0.98]" style={{ boxShadow: "0 6px 0 0 hsl(45 85% 42%), 0 10px 20px -4px hsl(45 85% 52% / 0.4)" }}>
+            <div className="w-14 h-14 rounded-xl bg-white/30 backdrop-blur-sm flex items-center justify-center shrink-0"><CheckCircle2 className="w-7 h-7 text-yellow-950" /></div>
             <div className="text-left">
               <p className="text-lg font-extrabold">Precificar Produto Final</p>
               <p className="text-sm opacity-80">Bolo, doce, salgado com custo completo</p>
