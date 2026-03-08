@@ -455,7 +455,7 @@ const Pricing = () => {
             <Card className="border border-primary/20 bg-primary/5">
               <CardContent className="p-4 space-y-3">
                 <h3 className="text-base font-bold text-foreground">📏 Rendimento da receita</h3>
-                <Hint>Quanto essa receita rende? Ex: 2 kg de recheio, 3 discos de massa, 500 ml de calda</Hint>
+                <Hint>Ex: 2 kg de recheio, 3 discos, 500 ml de calda</Hint>
                 <div className="flex gap-2">
                   <Input
                     type="number"
