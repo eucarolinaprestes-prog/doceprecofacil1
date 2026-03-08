@@ -16,7 +16,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 type PricingMode = "select" | "product" | "recipe";
 
 const stepLabelsProduct = ["Produto", "Ingredientes", "Mão de Obra", "Estratégia", "Salvar"];
-const stepLabelsRecipe = ["Ingredientes", "Resumo"];
+const stepLabelsRecipe = ["Receita", "Ingredientes", "Rendimento", "Resumo"];
 const categories = ["Massa", "Recheio", "Bolo", "Fatias", "Cupcakes", "Salgados", "Doces", "Outros"];
 const recipeCategories = ["Massa", "Recheio", "Cobertura", "Mousse", "Calda", "Creme", "Outros"];
 const saleTypes = [
