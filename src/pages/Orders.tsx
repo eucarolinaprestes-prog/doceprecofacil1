@@ -36,6 +36,8 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [editingOrder, setEditingOrder] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [whatsappPreview, setWhatsappPreview] = useState<string | null>(null);
+  const [whatsappOrder, setWhatsappOrder] = useState<any>(null);
 
   // Form
   const [clientId, setClientId] = useState("");
