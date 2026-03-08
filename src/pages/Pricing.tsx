@@ -436,9 +436,7 @@ const Pricing = () => {
               <p className="text-center text-sm text-muted-foreground py-4">Nenhum ingrediente adicionado ainda. Toque no botão acima para começar!</p>
             )}
 
-            {selectedIngredients.map(item => (
-              <ItemRow key={item.id} item={item} type="ingredient" />
-            ))}
+            {selectedIngredients.map(item => renderItemRow(item, "ingredient"))}
 
             {/* Yield / Rendimento */}
             <Card className="border border-primary/20 bg-primary/5">
