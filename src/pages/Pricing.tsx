@@ -50,6 +50,7 @@ const Pricing = () => {
   // Recipe
   const [recipeName, setRecipeName] = useState("");
   const [recipeCategory, setRecipeCategory] = useState("");
+  const [customRecipeCategory, setCustomRecipeCategory] = useState("");
 
   // Step 1 shared
   const [stockIngredients, setStockIngredients] = useState<StockItem[]>([]);
