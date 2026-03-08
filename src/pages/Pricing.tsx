@@ -291,6 +291,13 @@ const Pricing = () => {
     finally { setSaving(false); }
   };
 
+  const handleRecipePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setRecipePhotoFile(file);
+    setRecipePhotoPreview(URL.createObjectURL(file));
+  };
+
   const goNext = () => {
     if (mode === "product" && canAdvanceProduct()) setStep(step + 1);
     if (mode === "recipe") setStep(step + 1);
