@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight, CalendarDays } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, addDays, isToday, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from "recharts";
+import FinanceDialog from "@/components/dashboard/FinanceDialog";
 
 const Dashboard = () => {
   const { user, profile } = useAuth();
@@ -19,8 +19,9 @@ const Dashboard = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(today);
+  const [dialogType, setDialogType] = useState<"income" | "expense" | null>(null);
 
-  useEffect(() => {
+  const fetchData = () => {
     if (!user) return;
     const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
     const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
@@ -40,17 +41,14 @@ const Dashboard = () => {
       (ord || []).slice(0, 3).forEach(o => activity.push({ type: "order", text: `Encomenda: ${o.clients?.name || "Cliente"}`, sub: o.category, date: o.created_at?.split("T")[0] }));
       setRecentActivity(activity.sort((a, b) => b.date?.localeCompare(a.date || "") || 0).slice(0, 5));
     });
-  }, [user]);
+  };
+
+  useEffect(() => { fetchData(); }, [user]);
 
   const totalIncome = incomes.reduce((s, i) => s + Number(i.amount), 0);
   const totalExpense = expenses.reduce((s, e) => s + Number(e.amount), 0);
   const profit = totalIncome - totalExpense;
 
-  const chartData = [
-    { name: "Entradas", value: totalIncome, color: "hsl(152, 70%, 38%)" },
-    { name: "Saídas", value: totalExpense, color: "hsl(0, 84%, 60%)" },
-    { name: "Lucro", value: Math.max(0, profit), color: "hsl(152, 70%, 38%)" },
-  ];
 
   // Calendar
   const orderDates = orders.reduce((acc: Record<string, number>, o) => {
@@ -118,20 +116,20 @@ const Dashboard = () => {
       {/* Botões de ação */}
       <div className="grid grid-cols-2 gap-3">
         <button
-          onClick={() => navigate("/finance")}
+          onClick={() => setDialogType("income")}
           className="rounded-2xl h-16 bg-success text-success-foreground font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
           style={{ boxShadow: "0 4px 0 0 hsl(152 70% 26%), 0 8px 16px -4px hsl(152 70% 38% / 0.35)" }}
         >
           <ArrowUpRight className="w-5 h-5" />
-          <span>+ Entrada</span>
+          <span>Adicionar Entrada</span>
         </button>
         <button
-          onClick={() => navigate("/finance")}
+          onClick={() => setDialogType("expense")}
           className="rounded-2xl h-16 bg-destructive text-destructive-foreground font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
           style={{ boxShadow: "0 4px 0 0 hsl(0 62% 40%), 0 8px 16px -4px hsl(0 84% 60% / 0.35)" }}
         >
           <ArrowDownRight className="w-5 h-5" />
-          <span>+ Saída</span>
+          <span>Adicionar Saída</span>
         </button>
         <button
           onClick={() => navigate("/shopping")}
@@ -210,6 +208,8 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      <FinanceDialog type={dialogType} onClose={() => setDialogType(null)} onSaved={fetchData} />
     </div>
   );
 };
