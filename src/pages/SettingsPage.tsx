@@ -252,7 +252,17 @@ const SettingsPage = () => {
             <CardContent className="p-5 space-y-4">
               <h3 className="text-base font-extrabold text-foreground">🗂️ Custos Fixos</h3>
               <div className="space-y-3">
-                <Input placeholder="Nome do custo" value={newFixedName} onChange={(e) => setNewFixedName(e.target.value)} className="h-11 rounded-xl" />
+                <div className="flex flex-wrap gap-2">
+                  {fixedCostCategories.map(c => (
+                    <button key={c} onClick={() => setNewFixedCategory(c)}
+                      className={`px-3 py-2 rounded-xl text-sm font-bold transition-all ${newFixedCategory === c ? "bg-success text-success-foreground shadow-md" : "bg-secondary text-muted-foreground"}`}>
+                      {c}
+                    </button>
+                  ))}
+                </div>
+                {newFixedCategory === "Outros" && (
+                  <Input placeholder="Especifique o custo..." value={newFixedCustomName} onChange={(e) => setNewFixedCustomName(e.target.value)} className="h-11 rounded-xl" />
+                )}
                 <div className="flex gap-2">
                   <Input type="number" placeholder="Valor (R$)" value={newFixedAmount} onChange={(e) => setNewFixedAmount(e.target.value)} className="h-11 rounded-xl flex-1" />
                   <Select value={newFixedFreq} onValueChange={setNewFixedFreq}>
@@ -260,7 +270,7 @@ const SettingsPage = () => {
                     <SelectContent>{frequencies.map(f => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                {newFixedName.trim() && newFixedAmount && (
+                {newFixedCategory && newFixedAmount && (
                   <Button onClick={addFixedCost} className="w-full rounded-xl h-11 font-bold bg-success hover:bg-success/90 text-success-foreground">
                     Adicionar
                   </Button>
