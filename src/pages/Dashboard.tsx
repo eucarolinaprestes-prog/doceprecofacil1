@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight, CalendarDays } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, addDays, isToday, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell } from "recharts";
+import FinanceDialog from "@/components/dashboard/FinanceDialog";
 
 const Dashboard = () => {
   const { user, profile } = useAuth();
