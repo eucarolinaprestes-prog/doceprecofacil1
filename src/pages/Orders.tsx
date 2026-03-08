@@ -412,16 +412,16 @@ const Orders = () => {
               <CardContent className="p-4 space-y-3">
                 <div className="flex justify-between items-start">
                   <div>
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full bg-warning/10 ${statusColors[o.status]}`}>
+                    <span className={`text-sm font-extrabold px-3 py-1 rounded-full bg-warning/10 ${statusColors[o.status]}`}>
                       {statusLabels[o.status] || o.status}
                     </span>
-                    <p className="font-bold text-foreground mt-1">{o.clients?.name || "Cliente"}</p>
+                    <p className="font-bold text-foreground text-base mt-2">{o.clients?.name || "Cliente"}</p>
                     <p className="text-xs text-muted-foreground">{o.category || "—"}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-lg font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</p>
+                    <p className="text-xl font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</p>
                     {o.event_date && (
-                      <p className="text-[10px] font-semibold text-muted-foreground mt-0.5">
+                      <p className="text-sm font-bold text-foreground mt-1">
                         📅 {new Date(o.event_date).toLocaleDateString("pt-BR")}
                       </p>
                     )}
@@ -430,7 +430,7 @@ const Orders = () => {
 
                 {/* Payment details for scheduled/production/finished */}
                 {(o.status === "scheduled" || o.status === "production" || o.status === "finished") && (
-                  <div className="flex gap-2 text-[10px] font-semibold">
+                  <div className="flex gap-2 text-xs font-bold">
                     {(() => {
                       const total = Number(o.total_value || 0);
                       const pct = Number(o.payment_percent || 100);
@@ -438,12 +438,12 @@ const Orders = () => {
                       const remaining = total - paid;
                       return (
                         <>
-                          <span className="px-2 py-1 rounded-lg bg-success/10 text-success">Pago: R$ {paid.toFixed(2)}</span>
+                          <span className="px-3 py-1.5 rounded-lg bg-success/10 text-success">Pago: R$ {paid.toFixed(2)}</span>
                           {remaining > 0 && (
-                            <span className="px-2 py-1 rounded-lg bg-warning/10 text-warning">Falta: R$ {remaining.toFixed(2)}</span>
+                            <span className="px-3 py-1.5 rounded-lg bg-warning/10 text-warning">Falta: R$ {remaining.toFixed(2)}</span>
                           )}
                           {remaining <= 0 && (
-                            <span className="px-2 py-1 rounded-lg bg-success/10 text-success">✅ Pago total</span>
+                            <span className="px-3 py-1.5 rounded-lg bg-success/10 text-success">✅ Pago total</span>
                           )}
                         </>
                       );
@@ -453,8 +453,8 @@ const Orders = () => {
 
                 {/* Delivered: show total paid */}
                 {o.status === "delivered" && (
-                  <div className="text-[10px] font-semibold">
-                    <span className="px-2 py-1 rounded-lg bg-success/10 text-success">✅ Valor total pago: R$ {Number(o.total_value || 0).toFixed(2)}</span>
+                  <div className="text-xs font-bold">
+                    <span className="px-3 py-1.5 rounded-lg bg-success/10 text-success">✅ Valor total pago: R$ {Number(o.total_value || 0).toFixed(2)}</span>
                   </div>
                 )}
 
