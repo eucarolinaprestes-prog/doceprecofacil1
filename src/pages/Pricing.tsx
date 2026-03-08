@@ -39,7 +39,7 @@ interface StockItem { id: string; name: string; unit: string; cost_per_unit: num
 interface RecipeItem { id: string; name: string; total_cost: number; yield_quantity: number; yield_unit: string; }
 interface SelectedItem { id: string; name: string; unit: string; cost_per_unit: number; quantity_used: string; isManual?: boolean; }
 
-const CHART_COLORS = ["hsl(340, 75%, 55%)", "hsl(40, 80%, 55%)", "hsl(152, 70%, 38%)"];
+const CHART_COLORS = ["hsl(340, 75%, 55%)", "hsl(35, 85%, 50%)", "hsl(152, 70%, 38%)"];
 
 const Hint = ({ children }: { children: React.ReactNode }) => (
   <div className="flex items-center gap-1.5 mt-1.5 px-2.5 py-1.5 rounded-lg bg-warning/15 border border-warning/25 w-fit">
