@@ -136,7 +136,6 @@ const Shopping = () => {
           ingredient_name: i.ingredient_name,
           quantity: i.quantity,
           unit_price: i.unit_price,
-          total: i.quantity * i.unit_price,
           store: selectedStore,
         }))
       );
