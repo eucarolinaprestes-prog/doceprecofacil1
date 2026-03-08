@@ -21,7 +21,7 @@ const Dashboard = () => {
   const [calendarMonth, setCalendarMonth] = useState(today);
   const [dialogType, setDialogType] = useState<"income" | "expense" | null>(null);
 
-  useEffect(() => {
+  const fetchData = () => {
     if (!user) return;
     const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
     const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
@@ -41,7 +41,9 @@ const Dashboard = () => {
       (ord || []).slice(0, 3).forEach(o => activity.push({ type: "order", text: `Encomenda: ${o.clients?.name || "Cliente"}`, sub: o.category, date: o.created_at?.split("T")[0] }));
       setRecentActivity(activity.sort((a, b) => b.date?.localeCompare(a.date || "") || 0).slice(0, 5));
     });
-  }, [user]);
+  };
+
+  useEffect(() => { fetchData(); }, [user]);
 
   const totalIncome = incomes.reduce((s, i) => s + Number(i.amount), 0);
   const totalExpense = expenses.reduce((s, e) => s + Number(e.amount), 0);
