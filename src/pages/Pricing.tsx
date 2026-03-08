@@ -118,6 +118,32 @@ const Pricing = () => {
       setStockIngredients(ing?.map((i: any) => ({ id: i.id, name: i.name, unit: i.unit, cost_per_unit: Number(i.cost_per_unit) || 0, quantity_purchased: i.quantity_purchased, total_cost: i.total_cost })) || []);
       setStockPackaging(pkg?.map((p: any) => ({ id: p.id, name: p.name, unit: p.unit, cost_per_unit: Number(p.cost_per_unit) || 0, quantity_purchased: p.quantity_purchased, total_cost: p.total_cost })) || []);
       setTotalFixedCosts(fc?.reduce((s: number, c: any) => s + Number(c.amount), 0) || 0);
+
+      // Check if editing a recipe from URL params
+      const editType = searchParams.get("edit");
+      const editId = searchParams.get("id");
+      if (editType === "recipe" && editId) {
+        const { data: recipe } = await supabase.from("recipes").select("*").eq("id", editId).single();
+        if (recipe) {
+          setEditingRecipeId(editId);
+          setMode("recipe");
+          setStep(0);
+          setRecipeName(recipe.name);
+          setRecipeCategory(recipe.category || "");
+          setRecipeYieldQty(String(recipe.yield_quantity || ""));
+          setRecipeYieldUnit(recipe.yield_unit || "");
+          if (Array.isArray(recipe.ingredients_json)) {
+            setSelectedIngredients((recipe.ingredients_json as any[]).map((item: any) => ({
+              id: item.id || `loaded-${Date.now()}-${Math.random()}`,
+              name: item.name,
+              unit: item.unit,
+              cost_per_unit: Number(item.cost_per_unit) || 0,
+              quantity_used: Number(item.quantity_used) || 0,
+              isManual: true,
+            })));
+          }
+        }
+      }
     };
     load();
   }, [user]);
