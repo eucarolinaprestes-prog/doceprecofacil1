@@ -25,6 +25,10 @@ const Supplies = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogType, setDialogType] = useState<"ingredient" | "packaging">("ingredient");
+  const [recipeDialogOpen, setRecipeDialogOpen] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState<any>(null);
+  const [recipeName, setRecipeName] = useState("");
+  const [recipeCategory, setRecipeCategory] = useState("");
 
   const [name, setName] = useState("");
   const [unit, setUnit] = useState("g");
