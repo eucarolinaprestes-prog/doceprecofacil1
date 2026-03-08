@@ -152,15 +152,15 @@ const Dashboard = () => {
         <button
           onClick={() => navigate("/shopping")}
           className="rounded-2xl h-16 text-white font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
-          style={{ background: "linear-gradient(135deg, hsl(340 70% 58%), hsl(340 65% 65%))", boxShadow: "0 4px 0 0 hsl(340 70% 48%), 0 8px 16px -4px hsl(340 70% 58% / 0.35)" }}
+          style={{ background: "linear-gradient(135deg, hsl(40 80% 55%), hsl(45 75% 60%))", boxShadow: "0 4px 0 0 hsl(40 80% 42%), 0 8px 16px -4px hsl(40 80% 55% / 0.35)" }}
         >
           <ShoppingCart className="w-5 h-5" />
           <span>Calculadora de Compras</span>
         </button>
         <button
           onClick={() => navigate("/orders")}
-          className="rounded-2xl h-16 gradient-gold text-white font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
-          style={{ boxShadow: "0 4px 0 0 hsl(30 60% 40%), 0 8px 16px -4px hsl(30 60% 58% / 0.35)" }}
+          className="rounded-2xl h-16 text-white font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
+          style={{ background: "linear-gradient(135deg, hsl(270 45% 65%), hsl(280 40% 72%))", boxShadow: "0 4px 0 0 hsl(270 45% 50%), 0 8px 16px -4px hsl(270 45% 65% / 0.35)" }}
         >
           <ShoppingBag className="w-5 h-5" />
           <span>Nova Encomenda</span>
@@ -169,20 +169,20 @@ const Dashboard = () => {
 
       {/* Calendário mensal */}
       <Card className="card-elevated border border-rose-200 overflow-hidden">
-        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "linear-gradient(135deg, hsl(340 30% 75%), hsl(350 25% 80%))" }}>
-          <button onClick={() => setCalendarMonth(m => subMonths(m, 1))} className="w-8 h-8 rounded-full bg-rose-900/10 flex items-center justify-center hover:bg-rose-900/20 transition-colors">
-            <ChevronLeft className="w-4 h-4 text-rose-900" />
+        <div className="px-4 py-3 flex items-center justify-between" style={{ background: "linear-gradient(135deg, hsl(340 70% 58%), hsl(340 65% 65%))" }}>
+          <button onClick={() => setCalendarMonth(m => subMonths(m, 1))} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
+            <ChevronLeft className="w-4 h-4 text-white" />
           </button>
           <div className="text-center">
-            <p className="text-sm font-extrabold text-rose-900 flex items-center gap-2">
+            <p className="text-sm font-extrabold text-white flex items-center gap-2">
               <CalendarDays className="w-4 h-4" /> Calendário de Encomendas
             </p>
-            <p className="text-xs text-rose-800/70 font-semibold capitalize mt-0.5">
+            <p className="text-xs text-white/80 font-semibold capitalize mt-0.5">
               {format(calendarMonth, "MMMM yyyy", { locale: ptBR })}
             </p>
           </div>
-          <button onClick={() => setCalendarMonth(m => addMonths(m, 1))} className="w-8 h-8 rounded-full bg-rose-900/10 flex items-center justify-center hover:bg-rose-900/20 transition-colors">
-            <ChevronRight className="w-4 h-4 text-rose-900" />
+          <button onClick={() => setCalendarMonth(m => addMonths(m, 1))} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
+            <ChevronRight className="w-4 h-4 text-white" />
           </button>
         </div>
         <CardContent className="p-4">
@@ -208,7 +208,7 @@ const Dashboard = () => {
                     hasOrder ? "bg-success/15 text-success font-extrabold border border-success/30" :
                     "text-foreground hover:bg-muted/50"
                   }`}
-                  style={isToday(day) && inMonth ? { background: "linear-gradient(135deg, hsl(340 30% 75%), hsl(350 25% 80%))" } : undefined}
+                  style={isToday(day) && inMonth ? { background: "linear-gradient(135deg, hsl(340 70% 58%), hsl(340 65% 65%))" } : undefined}
                 >
                   <span className="text-sm font-bold">{format(day, "d")}</span>
                   {hasOrder && inMonth && (
