@@ -256,6 +256,19 @@ const Pricing = () => {
     if (!user) return;
     setSaving(true);
     try {
+      let photoUrl = recipePhotoPreview;
+
+      // Upload photo if new file selected
+      if (recipePhotoFile) {
+        const fileExt = recipePhotoFile.name.split(".").pop();
+        const filePath = `recipes/${user.id}/${Date.now()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from("uploads").upload(filePath, recipePhotoFile);
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(filePath);
+          photoUrl = urlData.publicUrl;
+        }
+      }
+
       const finalCat = recipeCategory === "Outros" && customRecipeCategory.trim() ? customRecipeCategory.trim() : recipeCategory;
       const payload = {
         name: recipeName,
@@ -264,6 +277,7 @@ const Pricing = () => {
         total_cost: ingredientsCost,
         yield_quantity: recipeYieldNum,
         yield_unit: finalRecipeYieldUnit,
+        photo_url: photoUrl,
       };
       if (editingRecipeId) {
         await supabase.from("recipes").update(payload).eq("id", editingRecipeId);
