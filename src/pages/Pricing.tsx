@@ -189,7 +189,7 @@ const Pricing = () => {
     setSaving(true);
     try {
       await supabase.from("recipes").insert({
-        user_id: user.id, name: recipeName, category: recipeCategory,
+        user_id: user.id, name: recipeName, category: recipeCategory === "Outros" && customRecipeCategory.trim() ? customRecipeCategory.trim() : recipeCategory,
         ingredients_json: selectedIngredients as any, total_cost: ingredientsCost,
       });
       toast({ title: "Receita salva com sucesso! 🎉" });
