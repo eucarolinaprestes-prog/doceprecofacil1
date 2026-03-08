@@ -632,6 +632,16 @@ const Pricing = () => {
               <Input placeholder="Especifique o tipo de venda..." value={customSaleType} onChange={(e) => setCustomSaleType(e.target.value)} className="h-12 rounded-xl mt-2" />
             )}
           </div>
+
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-primary">Rendimento *</label>
+            <Hint>Quantas unidades, fatias ou porções essa receita rende?</Hint>
+            <Input type="number" placeholder="Ex: 12" value={productYieldQty} onChange={(e) => setProductYieldQty(e.target.value)} className="h-12 rounded-xl" />
+          </div>
+
+          {stepError && step === 0 && (
+            <p className="text-sm font-bold text-destructive text-center">{stepError}</p>
+          )}
         </div>
       )}
 
