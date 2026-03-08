@@ -285,14 +285,13 @@ const Pricing = () => {
 
   const stepLabels = mode === "product" ? stepLabelsProduct : stepLabelsRecipe;
 
-  /** Item row: name | qty | value on ONE line, small actions below */
-  const ItemRow = ({ item, type }: { item: SelectedItem; type: "ingredient" | "packaging" }) => {
+  /** Inline item row render (not a sub-component, to preserve focus) */
+  const renderItemRow = (item: SelectedItem, type: "ingredient" | "packaging") => {
     const isEditing = editingId === item.id;
     const cost = item.cost_per_unit * (Number(item.quantity_used) || 0);
 
     return (
-      <div className="bg-secondary/40 p-3 rounded-xl space-y-1.5">
-        {/* Main row: name | qty unit | R$ value */}
+      <div key={item.id} className="bg-secondary/40 p-3 rounded-xl space-y-1.5">
         <div className="flex items-center gap-2">
           {isEditing ? (
             <Input
@@ -305,32 +304,26 @@ const Pricing = () => {
           ) : (
             <span className="text-sm font-semibold flex-1 min-w-0 truncate">{item.name}</span>
           )}
-          <Input
+          <input
             inputMode="decimal"
             placeholder="Qtd"
-            value={item.quantity_used || ""}
+            value={item.quantity_used}
             onChange={(e) => updateSelectedQty(item.id, e.target.value, type)}
-            className="w-[72px] h-9 rounded-lg text-sm text-center bg-background shrink-0"
+            className="w-[72px] h-9 rounded-lg text-sm text-center bg-background border border-input shrink-0 outline-none focus:ring-2 focus:ring-ring"
           />
           <span className="text-xs text-muted-foreground shrink-0 w-6">{item.unit}</span>
           <span className="text-sm font-bold text-primary shrink-0 min-w-[70px] text-right">
             R$ {cost.toFixed(2)}
           </span>
         </div>
-
-        {/* Small action buttons */}
         <div className="flex items-center gap-3 pl-0.5">
           <button onClick={() => setEditingId(isEditing ? null : item.id)} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary transition-colors">
             <Pencil className="w-3 h-3" /> Editar
-          </button>
-          <button onClick={() => duplicateSelected(item, type)} className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-primary transition-colors">
-            <Copy className="w-3 h-3" /> Copiar
           </button>
           <button onClick={() => removeSelected(item.id, type)} className="flex items-center gap-1 text-[11px] text-destructive/70 hover:text-destructive transition-colors">
             <Trash2 className="w-3 h-3" /> Remover
           </button>
         </div>
-
       </div>
     );
   };
