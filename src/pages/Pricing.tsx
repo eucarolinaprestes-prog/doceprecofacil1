@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Cell, ResponsiveContainer } from "recharts";
 
 type PricingMode = "select" | "product" | "recipe";
 
@@ -822,9 +822,13 @@ const Pricing = () => {
                 <p className="text-sm font-extrabold text-foreground">Parabéns, você precificou! 🎉</p>
               </div>
               <ResponsiveContainer width="100%" height={180}>
-                <PieChart><Pie data={chartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} innerRadius={40} paddingAngle={2}>
-                  {chartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                </Pie></PieChart>
+                <BarChart data={chartData} barCategoryGap="30%">
+                  <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+                  <YAxis hide />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                    {chartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
               <div className="space-y-1.5">
                 {chartData.map((d, i) => (
