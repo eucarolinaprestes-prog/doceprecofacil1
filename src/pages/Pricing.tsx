@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { BarChart, Bar, XAxis, YAxis, Cell, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 type PricingMode = "select" | "product" | "recipe";
 
@@ -569,14 +569,17 @@ const Pricing = () => {
           </div>
         )}
 
-        {step < 3 && (
-          <div className="space-y-2">
-            {stepError && <p className="text-sm font-bold text-destructive text-center">{stepError}</p>}
-            <Button onClick={goNext} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
-              Próximo <ChevronRight className="w-5 h-5" />
-            </Button>
-          </div>
-        )}
+        {step < 3 && (() => {
+          const canAdvanceRecipe = step === 0 ? !!recipeName.trim() : step === 1 ? selectedIngredients.length > 0 : !!(recipeYieldQty && Number(recipeYieldQty) > 0 && recipeYieldUnit);
+          return (
+            <div className="space-y-2">
+              {stepError && <p className="text-sm font-bold text-destructive text-center">{stepError}</p>}
+              <Button onClick={goNext} className={`w-full rounded-2xl h-14 text-base font-bold gap-2 ${canAdvanceRecipe ? "btn-3d" : "bg-muted text-muted-foreground hover:bg-muted"}`}>
+                Próximo <ChevronRight className="w-5 h-5" />
+              </Button>
+            </div>
+          );
+        })()}
       </div>
     );
   }
@@ -792,7 +795,7 @@ const Pricing = () => {
             {/* iFood */}
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-sm">iFood / Uber Eats</span>
+                <span className="text-sm">iFood</span>
                 <Switch checked={ifoodEnabled} onCheckedChange={setIfoodEnabled} />
               </div>
               {ifoodEnabled && (
@@ -874,14 +877,12 @@ const Pricing = () => {
                 <Star className="w-5 h-5 text-primary" />
                 <p className="text-sm font-extrabold text-foreground">Parabéns, você precificou! 🎉</p>
               </div>
-              <ResponsiveContainer width="100%" height={180}>
-                <BarChart data={chartData} barCategoryGap="30%">
-                  <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
-                  <YAxis hide />
-                  <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie data={chartData} dataKey="value" cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={4} strokeWidth={0}>
                     {chartData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
-                  </Bar>
-                </BarChart>
+                  </Pie>
+                </PieChart>
               </ResponsiveContainer>
               <div className="space-y-1.5">
                 {chartData.map((d, i) => (
@@ -941,7 +942,7 @@ const Pricing = () => {
       {step < 4 && (
         <div className="space-y-2">
           {stepError && <p className="text-sm font-bold text-destructive text-center">{stepError}</p>}
-          <Button onClick={goNext} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
+          <Button onClick={goNext} className={`w-full rounded-2xl h-14 text-base font-bold gap-2 ${canAdvanceProduct() ? "btn-3d" : "bg-muted text-muted-foreground hover:bg-muted"}`}>
             Próximo <ChevronRight className="w-5 h-5" />
           </Button>
         </div>
