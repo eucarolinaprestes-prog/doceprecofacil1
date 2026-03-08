@@ -34,8 +34,8 @@ input[type="number"] {
     --muted: 340 25% 93%;
     --muted-foreground: 340 10% 45%;
 
-    --accent: 30 60% 58%;
-    --accent-foreground: 30 60% 12%;
+    --accent: 45 85% 52%;
+    --accent-foreground: 45 90% 12%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
