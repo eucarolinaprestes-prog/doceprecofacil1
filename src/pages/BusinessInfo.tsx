@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Plus, Trash2, CheckCircle2 } from "lucide-react";
+import { Camera, Plus, Trash2, CheckCircle2, Pencil, Settings, User, Bell, CreditCard, Target } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface CostItem {
   id?: string;
   category: string;
   amount: number;
-  frequency: string; // mensal, semanal, anual
+  frequency: string;
 }
 
 const frequencies = [
@@ -22,17 +24,26 @@ const frequencies = [
   { value: "anual", label: "Anual" },
 ];
 
-const BusinessInfo = () => {
-  const { user } = useAuth();
+const SettingsPage = () => {
+  const { user, profile, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("profile");
 
+  // Profile
+  const [name, setName] = useState("");
   const [storeName, setStoreName] = useState("");
+  const [address, setAddress] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
+
+  // Labor
   const [desiredSalary, setDesiredSalary] = useState("");
   const [workDays, setWorkDays] = useState("");
   const [workHours, setWorkHours] = useState("");
 
+  // Costs
   const [fixedCosts, setFixedCosts] = useState<CostItem[]>([]);
   const [variableCosts, setVariableCosts] = useState<CostItem[]>([]);
   const [newFixedName, setNewFixedName] = useState("");
@@ -58,17 +69,20 @@ const BusinessInfo = () => {
 
   const fixedTotal = fixedCosts.reduce((s, c) => s + toMonthly(c.amount, c.frequency), 0);
   const variableTotal = variableCosts.reduce((s, c) => s + toMonthly(c.amount, c.frequency), 0);
-  const dailyFixed = fixedTotal / 30;
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const { data: profile } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
-      if (profile) {
-        setStoreName(profile.store_name || "");
-        if (profile.desired_salary) setDesiredSalary(String(profile.desired_salary));
-        if (profile.work_days_per_week) setWorkDays(String(profile.work_days_per_week));
-        if (profile.work_hours_per_day) setWorkHours(String(profile.work_hours_per_day));
+      const { data: p } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
+      if (p) {
+        setName(p.name || "");
+        setStoreName(p.store_name || "");
+        setAddress(p.address || "");
+        setWhatsapp(p.whatsapp || "");
+        setLogoUrl(p.logo_url || "");
+        if (p.desired_salary) setDesiredSalary(String(p.desired_salary));
+        if (p.work_days_per_week) setWorkDays(String(p.work_days_per_week));
+        if (p.work_hours_per_day) setWorkHours(String(p.work_hours_per_day));
       }
       const { data: fc } = await supabase.from("fixed_costs").select("*").eq("user_id", user.id);
       setFixedCosts(fc?.map((c) => ({ id: c.id, category: c.category, amount: Number(c.amount), frequency: "mensal" })) || []);
@@ -78,6 +92,18 @@ const BusinessInfo = () => {
     };
     load();
   }, [user]);
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    const path = `${user.id}/logo-${Date.now()}.${file.name.split(".").pop()}`;
+    const { error } = await supabase.storage.from("uploads").upload(path, file);
+    if (error) { toast({ title: "Erro no upload", variant: "destructive" }); return; }
+    const { data: { publicUrl } } = supabase.storage.from("uploads").getPublicUrl(path);
+    setLogoUrl(publicUrl);
+    await supabase.from("profiles").update({ logo_url: publicUrl }).eq("user_id", user.id);
+    toast({ title: "Logo atualizada! ✅" });
+  };
 
   const addFixedCost = () => {
     if (!newFixedName.trim() || !newFixedAmount) return;
@@ -91,35 +117,29 @@ const BusinessInfo = () => {
     setNewVarName(""); setNewVarAmount(""); setNewVarFreq("mensal");
   };
 
-  const removeFixed = (idx: number) => setFixedCosts(fixedCosts.filter((_, i) => i !== idx));
-  const removeVariable = (idx: number) => setVariableCosts(variableCosts.filter((_, i) => i !== idx));
-
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
     try {
       await supabase.from("profiles").update({
-        store_name: storeName,
+        name, store_name: storeName, address, whatsapp,
         desired_salary: Number(desiredSalary) || 0,
-        work_days_per_week: Number(workDays) || 5,
-        work_hours_per_day: Number(workHours) || 8,
+        work_days_per_week: Number(workDays) || 0,
+        work_hours_per_day: Number(workHours) || 0,
       }).eq("user_id", user.id);
 
       await supabase.from("fixed_costs").delete().eq("user_id", user.id);
       if (fixedCosts.length > 0) {
-        await supabase.from("fixed_costs").insert(
-          fixedCosts.map((c) => ({ user_id: user.id, category: c.category, amount: toMonthly(c.amount, c.frequency) }))
-        );
+        await supabase.from("fixed_costs").insert(fixedCosts.map((c) => ({ user_id: user.id, category: c.category, amount: toMonthly(c.amount, c.frequency) })));
       }
 
       await supabase.from("variable_costs").delete().eq("user_id", user.id);
       if (variableCosts.length > 0) {
-        await supabase.from("variable_costs").insert(
-          variableCosts.map((c) => ({ user_id: user.id, category: c.category, amount: toMonthly(c.amount, c.frequency) }))
-        );
+        await supabase.from("variable_costs").insert(variableCosts.map((c) => ({ user_id: user.id, category: c.category, amount: toMonthly(c.amount, c.frequency) })));
       }
 
-      toast({ title: "Informações salvas com sucesso! ✅" });
+      await refreshProfile();
+      toast({ title: "Configurações salvas! ✅" });
     } catch {
       toast({ title: "Erro ao salvar", variant: "destructive" });
     } finally { setSaving(false); }
@@ -129,181 +149,199 @@ const BusinessInfo = () => {
 
   return (
     <div className="space-y-6 pb-6">
-      <div>
-        <h1 className="text-xl font-extrabold text-foreground flex items-center gap-2">🧾 Financeiro</h1>
-        <p className="text-sm text-muted-foreground">Gerencie seus custos fixos e mão de obra</p>
+      <div className="text-center space-y-2">
+        <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center mx-auto shadow-lg">
+          <Settings className="w-7 h-7 text-white" />
+        </div>
+        <h1 className="text-2xl font-extrabold text-foreground">Configurações</h1>
       </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="gradient-primary p-4 rounded-2xl text-primary-foreground">
-          <p className="text-xs font-medium opacity-80">Total Mensal</p>
-          <p className="text-2xl font-extrabold">R$ {fixedTotal.toFixed(2)}</p>
-          <p className="text-xs opacity-70">{fixedCosts.length} despesas</p>
-        </div>
-        <div className="bg-warning/20 p-4 rounded-2xl">
-          <p className="text-xs font-medium text-warning">Custo Fixo Diário</p>
-          <p className="text-2xl font-extrabold text-warning">R$ {dailyFixed.toFixed(2)}</p>
-          <p className="text-xs text-muted-foreground">Baseado em 30 dias</p>
-        </div>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-3 w-full h-12 rounded-xl">
+          <TabsTrigger value="profile" className="rounded-xl font-bold text-xs">Perfil</TabsTrigger>
+          <TabsTrigger value="financial" className="rounded-xl font-bold text-xs">Financeiro</TabsTrigger>
+          <TabsTrigger value="notifications" className="rounded-xl font-bold text-xs">Notificações</TabsTrigger>
+        </TabsList>
 
-      {/* Logo + Name */}
-      <Card className="card-elevated">
-        <CardContent className="py-5 flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl border-2 border-dashed border-primary/30 flex items-center justify-center bg-secondary/30 cursor-pointer hover:bg-secondary/50 transition-colors shrink-0">
-            <Camera className="w-6 h-6 text-primary/50" />
-          </div>
-          <div className="flex-1 space-y-1">
-            <label className="text-xs font-semibold text-muted-foreground">Nome da loja</label>
-            <Input placeholder="Ex: Doces da Maria" value={storeName} onChange={(e) => setStoreName(e.target.value)} className="h-11 rounded-xl" />
-          </div>
-        </CardContent>
-      </Card>
+        {/* PROFILE TAB */}
+        <TabsContent value="profile" className="space-y-4 mt-4">
+          {/* Logo */}
+          <Card className="card-elevated">
+            <CardContent className="py-5 flex flex-col items-center gap-3">
+              <label className="cursor-pointer">
+                <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Logo" className="w-20 h-20 rounded-2xl object-cover border-2 border-primary/20" />
+                ) : (
+                  <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-primary/30 flex items-center justify-center bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                    <Camera className="w-8 h-8 text-primary/50" />
+                  </div>
+                )}
+              </label>
+              <p className="text-xs text-muted-foreground">Toque para adicionar sua logo</p>
+            </CardContent>
+          </Card>
 
-      {/* Labor config - matching reference */}
-      <Card className="card-elevated">
-        <CardContent className="p-5 space-y-4">
-          <div>
-            <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">👩‍🍳 Configuração de Mão de Obra</h3>
-            <p className="text-xs text-muted-foreground">Valores usados automaticamente na precificação</p>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-foreground">Salário Mensal Desejado (R$)</label>
-            <Input type="number" placeholder="Ex: 3000" value={desiredSalary} onChange={(e) => setDesiredSalary(e.target.value)} className="h-12 rounded-xl" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-foreground">Horas/dia</label>
-              <Input type="number" placeholder="8" value={workHours} onChange={(e) => setWorkHours(e.target.value)} className="h-12 rounded-xl" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-foreground">Dias/semana</label>
-              <Input type="number" placeholder="5" value={workDays} onChange={(e) => setWorkDays(e.target.value)} className="h-12 rounded-xl" />
-            </div>
-          </div>
-
-          {hourlyRate > 0 && (
-            <div className="bg-secondary p-3 rounded-xl text-center">
-              <p className="text-xs text-muted-foreground">Valor da sua hora:</p>
-              <p className="text-xl font-extrabold text-primary">R$ {hourlyRate.toFixed(2)}</p>
-            </div>
-          )}
-
-          <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl h-12 btn-3d font-bold gap-2">
-            <CheckCircle2 className="w-5 h-5" />
-            {saving ? "Salvando..." : "Salvar"}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Fixed costs */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">🗂️ Custos Fixos</h3>
-          <Button variant="outline" size="sm" onClick={addFixedCost} className="rounded-xl text-primary border-primary/30 font-bold gap-1">
-            <Plus className="w-4 h-4" /> Adicionar
-          </Button>
-        </div>
-
-        <Card className="card-elevated">
-          <CardContent className="p-4 space-y-3">
-            <Input placeholder="Nome do custo" value={newFixedName} onChange={(e) => setNewFixedName(e.target.value)} className="h-11 rounded-xl" />
-            <div className="flex gap-2">
-              <Input type="number" placeholder="Valor (R$)" value={newFixedAmount} onChange={(e) => setNewFixedAmount(e.target.value)} className="h-11 rounded-xl flex-1" />
-              <Select value={newFixedFreq} onValueChange={setNewFixedFreq}>
-                <SelectTrigger className="h-11 rounded-xl w-32"><SelectValue /></SelectTrigger>
-                <SelectContent>{frequencies.map(f => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {fixedCosts.length === 0 ? (
-          <div className="text-center py-6">
-            <p className="text-3xl mb-1">🗂️</p>
-            <p className="text-sm text-muted-foreground">Nenhuma despesa cadastrada</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {fixedCosts.map((cost, idx) => (
-              <div key={idx} className="flex items-center gap-2 bg-card border border-border p-3 rounded-xl">
-                <span className="text-sm font-medium text-foreground flex-1 truncate">{cost.category}</span>
-                <span className="text-xs text-muted-foreground">{cost.frequency}</span>
-                <span className="text-sm font-bold text-primary">R$ {cost.amount.toFixed(2)}</span>
-                <button onClick={() => removeFixed(idx)} className="text-destructive hover:text-destructive/80 p-1">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+          {/* Name, store, contact */}
+          <Card className="card-elevated">
+            <CardContent className="p-5 space-y-3">
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-foreground">Seu nome</label>
+                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" className="h-12 rounded-xl" />
               </div>
-            ))}
-            <div className="flex justify-between items-center bg-primary/10 p-3 rounded-xl">
-              <span className="text-sm font-bold text-foreground">Total mensal</span>
-              <span className="text-lg font-extrabold text-primary">R$ {fixedTotal.toFixed(2)}</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Variable costs */}
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">📊 Custos Variáveis</h3>
-          <Button variant="outline" size="sm" onClick={addVariableCost} className="rounded-xl text-primary border-primary/30 font-bold gap-1">
-            <Plus className="w-4 h-4" /> Adicionar
-          </Button>
-        </div>
-
-        <Card className="card-elevated">
-          <CardContent className="p-4 space-y-3">
-            <Input placeholder="Nome do custo" value={newVarName} onChange={(e) => setNewVarName(e.target.value)} className="h-11 rounded-xl" />
-            <div className="flex gap-2">
-              <Input type="number" placeholder="Valor (R$)" value={newVarAmount} onChange={(e) => setNewVarAmount(e.target.value)} className="h-11 rounded-xl flex-1" />
-              <Select value={newVarFreq} onValueChange={setNewVarFreq}>
-                <SelectTrigger className="h-11 rounded-xl w-32"><SelectValue /></SelectTrigger>
-                <SelectContent>{frequencies.map(f => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {variableCosts.length === 0 ? (
-          <div className="text-center py-6">
-            <p className="text-3xl mb-1">📊</p>
-            <p className="text-sm text-muted-foreground">Nenhum custo variável cadastrado</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {variableCosts.map((cost, idx) => (
-              <div key={idx} className="flex items-center gap-2 bg-card border border-border p-3 rounded-xl">
-                <span className="text-sm font-medium text-foreground flex-1 truncate">{cost.category}</span>
-                <span className="text-xs text-muted-foreground">{cost.frequency}</span>
-                <span className="text-sm font-bold text-accent">R$ {cost.amount.toFixed(2)}</span>
-                <button onClick={() => removeVariable(idx)} className="text-destructive hover:text-destructive/80 p-1">
-                  <Trash2 className="w-4 h-4" />
-                </button>
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-foreground">Nome da loja</label>
+                <Input value={storeName} onChange={(e) => setStoreName(e.target.value)} placeholder="Ex: Doces da Maria" className="h-12 rounded-xl" />
               </div>
-            ))}
-            <div className="flex justify-between items-center bg-accent/10 p-3 rounded-xl">
-              <span className="text-sm font-bold text-foreground">Total mensal</span>
-              <span className="text-lg font-extrabold text-accent">R$ {variableTotal.toFixed(2)}</span>
-            </div>
-          </div>
-        )}
-      </div>
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-foreground">WhatsApp</label>
+                <Input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="(11) 99999-9999" className="h-12 rounded-xl" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-foreground">Endereço (usado para retirada)</label>
+                <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Rua, número, bairro, cidade" className="h-12 rounded-xl" />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Fechamento de Caixa */}
-      <Card className="card-elevated border-primary/20">
-        <CardContent className="p-5 space-y-3">
-          <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">📋 Fechamento de Caixa</h3>
-          <Button variant="outline" className="w-full rounded-xl h-12 font-bold text-primary border-primary/30">
-            Fechar Mês
+        {/* FINANCIAL TAB */}
+        <TabsContent value="financial" className="space-y-5 mt-4">
+          {/* Labor */}
+          <Card className="card-elevated">
+            <CardContent className="p-5 space-y-4">
+              <div>
+                <h3 className="text-base font-extrabold text-foreground flex items-center gap-2">👩‍🍳 Descubra o valor da sua hora</h3>
+                <p className="text-xs text-muted-foreground">Esse valor será usado automaticamente na precificação</p>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-foreground">Qual é o salário mensal desejado?</label>
+                <Input type="number" placeholder="R$" value={desiredSalary} onChange={(e) => setDesiredSalary(e.target.value)} className="h-12 rounded-xl" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-foreground">Quantas horas por dia você trabalha?</label>
+                <Input type="number" placeholder="Ex: 8" value={workHours} onChange={(e) => setWorkHours(e.target.value)} className="h-12 rounded-xl" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-sm font-semibold text-foreground">Quantos dias por semana você trabalha?</label>
+                <Input type="number" placeholder="Ex: 5" value={workDays} onChange={(e) => setWorkDays(e.target.value)} className="h-12 rounded-xl" />
+              </div>
+
+              {hourlyRate > 0 && (
+                <div className="bg-success/10 border border-success/20 p-4 rounded-xl text-center">
+                  <p className="text-xs text-muted-foreground">Com base nas suas respostas, o valor da sua hora é:</p>
+                  <p className="text-2xl font-extrabold text-success">R$ {hourlyRate.toFixed(2)}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Fixed costs */}
+          <Card className="card-elevated">
+            <CardContent className="p-5 space-y-4">
+              <h3 className="text-base font-extrabold text-foreground">🗂️ Custos Fixos</h3>
+              <div className="space-y-3">
+                <Input placeholder="Nome do custo" value={newFixedName} onChange={(e) => setNewFixedName(e.target.value)} className="h-11 rounded-xl" />
+                <div className="flex gap-2">
+                  <Input type="number" placeholder="Valor (R$)" value={newFixedAmount} onChange={(e) => setNewFixedAmount(e.target.value)} className="h-11 rounded-xl flex-1" />
+                  <Select value={newFixedFreq} onValueChange={setNewFixedFreq}>
+                    <SelectTrigger className="h-11 rounded-xl w-28"><SelectValue /></SelectTrigger>
+                    <SelectContent>{frequencies.map(f => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <Button onClick={addFixedCost} disabled={!newFixedName.trim() || !newFixedAmount} className="w-full rounded-xl h-11 font-bold bg-success hover:bg-success/90 text-success-foreground">
+                  Adicionar
+                </Button>
+              </div>
+
+              {fixedCosts.length > 0 && (
+                <div className="space-y-2">
+                  {fixedCosts.map((cost, idx) => (
+                    <div key={idx} className="flex items-center gap-2 bg-secondary/40 p-3 rounded-xl">
+                      <span className="text-sm font-medium text-foreground flex-1 truncate">{cost.category}</span>
+                      <span className="text-xs text-muted-foreground">{cost.frequency}</span>
+                      <span className="text-sm font-bold text-primary">R$ {cost.amount.toFixed(2)}</span>
+                      <button onClick={() => setFixedCosts(fixedCosts.filter((_, i) => i !== idx))} className="text-destructive p-1"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                  <div className="flex justify-between items-center bg-primary/10 p-3 rounded-xl">
+                    <span className="text-sm font-bold">Total mensal</span>
+                    <span className="text-lg font-extrabold text-primary">R$ {fixedTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Variable costs */}
+          <Card className="card-elevated">
+            <CardContent className="p-5 space-y-4">
+              <h3 className="text-base font-extrabold text-foreground">📊 Custos Variáveis</h3>
+              <div className="space-y-3">
+                <Input placeholder="Nome do custo" value={newVarName} onChange={(e) => setNewVarName(e.target.value)} className="h-11 rounded-xl" />
+                <div className="flex gap-2">
+                  <Input type="number" placeholder="Valor (R$)" value={newVarAmount} onChange={(e) => setNewVarAmount(e.target.value)} className="h-11 rounded-xl flex-1" />
+                  <Select value={newVarFreq} onValueChange={setNewVarFreq}>
+                    <SelectTrigger className="h-11 rounded-xl w-28"><SelectValue /></SelectTrigger>
+                    <SelectContent>{frequencies.map(f => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                <Button onClick={addVariableCost} disabled={!newVarName.trim() || !newVarAmount} className="w-full rounded-xl h-11 font-bold bg-success hover:bg-success/90 text-success-foreground">
+                  Adicionar
+                </Button>
+              </div>
+
+              {variableCosts.length > 0 && (
+                <div className="space-y-2">
+                  {variableCosts.map((cost, idx) => (
+                    <div key={idx} className="flex items-center gap-2 bg-secondary/40 p-3 rounded-xl">
+                      <span className="text-sm font-medium text-foreground flex-1 truncate">{cost.category}</span>
+                      <span className="text-xs text-muted-foreground">{cost.frequency}</span>
+                      <span className="text-sm font-bold text-accent">R$ {cost.amount.toFixed(2)}</span>
+                      <button onClick={() => setVariableCosts(variableCosts.filter((_, i) => i !== idx))} className="text-destructive p-1"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                  <div className="flex justify-between items-center bg-accent/10 p-3 rounded-xl">
+                    <span className="text-sm font-bold">Total mensal</span>
+                    <span className="text-lg font-extrabold text-accent">R$ {variableTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Fechamento de caixa */}
+          <Button variant="outline" className="w-full rounded-xl h-14 font-bold text-primary border-primary/30 text-base gap-2 bg-primary/5">
+            📋 Fechamento de Caixa
           </Button>
-        </CardContent>
-      </Card>
+        </TabsContent>
+
+        {/* NOTIFICATIONS TAB */}
+        <TabsContent value="notifications" className="space-y-4 mt-4">
+          <Card className="card-elevated">
+            <CardContent className="p-5 space-y-4">
+              {[
+                { label: "Lembretes de encomendas", icon: "📦" },
+                { label: "Lembretes de produção", icon: "👩‍🍳" },
+                { label: "Alertas de estoque", icon: "📦" },
+                { label: "Resumo semanal", icon: "📊" },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center justify-between">
+                  <span className="text-sm text-foreground">{item.icon} {item.label}</span>
+                  <Switch />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <Button onClick={handleSave} disabled={saving} className="w-full rounded-xl h-14 btn-3d font-bold text-base gap-2">
+        <CheckCircle2 className="w-5 h-5" /> {saving ? "Salvando..." : "Salvar Configurações"}
+      </Button>
     </div>
   );
 };
 
-export default BusinessInfo;
+export default SettingsPage;

@@ -1,41 +1,53 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Crown, Shield, Gem, Check, Sparkles } from "lucide-react";
+import { Crown, Star, Medal, Gem, Check, Sparkles } from "lucide-react";
 
 const plans = [
+  {
+    name: "Básico",
+    price: "Grátis",
+    period: "",
+    icon: Star,
+    gradient: "from-gray-400 via-gray-300 to-gray-200",
+    borderColor: "border-gray-300",
+    iconColor: "text-gray-500",
+    btnClass: "bg-gray-500 hover:bg-gray-600 text-white",
+    features: ["Precificação básica", "Até 5 produtos", "Suporte por e-mail"],
+    current: true,
+  },
   {
     name: "Prata",
     price: "R$ 9,90",
     period: "semanal",
-    icon: Shield,
+    icon: Medal,
     gradient: "from-slate-400 via-slate-300 to-slate-200",
     borderColor: "border-slate-300",
     iconColor: "text-slate-500",
-    btnClass: "bg-slate-500 hover:bg-slate-600 text-white btn-3d",
-    features: ["Precificação básica", "Até 10 produtos", "Suporte por e-mail"],
+    btnClass: "bg-slate-500 hover:bg-slate-600 text-white",
+    features: ["Precificação ilimitada", "Até 20 produtos", "Suporte prioritário"],
   },
   {
     name: "Ouro",
     price: "R$ 27",
     period: "mensal",
-    icon: Gem,
+    icon: Medal,
     gradient: "from-amber-400 via-yellow-300 to-amber-200",
     borderColor: "border-amber-300",
     iconColor: "text-amber-500",
-    btnClass: "bg-accent hover:bg-accent/90 text-accent-foreground btn-3d-gold",
+    btnClass: "bg-amber-500 hover:bg-amber-600 text-white",
     popular: true,
-    features: ["Precificação ilimitada", "Cardápio digital", "Encomendas ilimitadas", "Suporte prioritário"],
+    features: ["Tudo do Prata", "Cardápio digital", "Encomendas ilimitadas", "Suporte VIP"],
   },
   {
     name: "Diamante",
     price: "R$ 97",
     period: "anual",
-    icon: Crown,
+    icon: Gem,
     gradient: "from-rose-400 via-pink-300 to-rose-200",
     borderColor: "border-primary/40",
     iconColor: "text-primary",
     btnClass: "bg-primary hover:bg-primary/90 text-primary-foreground btn-3d",
-    features: ["Tudo do Ouro", "Relatórios avançados", "WhatsApp automático", "Suporte VIP"],
+    features: ["Tudo do Ouro", "Relatórios avançados", "WhatsApp automático", "Suporte VIP 24h"],
   },
 ];
 
@@ -47,17 +59,17 @@ const Plans = () => {
           <Crown className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-2xl font-extrabold text-foreground">Escolha seu plano</h1>
-        <p className="text-sm text-muted-foreground max-w-xs mx-auto">Invista no seu negócio e tenha acesso a todas as ferramentas que você precisa 💎</p>
+        <p className="text-sm text-muted-foreground max-w-xs mx-auto">Invista no seu negócio e tenha acesso a todas as ferramentas 💎</p>
       </div>
 
       <div className="grid gap-5">
         {plans.map((plan) => {
           const Icon = plan.icon;
           return (
-            <Card key={plan.name} className={`relative overflow-hidden card-elevated border-2 ${plan.borderColor} ${plan.popular ? "ring-2 ring-accent ring-offset-2" : ""}`}>
+            <Card key={plan.name} className={`relative overflow-hidden card-elevated border-2 ${plan.borderColor} ${plan.popular ? "ring-2 ring-amber-400 ring-offset-2" : ""}`}>
               <div className={`absolute top-0 left-0 right-0 h-2 bg-gradient-to-r ${plan.gradient}`} />
               {plan.popular && (
-                <div className="absolute -top-0 right-4 bg-accent text-accent-foreground px-3 py-1 rounded-b-lg text-xs font-bold flex items-center gap-1 shadow-md">
+                <div className="absolute -top-0 right-4 bg-amber-400 text-amber-900 px-3 py-1 rounded-b-lg text-xs font-bold flex items-center gap-1 shadow-md">
                   <Sparkles className="w-3 h-3" /> Mais popular
                 </div>
               )}
@@ -70,7 +82,7 @@ const Plans = () => {
                     <CardTitle className="text-xl font-extrabold">{plan.name}</CardTitle>
                     <div>
                       <span className="text-2xl font-extrabold text-foreground">{plan.price}</span>
-                      <span className="text-sm text-muted-foreground font-medium">/{plan.period}</span>
+                      {plan.period && <span className="text-sm text-muted-foreground font-medium">/{plan.period}</span>}
                     </div>
                   </div>
                 </div>
@@ -84,9 +96,15 @@ const Plans = () => {
                     <span className="font-medium">{f}</span>
                   </div>
                 ))}
-                <Button className={`w-full rounded-xl mt-3 h-12 text-base font-bold ${plan.btnClass}`}>
-                  Assinar {plan.name}
-                </Button>
+                {plan.current ? (
+                  <Button disabled className="w-full rounded-xl mt-3 h-12 text-base font-bold bg-muted text-muted-foreground cursor-not-allowed">
+                    PLANO ATUAL
+                  </Button>
+                ) : (
+                  <Button className={`w-full rounded-xl mt-3 h-12 text-base font-bold ${plan.btnClass} animate-pulse`}>
+                    ASSINAR AGORA
+                  </Button>
+                )}
               </CardContent>
             </Card>
           );
