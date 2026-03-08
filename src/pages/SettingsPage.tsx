@@ -225,7 +225,7 @@ const SettingsPage = () => {
 
               <div className="space-y-1">
                 <label className="text-sm font-semibold text-foreground">Qual é o salário mensal desejado?</label>
-                <Input type="number" placeholder="R$" value={desiredSalary} onChange={(e) => setDesiredSalary(e.target.value)} className="h-12 rounded-xl" />
+                <CurrencyInput placeholder="R$" value={desiredSalary} onValueChange={setDesiredSalary} className="h-12 rounded-xl" />
               </div>
               <div className="space-y-1">
                 <label className="text-sm font-semibold text-foreground">Quantas horas por dia você trabalha?</label>
