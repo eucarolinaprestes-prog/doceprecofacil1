@@ -66,6 +66,7 @@ const Pricing = () => {
   const [customSaleType, setCustomSaleType] = useState("");
   const [productPhotoPreview, setProductPhotoPreview] = useState("");
   const [productPhotoFile, setProductPhotoFile] = useState<File | null>(null);
+  const [productYieldQty, setProductYieldQty] = useState("");
 
   // Recipe
   const [recipeName, setRecipeName] = useState("");
