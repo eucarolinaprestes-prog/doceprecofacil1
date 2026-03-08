@@ -720,7 +720,7 @@ const Pricing = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium">Tempo de produção (minutos)</label>
+            <label className="text-sm font-semibold text-primary">Tempo de produção (minutos) *</label>
             <Input type="number" placeholder="Ex: 90" value={prepTime} onChange={(e) => setPrepTime(e.target.value)} className="h-12 rounded-xl" />
             <Hint>Quanto tempo em minutos você leva para preparar esse produto do início ao fim?</Hint>
           </div>
