@@ -294,18 +294,30 @@ const Shopping = () => {
             <p className="text-sm font-medium opacity-90">Total — {selectedStore}</p>
             <p className="text-3xl font-extrabold">R$ {grandTotal.toFixed(2)}</p>
           </div>
+          {/* Action buttons */}
+          <div className="space-y-2">
+            <Button
+              onClick={() => { saveAll(); toast({ title: "Compra finalizada!", description: `${selectedStore} salvo no histórico.` }); }}
+              className="w-full rounded-2xl h-12 font-bold text-sm bg-emerald-500 hover:bg-emerald-600 text-white"
+              style={{ boxShadow: "0 4px 0 0 hsl(150 50% 30%)" }}
+            >
+              ✅ Finalizar Compras
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!selectedStore) return;
+                setStoreItems(prev => ({ ...prev, [selectedStore]: [emptyRow()] }));
+                toast({ title: "Carrinho limpo!" });
+              }}
+              className="w-full rounded-2xl h-12 font-bold text-sm border-primary text-primary hover:bg-primary/10"
+            >
+              🧹 Limpar Carrinho
+            </Button>
+          </div>
         </>
       )}
-
-      {/* Clear list button */}
-      <Button
-        variant="destructive"
-        onClick={clearAllLists}
-        className="w-full rounded-2xl h-12 font-bold text-sm"
-      >
-        <Trash2 className="w-4 h-4 mr-2" />
-        Limpar Lista Completa
-      </Button>
 
       {/* History toggle */}
       <button
@@ -316,7 +328,7 @@ const Shopping = () => {
             : "bg-primary/10 text-primary border-primary/20"
         }`}
       >
-        Histórico de Compras
+        📊 Histórico de Compras
       </button>
 
       {/* History */}
