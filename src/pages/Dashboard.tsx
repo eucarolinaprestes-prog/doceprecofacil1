@@ -56,7 +56,7 @@ const Dashboard = () => {
         style={{ boxShadow: "0 6px 0 0 hsl(340 75% 38%), 0 10px 20px -4px hsl(340 75% 55% / 0.4)" }}
       >
         <div className="text-left">
-          <p className="text-lg font-extrabold">Oi, {name}! 👋</p>
+          <p className="text-lg font-extrabold">Oi, {displayName}! 👋</p>
           <p className="text-sm font-bold opacity-90 mt-0.5">Vamos precificar hoje?</p>
         </div>
         <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
