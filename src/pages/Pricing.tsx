@@ -564,16 +564,18 @@ const Pricing = () => {
           </div>
 
           <div className="space-y-3">
-            <h3 className="text-base font-bold text-foreground">🥄 Ingredientes</h3>
-            <div className="flex flex-wrap gap-2">
-              <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
-                <SelectTrigger className="h-9 rounded-full bg-secondary text-primary text-xs font-bold border-0 px-4 w-auto"><span>+ Estoque</span></SelectTrigger>
-                <SelectContent>{stockIngredients.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
-              </Select>
-              <Select onValueChange={(id) => { const recipe = savedRecipes.find(r => r.id === id); if (recipe) addFromRecipe(recipe); }}>
-                <SelectTrigger className="h-9 rounded-full bg-primary/10 text-primary text-xs font-bold border-0 px-4 w-auto"><span>+ Receitas</span></SelectTrigger>
-                <SelectContent>{savedRecipes.map(r => <SelectItem key={r.id} value={r.id}>{r.name} (R$ {(r.total_cost / r.yield_quantity).toFixed(2)}/{r.yield_unit})</SelectItem>)}</SelectContent>
-              </Select>
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-foreground">🥄 Ingredientes</h3>
+              <div className="flex gap-2">
+                <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
+                  <SelectTrigger className="h-8 rounded-full bg-success/15 text-success text-xs font-bold border-0 px-3 w-auto"><span>+ Estoque</span></SelectTrigger>
+                  <SelectContent>{stockIngredients.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
+                </Select>
+                <Select onValueChange={(id) => { const recipe = savedRecipes.find(r => r.id === id); if (recipe) addFromRecipe(recipe); }}>
+                  <SelectTrigger className="h-8 rounded-full bg-[hsl(210,80%,55%)]/15 text-[hsl(210,80%,45%)] text-xs font-bold border-0 px-3 w-auto"><span>+ Receitas</span></SelectTrigger>
+                  <SelectContent>{savedRecipes.map(r => <SelectItem key={r.id} value={r.id}>{r.name} (R$ {(r.total_cost / r.yield_quantity).toFixed(2)}/{r.yield_unit})</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
             </div>
 
             {selectedIngredients.length === 0 && (
@@ -583,11 +585,13 @@ const Pricing = () => {
           </div>
 
           <div className="space-y-3">
-            <h3 className="text-base font-bold text-foreground">📦 Embalagens</h3>
-            <Select onValueChange={(id) => { const item = stockPackaging.find(i => i.id === id); if (item) addFromStock(item, "packaging"); }}>
-              <SelectTrigger className="h-9 rounded-full bg-secondary text-primary text-xs font-bold border-0 px-4 w-auto"><span>+ Estoque</span></SelectTrigger>
-              <SelectContent>{stockPackaging.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
-            </Select>
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-foreground">📦 Embalagens</h3>
+              <Select onValueChange={(id) => { const item = stockPackaging.find(i => i.id === id); if (item) addFromStock(item, "packaging"); }}>
+                <SelectTrigger className="h-8 rounded-full bg-success/15 text-success text-xs font-bold border-0 px-3 w-auto"><span>+ Estoque</span></SelectTrigger>
+                <SelectContent>{stockPackaging.map(i => <SelectItem key={i.id} value={i.id}>{i.name}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
 
             {selectedPackaging.length === 0 && (
               <p className="text-center text-sm text-muted-foreground py-3">Nenhuma embalagem adicionada</p>
@@ -595,9 +599,9 @@ const Pricing = () => {
             {selectedPackaging.map(item => renderItemRow(item, "packaging"))}
           </div>
 
-          <div className="bg-secondary p-4 rounded-xl flex justify-between items-center">
+          <div className="bg-success/10 border border-success/20 p-4 rounded-xl flex justify-between items-center">
             <span className="font-bold text-foreground">Custo total dos insumos</span>
-            <span className="text-xl font-extrabold text-primary">R$ {(ingredientsCost + packagingCost).toFixed(2)}</span>
+            <span className="text-xl font-extrabold text-success">R$ {(ingredientsCost + packagingCost).toFixed(2)}</span>
           </div>
         </div>
       )}
