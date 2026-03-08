@@ -11,8 +11,7 @@ const Dashboard = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const today = new Date();
-  const weekStart = startOfWeek(today, { weekStartsOn: 0 });
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+  const name = profile?.name || "Confeiteira";
   const name = profile?.name || "Confeiteira";
 
   const [incomes, setIncomes] = useState<any[]>([]);
