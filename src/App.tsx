@@ -63,6 +63,7 @@ const AppRoutes = () => (
     <Route path="/business-info" element={<ProtectedRoute><BusinessInfo /></ProtectedRoute>} />
     <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
     <Route path="/settings" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
+    <Route path="/cardapio/:userId" element={<PublicMenu />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );

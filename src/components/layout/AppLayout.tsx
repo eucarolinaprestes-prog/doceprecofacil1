@@ -35,6 +35,7 @@ const sidebarNav = [
   { label: "Encomendas", icon: ShoppingBag, path: "/orders" },
   { label: "Suas Finanças", icon: Wallet, path: "/finance" },
   { label: "Calculadora de Compras", icon: ShoppingCart, path: "/shopping" },
+  { label: "Cardápio Digital", icon: UtensilsCrossed, path: "/menu" },
   { label: "Planos", icon: Crown, path: "/plans" },
   { label: "Configurações", icon: Settings, path: "/settings" },
 ];
