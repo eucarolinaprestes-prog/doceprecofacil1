@@ -122,19 +122,12 @@ const Supplies = () => {
   };
 
   const openEditRecipe = (r: any) => {
-    setEditingRecipe(r);
-    setRecipeName(r.name);
-    setRecipeCategory(r.category || "");
-    setRecipeDialogOpen(true);
+    // Navigate to pricing page in recipe mode with pre-filled data
+    navigate(`/pricing?edit=recipe&id=${r.id}`);
   };
 
   const handleSaveRecipe = async () => {
-    if (!editingRecipe || !recipeName.trim()) return;
-    await supabase.from("recipes").update({ name: recipeName.trim(), category: recipeCategory }).eq("id", editingRecipe.id);
-    toast({ title: "Receita atualizada! ✅" });
-    setRecipeDialogOpen(false);
-    setEditingRecipe(null);
-    fetchAll();
+    // No longer needed - editing happens in Pricing page
   };
 
   const renderItemList = (items: any[], table: "ingredients" | "packaging", type: "ingredient" | "packaging") => {
