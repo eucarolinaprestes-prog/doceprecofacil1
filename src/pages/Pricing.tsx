@@ -134,6 +134,7 @@ const Pricing = () => {
           setRecipeCategory(recipe.category || "");
           setRecipeYieldQty(String(recipe.yield_quantity || ""));
           setRecipeYieldUnit(recipe.yield_unit || "");
+          if ((recipe as any).photo_url) setRecipePhotoPreview((recipe as any).photo_url);
           if (Array.isArray(recipe.ingredients_json)) {
             setSelectedIngredients((recipe.ingredients_json as any[]).map((item: any) => ({
               id: item.id || `loaded-${Date.now()}-${Math.random()}`,
