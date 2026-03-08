@@ -32,6 +32,14 @@ interface SelectedItem { id: string; name: string; unit: string; cost_per_unit: 
 
 const CHART_COLORS = ["hsl(340, 75%, 55%)", "hsl(40, 80%, 55%)", "hsl(152, 70%, 38%)"];
 
+/** Small hint component */
+const Hint = ({ children }: { children: React.ReactNode }) => (
+  <p className="text-xs text-muted-foreground flex items-start gap-1.5 mt-1">
+    <Info className="w-3.5 h-3.5 shrink-0 mt-0.5 text-primary/60" />
+    <span>{children}</span>
+  </p>
+);
+
 const Pricing = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -62,6 +70,7 @@ const Pricing = () => {
   const [showPkgManual, setShowPkgManual] = useState(false);
   const [manualIng, setManualIng] = useState({ name: "", qty: "", unit: "g", cost: "" });
   const [manualPkg, setManualPkg] = useState({ name: "", qty: "", unit: "un", cost: "" });
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   // Step 2 product
   const [hourlyRate, setHourlyRate] = useState(0);
@@ -134,6 +143,12 @@ const Pricing = () => {
     const setter = type === "ingredient" ? setSelectedIngredients : setSelectedPackaging;
     const list = type === "ingredient" ? selectedIngredients : selectedPackaging;
     setter(list.map(i => i.id === id ? { ...i, quantity_used: qty } : i));
+  };
+
+  const updateSelectedName = (id: string, name: string, type: "ingredient" | "packaging") => {
+    const setter = type === "ingredient" ? setSelectedIngredients : setSelectedPackaging;
+    const list = type === "ingredient" ? selectedIngredients : selectedPackaging;
+    setter(list.map(i => i.id === id ? { ...i, name } : i));
   };
 
   const removeSelected = (id: string, type: "ingredient" | "packaging") => {
@@ -210,6 +225,49 @@ const Pricing = () => {
 
   const stepLabels = mode === "product" ? stepLabelsProduct : stepLabelsRecipe;
 
+  /** Reusable selected item row with edit + delete */
+  const ItemRow = ({ item, type }: { item: SelectedItem; type: "ingredient" | "packaging" }) => {
+    const isEditing = editingId === item.id;
+    return (
+      <div className="bg-secondary/40 p-3 rounded-xl space-y-2">
+        <div className="flex items-center gap-2">
+          {isEditing ? (
+            <Input
+              value={item.name}
+              onChange={(e) => updateSelectedName(item.id, e.target.value, type)}
+              className="h-8 rounded-lg text-sm flex-1 bg-background"
+              autoFocus
+            />
+          ) : (
+            <span className="text-sm font-medium flex-1 min-w-0 break-words">{item.name}</span>
+          )}
+          <button onClick={() => setEditingId(isEditing ? null : item.id)} className="text-primary/70 hover:text-primary p-1 shrink-0">
+            <Pencil className="w-4 h-4" />
+          </button>
+          <button onClick={() => removeSelected(item.id, type)} className="text-destructive/70 hover:text-destructive p-1 shrink-0">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            placeholder="Qtd"
+            value={item.quantity_used || ""}
+            onChange={(e) => updateSelectedQty(item.id, Number(e.target.value), type)}
+            className="w-20 h-9 rounded-lg text-sm text-center bg-background"
+          />
+          <span className="text-xs text-muted-foreground shrink-0">{item.unit}</span>
+          <span className="text-xs font-bold text-primary ml-auto whitespace-nowrap">
+            R$ {(item.cost_per_unit * item.quantity_used).toFixed(2)}
+          </span>
+        </div>
+        {item.quantity_used === 0 && (
+          <Hint>Informe a quantidade que você usa nessa receita</Hint>
+        )}
+      </div>
+    );
+  };
+
   // ============ MODE SELECTOR ============
   if (mode === "select") {
     return (
@@ -275,6 +333,7 @@ const Pricing = () => {
         {step === 0 && (
           <div className="space-y-4">
             <h2 className="text-xl font-extrabold text-foreground">Nome da receita</h2>
+            <Hint>Dê um nome para identificar essa receita, ex: "Massa de chocolate belga"</Hint>
             <Input placeholder="Ex: Massa de chocolate" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
           </div>
         )}
@@ -283,6 +342,7 @@ const Pricing = () => {
         {step === 1 && (
           <div className="space-y-4">
             <h2 className="text-xl font-extrabold text-foreground">Categoria da receita</h2>
+            <Hint>Escolha a categoria que melhor descreve essa receita. Isso ajuda a organizar tudo!</Hint>
             <div className="flex flex-wrap gap-2">
               {recipeCategories.map(c => (
                 <button key={c} onClick={() => setRecipeCategory(c)}
@@ -292,7 +352,10 @@ const Pricing = () => {
               ))}
             </div>
             {recipeCategory === "Outros" && (
-              <Input placeholder="Especifique a categoria..." value={customRecipeCategory} onChange={(e) => setCustomRecipeCategory(e.target.value)} className="h-12 rounded-xl" />
+              <>
+                <Input placeholder="Especifique a categoria..." value={customRecipeCategory} onChange={(e) => setCustomRecipeCategory(e.target.value)} className="h-12 rounded-xl" />
+                <Hint>Digite o nome da categoria personalizada</Hint>
+              </>
             )}
           </div>
         )}
@@ -301,7 +364,7 @@ const Pricing = () => {
         {step === 2 && (
           <div className="space-y-4">
             <h2 className="text-xl font-extrabold text-foreground">Ingredientes da receita</h2>
-            <p className="text-sm text-muted-foreground">Selecione do seu estoque de ingredientes</p>
+            <Hint>Selecione os ingredientes do seu estoque e informe a quantidade usada nessa receita</Hint>
 
             <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
               <SelectTrigger className="h-12 rounded-xl bg-success/10 border-success/30 text-success font-bold">
@@ -310,14 +373,12 @@ const Pricing = () => {
               <SelectContent>{stockIngredients.map(i => <SelectItem key={i.id} value={i.id}>{i.name} (R$ {i.cost_per_unit.toFixed(4)}/{i.unit})</SelectItem>)}</SelectContent>
             </Select>
 
+            {selectedIngredients.length === 0 && (
+              <p className="text-center text-sm text-muted-foreground py-4">Nenhum ingrediente adicionado ainda. Toque no botão acima para começar!</p>
+            )}
+
             {selectedIngredients.map(item => (
-              <div key={item.id} className="flex items-center gap-2 bg-secondary/40 p-3 rounded-xl">
-                <span className="text-sm font-medium flex-1 truncate">{item.name}</span>
-                <Input type="number" placeholder="Qtd" value={item.quantity_used || ""} onChange={(e) => updateSelectedQty(item.id, Number(e.target.value), "ingredient")} className="w-16 h-9 rounded-lg text-sm text-center bg-background" />
-                <span className="text-xs text-muted-foreground">{item.unit}</span>
-                <span className="text-xs font-bold text-primary min-w-[55px] text-right">R$ {(item.cost_per_unit * item.quantity_used).toFixed(2)}</span>
-                <button onClick={() => removeSelected(item.id, "ingredient")} className="text-destructive p-1"><Trash2 className="w-4 h-4" /></button>
-              </div>
+              <ItemRow key={item.id} item={item} type="ingredient" />
             ))}
 
             <div className="bg-success/10 border border-success/20 p-4 rounded-xl flex justify-between items-center">
@@ -333,6 +394,7 @@ const Pricing = () => {
             <div className="text-center">
               <p className="text-3xl">📋</p>
               <h2 className="text-xl font-extrabold text-foreground mt-2">Resumo da Receita</h2>
+              <Hint>Confira se tudo está certo antes de salvar!</Hint>
             </div>
             <Card className="border border-border"><CardContent className="p-5 space-y-3">
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Receita</span><span className="font-bold">{recipeName}</span></div>
@@ -383,7 +445,7 @@ const Pricing = () => {
         <div className="space-y-5">
           <div>
             <h2 className="text-xl font-extrabold text-foreground">O que você quer precificar?</h2>
-            <p className="text-sm text-muted-foreground">Informe os detalhes do produto</p>
+            <p className="text-sm text-muted-foreground">Preencha os dados do seu produto para calcular o preço ideal</p>
           </div>
 
           <div className="flex justify-center">
@@ -396,15 +458,18 @@ const Pricing = () => {
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-primary">Nome do Produto *</label>
             <Input placeholder="Ex: Bolo de Chocolate" value={productName} onChange={(e) => setProductName(e.target.value)} className="h-12 rounded-xl" />
+            <Hint>Digite o nome do produto que você vai vender, como "Bolo de cenoura com cobertura"</Hint>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-primary">Descrição (opcional)</label>
             <Input placeholder="Descrição curta" value={productDesc} onChange={(e) => setProductDesc(e.target.value)} className="h-12 rounded-xl" />
+            <Hint>Uma breve descrição ajuda a lembrar detalhes do produto depois</Hint>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-primary">Categoria *</label>
+            <Hint>Selecione a categoria do seu produto. Toque no botão que melhor combina!</Hint>
             <div className="flex flex-wrap gap-2">
               {categories.map(c => (
                 <button key={c} onClick={() => setCategory(c)}
@@ -414,12 +479,16 @@ const Pricing = () => {
               ))}
             </div>
             {category === "Outros" && (
-              <Input placeholder="Especifique a categoria..." value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} className="h-12 rounded-xl mt-2" />
+              <>
+                <Input placeholder="Especifique a categoria..." value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} className="h-12 rounded-xl mt-2" />
+                <Hint>Digite o nome da categoria que melhor descreve seu produto</Hint>
+              </>
             )}
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-primary">Tipo de Venda *</label>
+            <Hint>Como você vende esse produto? Por unidade, fatias, porções ou por kg?</Hint>
             <div className="flex flex-wrap gap-2">
               {saleTypes.map(t => (
                 <button key={t.value} onClick={() => setSaleType(t.value)}
@@ -433,6 +502,7 @@ const Pricing = () => {
           <div className="space-y-1.5">
             <label className="text-sm font-semibold text-primary">Rendimento *</label>
             <Input type="number" placeholder="Ex: 12" value={yieldQty} onChange={(e) => setYieldQty(e.target.value)} className="h-12 rounded-xl" />
+            <Hint>Quantas unidades/fatias/porções essa receita rende? Ex: um bolo rende 12 fatias</Hint>
           </div>
         </div>
       )}
@@ -442,7 +512,7 @@ const Pricing = () => {
         <div className="space-y-5">
           <div>
             <h2 className="text-xl font-extrabold text-foreground">Ingredientes & Embalagens</h2>
-            <p className="text-sm text-muted-foreground">Adicione os insumos da receita</p>
+            <p className="text-sm text-muted-foreground">Adicione tudo que você usa para fazer esse produto</p>
           </div>
 
           <div className="space-y-3">
@@ -457,29 +527,31 @@ const Pricing = () => {
               </div>
             </div>
 
+            <Hint>Escolha os ingredientes do estoque ou adicione um avulso. Depois informe a quantidade usada nessa receita.</Hint>
+
             {showIngManual && (
               <Card className="border border-border"><CardContent className="p-4 space-y-3">
-                <Input placeholder="Nome" value={manualIng.name} onChange={(e) => setManualIng({ ...manualIng, name: e.target.value })} className="h-11 rounded-xl" />
+                <Hint>Adicione um ingrediente que não está no seu estoque</Hint>
+                <Input placeholder="Nome do ingrediente" value={manualIng.name} onChange={(e) => setManualIng({ ...manualIng, name: e.target.value })} className="h-11 rounded-xl" />
                 <div className="flex gap-2">
-                  <Input type="number" placeholder="Qtd" value={manualIng.qty} onChange={(e) => setManualIng({ ...manualIng, qty: e.target.value })} className="h-11 rounded-xl flex-1" />
+                  <Input type="number" placeholder="Qtd comprada" value={manualIng.qty} onChange={(e) => setManualIng({ ...manualIng, qty: e.target.value })} className="h-11 rounded-xl flex-1" />
                   <Select value={manualIng.unit} onValueChange={(v) => setManualIng({ ...manualIng, unit: v })}>
                     <SelectTrigger className="h-11 rounded-xl w-20"><SelectValue /></SelectTrigger>
                     <SelectContent>{["g", "ml", "kg", "l"].map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
                   </Select>
-                  <CurrencyInput placeholder="R$" value={manualIng.cost} onValueChange={(v) => setManualIng({ ...manualIng, cost: v })} className="h-11 rounded-xl flex-1" />
+                  <CurrencyInput placeholder="R$ total" value={manualIng.cost} onValueChange={(v) => setManualIng({ ...manualIng, cost: v })} className="h-11 rounded-xl flex-1" />
                 </div>
+                <Hint>Informe a quantidade total comprada e o valor total pago. Ex: 1000g por R$ 12.00</Hint>
                 <Button onClick={addManualIngredient} className="w-full rounded-xl h-10 font-bold">Adicionar</Button>
               </CardContent></Card>
             )}
 
+            {selectedIngredients.length === 0 && !showIngManual && (
+              <p className="text-center text-sm text-muted-foreground py-3">Nenhum ingrediente adicionado ainda. Toque em "+ Estoque" ou "+ Avulso" acima!</p>
+            )}
+
             {selectedIngredients.map(item => (
-              <div key={item.id} className="flex items-center gap-2 bg-secondary/40 p-3 rounded-xl">
-                <span className="text-sm font-medium flex-1 truncate">{item.name}</span>
-                <Input type="number" placeholder="Qtd" value={item.quantity_used || ""} onChange={(e) => updateSelectedQty(item.id, Number(e.target.value), "ingredient")} className="w-16 h-9 rounded-lg text-sm text-center bg-background" />
-                <span className="text-xs text-muted-foreground">{item.unit}</span>
-                <span className="text-xs font-bold text-primary min-w-[55px] text-right">R$ {(item.cost_per_unit * item.quantity_used).toFixed(2)}</span>
-                <button onClick={() => removeSelected(item.id, "ingredient")} className="text-destructive p-1"><Trash2 className="w-4 h-4" /></button>
-              </div>
+              <ItemRow key={item.id} item={item} type="ingredient" />
             ))}
           </div>
 
@@ -495,29 +567,31 @@ const Pricing = () => {
               </div>
             </div>
 
+            <Hint>Adicione as embalagens que você usa para esse produto (caixa, saco, tampa...)</Hint>
+
             {showPkgManual && (
               <Card className="border border-border"><CardContent className="p-4 space-y-3">
-                <Input placeholder="Nome" value={manualPkg.name} onChange={(e) => setManualPkg({ ...manualPkg, name: e.target.value })} className="h-11 rounded-xl" />
+                <Hint>Adicione uma embalagem que não está no seu estoque</Hint>
+                <Input placeholder="Nome da embalagem" value={manualPkg.name} onChange={(e) => setManualPkg({ ...manualPkg, name: e.target.value })} className="h-11 rounded-xl" />
                 <div className="flex gap-2">
                   <Input type="number" placeholder="Qtd" value={manualPkg.qty} onChange={(e) => setManualPkg({ ...manualPkg, qty: e.target.value })} className="h-11 rounded-xl flex-1" />
                   <Select value={manualPkg.unit} onValueChange={(v) => setManualPkg({ ...manualPkg, unit: v })}>
                     <SelectTrigger className="h-11 rounded-xl w-24"><SelectValue /></SelectTrigger>
                     <SelectContent>{["un", "pacote", "caixa"].map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
                   </Select>
-                  <CurrencyInput placeholder="R$" value={manualPkg.cost} onValueChange={(v) => setManualPkg({ ...manualPkg, cost: v })} className="h-11 rounded-xl flex-1" />
+                  <CurrencyInput placeholder="R$ total" value={manualPkg.cost} onValueChange={(v) => setManualPkg({ ...manualPkg, cost: v })} className="h-11 rounded-xl flex-1" />
                 </div>
+                <Hint>Informe a quantidade comprada e o valor total pago pela embalagem</Hint>
                 <Button onClick={addManualPackaging} className="w-full rounded-xl h-10 font-bold">Adicionar</Button>
               </CardContent></Card>
             )}
 
+            {selectedPackaging.length === 0 && !showPkgManual && (
+              <p className="text-center text-sm text-muted-foreground py-3">Nenhuma embalagem adicionada. Toque em "+ Estoque" ou "+ Avulso" acima!</p>
+            )}
+
             {selectedPackaging.map(item => (
-              <div key={item.id} className="flex items-center gap-2 bg-secondary/40 p-3 rounded-xl">
-                <span className="text-sm font-medium flex-1 truncate">{item.name}</span>
-                <Input type="number" placeholder="Qtd" value={item.quantity_used || ""} onChange={(e) => updateSelectedQty(item.id, Number(e.target.value), "packaging")} className="w-16 h-9 rounded-lg text-sm text-center bg-background" />
-                <span className="text-xs text-muted-foreground">{item.unit}</span>
-                <span className="text-xs font-bold text-primary min-w-[55px] text-right">R$ {(item.cost_per_unit * item.quantity_used).toFixed(2)}</span>
-                <button onClick={() => removeSelected(item.id, "packaging")} className="text-destructive p-1"><Trash2 className="w-4 h-4" /></button>
-              </div>
+              <ItemRow key={item.id} item={item} type="packaging" />
             ))}
           </div>
 
@@ -533,24 +607,32 @@ const Pricing = () => {
         <div className="space-y-5">
           <div>
             <h2 className="text-xl font-extrabold text-foreground">Mão de Obra & Custos Fixos</h2>
-            <p className="text-sm text-muted-foreground">Calculado automaticamente</p>
+            <p className="text-sm text-muted-foreground">Vamos calcular o custo do seu tempo e gastos fixos</p>
           </div>
 
           <div className={`p-4 rounded-xl ${salaryConfigured ? "bg-secondary" : "bg-secondary border border-warning/30"}`}>
             {salaryConfigured ? (
-              <p className="text-sm text-muted-foreground">✅ Valor da sua hora: <strong className="text-primary">R$ {hourlyRate.toFixed(2)}</strong></p>
+              <>
+                <p className="text-sm text-muted-foreground">✅ Valor da sua hora: <strong className="text-primary">R$ {hourlyRate.toFixed(2)}</strong></p>
+                <Hint>Esse valor foi calculado com base no salário que você configurou nas Configurações</Hint>
+              </>
             ) : (
-              <p className="text-sm text-muted-foreground">⚠️ Configure seu salário nas Configurações → Financeiro</p>
+              <>
+                <p className="text-sm text-muted-foreground">⚠️ Configure seu salário nas Configurações → Financeiro</p>
+                <Hint>Sem o salário configurado, a mão de obra não será incluída no cálculo</Hint>
+              </>
             )}
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium">Tempo de produção (minutos)</label>
             <Input type="number" placeholder="Ex: 90" value={prepTime} onChange={(e) => setPrepTime(e.target.value)} className="h-12 rounded-xl" />
+            <Hint>Quanto tempo em minutos você leva para preparar esse produto do início ao fim?</Hint>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-medium">% Custos Fixos alocados</label>
+            <Hint>Arraste para definir quanto dos seus custos fixos (luz, gás, etc.) será alocado nesse produto</Hint>
             <Slider value={fixedCostPercent} onValueChange={setFixedCostPercent} min={0} max={50} step={1} />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>0%</span>
@@ -584,7 +666,7 @@ const Pricing = () => {
         <div className="space-y-5">
           <div>
             <h2 className="text-xl font-extrabold text-foreground">Estratégia de Preço</h2>
-            <p className="text-sm text-muted-foreground">Defina sua margem e custos adicionais</p>
+            <p className="text-sm text-muted-foreground">Defina quanto de lucro você quer ter e adicione taxas extras</p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -599,6 +681,7 @@ const Pricing = () => {
           </div>
 
           <div className="space-y-2">
+            <Hint>Arraste para definir sua margem de lucro. Recomendamos entre 30% e 50% para confeitaria</Hint>
             <Slider value={profitMargin} onValueChange={setProfitMargin} min={0} max={200} step={5} />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>0%</span><span className="text-primary font-bold">Sugerido: 30–50%</span><span>200%</span>
@@ -607,10 +690,11 @@ const Pricing = () => {
 
           <Card className="border border-border"><CardContent className="p-4 space-y-3">
             <p className="font-bold text-sm">Custos Adicionais (opcional)</p>
+            <Hint>Ative somente se você vender por aplicativo, fizer entrega ou aceitar cartão</Hint>
             {[
-              { label: "iFood / Uber Eats", enabled: ifoodEnabled, setEnabled: setIfoodEnabled, value: ifoodFee, setValue: setIfoodFee, suffix: "%" },
-              { label: "Delivery próprio", enabled: deliveryEnabled, setEnabled: setDeliveryEnabled, value: deliveryFee, setValue: setDeliveryFee, suffix: "R$" },
-              { label: "Maquininha (cartão)", enabled: cardEnabled, setEnabled: setCardEnabled, value: cardFee, setValue: setCardFee, suffix: "%" },
+              { label: "iFood / Uber Eats", enabled: ifoodEnabled, setEnabled: setIfoodEnabled, value: ifoodFee, setValue: setIfoodFee, suffix: "%", hint: "Taxa cobrada pelo aplicativo de delivery (geralmente 12%)" },
+              { label: "Delivery próprio", enabled: deliveryEnabled, setEnabled: setDeliveryEnabled, value: deliveryFee, setValue: setDeliveryFee, suffix: "R$", hint: "Valor que você gasta com entrega (gasolina, entregador...)" },
+              { label: "Maquininha (cartão)", enabled: cardEnabled, setEnabled: setCardEnabled, value: cardFee, setValue: setCardFee, suffix: "%", hint: "Taxa da maquininha de cartão (geralmente 2% a 5%)" },
             ].map(fee => (
               <div key={fee.label}>
                 <div className="flex items-center justify-between">
@@ -618,9 +702,12 @@ const Pricing = () => {
                   <Switch checked={fee.enabled} onCheckedChange={fee.setEnabled} />
                 </div>
                 {fee.enabled && (
-                  <div className="flex items-center gap-2 pl-4 mt-1">
-                    <Input type="number" value={fee.value} onChange={(e) => fee.setValue(e.target.value)} className="w-20 h-9 rounded-lg text-sm text-center" />
-                    <span className="text-xs text-muted-foreground">{fee.suffix}</span>
+                  <div className="mt-1 space-y-1">
+                    <div className="flex items-center gap-2 pl-4">
+                      <Input type="number" value={fee.value} onChange={(e) => fee.setValue(e.target.value)} className="w-20 h-9 rounded-lg text-sm text-center" />
+                      <span className="text-xs text-muted-foreground">{fee.suffix}</span>
+                    </div>
+                    <div className="pl-4"><Hint>{fee.hint}</Hint></div>
                   </div>
                 )}
               </div>
@@ -664,6 +751,7 @@ const Pricing = () => {
           <div className="text-center">
             <p className="text-3xl">🍰</p>
             <h2 className="text-xl font-extrabold text-foreground mt-2">Resumo do Produto</h2>
+            <Hint>Confira todos os dados antes de salvar. Tudo certo? Toque em Salvar!</Hint>
           </div>
 
           <Card className="border border-border"><CardContent className="p-5 space-y-3">
