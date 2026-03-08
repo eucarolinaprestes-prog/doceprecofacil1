@@ -99,11 +99,6 @@ const Clients = () => {
                   <Button variant="ghost" size="icon" onClick={() => openEdit(c)}>
                     <Pencil className="w-4 h-4 text-primary" />
                   </Button>
-                  {c.whatsapp && (
-                    <Button variant="ghost" size="icon" onClick={() => window.open(`https://wa.me/${c.whatsapp.replace(/\D/g, "")}`, "_blank")}>
-                      <MessageCircle className="w-4 h-4 text-success" />
-                    </Button>
-                  )}
                   <Button variant="ghost" size="icon" onClick={() => handleDelete(c.id)}>
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
