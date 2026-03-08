@@ -43,7 +43,7 @@ const Products = () => {
     <div className="space-y-6">
       <div className="text-center space-y-2">
         <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center mx-auto shadow-lg">
-          <Package className="w-7 h-7 text-white" />
+          <Cake className="w-7 h-7 text-white" />
         </div>
         <h1 className="text-2xl font-extrabold text-foreground">Produtos</h1>
         <p className="text-sm text-muted-foreground">Seus produtos precificados</p>
