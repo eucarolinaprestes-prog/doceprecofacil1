@@ -612,6 +612,12 @@ const Pricing = () => {
               </div>
             </div>
 
+  const handleRecipePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setRecipePhotoFile(file);
+    setRecipePhotoPreview(URL.createObjectURL(file));
+  };
 
 
             {showIngManual && (
