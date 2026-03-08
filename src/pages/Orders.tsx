@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Cake, Link2, Trash2, Copy, ChevronLeft, CreditCard, Smartphone, Pencil } from "lucide-react";
+import { Cake, Trash2, ChevronLeft, CreditCard, Smartphone, Pencil } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
@@ -34,8 +34,7 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  const [whatsappPreview, setWhatsappPreview] = useState<string | null>(null);
-  const [whatsappOrder, setWhatsappOrder] = useState<any>(null);
+  const [editingOrder, setEditingOrder] = useState<any>(null);
   const [statusFilter, setStatusFilter] = useState("all");
 
   // Form
@@ -88,9 +87,9 @@ const Orders = () => {
   const cardPercent = feeCard.enabled ? Number(feeCard.value) || 0 : 0;
   const finalValue = (baseVal + extraFees) * (1 + cardPercent / 100);
 
-  const handleCreate = async () => {
+  const handleSave = async () => {
     if (!user) return;
-    const { error } = await supabase.from("orders").insert({
+    const data = {
       user_id: user.id,
       client_id: clientId || null,
       event_date: eventDate || null,
@@ -108,12 +107,45 @@ const Orders = () => {
       fee_decoration: feeDecoration.enabled ? Number(feeDecoration.value) || 0 : 0,
       fee_delivery: feeDelivery.enabled ? Number(feeDelivery.value) || 0 : 0,
       fee_card_percent: cardPercent,
-    });
-    if (error) { toast({ title: "Erro ao criar", variant: "destructive" }); return; }
-    toast({ title: "Encomenda criada! 🎉" });
+    };
+
+    let error;
+    if (editingOrder) {
+      ({ error } = await supabase.from("orders").update(data).eq("id", editingOrder.id));
+    } else {
+      ({ error } = await supabase.from("orders").insert(data));
+    }
+    if (error) { toast({ title: "Erro ao salvar", variant: "destructive" }); return; }
+    toast({ title: editingOrder ? "Encomenda atualizada! ✅" : "Encomenda criada! 🎉" });
     setDialogOpen(false);
+    setEditingOrder(null);
     resetForm();
     fetchData();
+  };
+
+  const openEditDialog = (o: any) => {
+    setEditingOrder(o);
+    setClientId(o.client_id || "");
+    setEventDate(o.event_date ? o.event_date.split("T")[0] : "");
+    setEventTime(o.event_date && o.event_date.includes("T") ? o.event_date.split("T")[1]?.substring(0, 5) : "");
+    setStatus(o.status || "pending");
+    setOrderCategory(o.category || "");
+    setSize(o.size || "");
+    setDough(o.dough || "");
+    setFilling(o.filling || "");
+    setTopping(o.topping || "");
+    setTotalValue(String(o.total_value || ""));
+    setPaymentPercent(String(o.payment_percent || "100"));
+    setPaymentMethod(o.payment_method || "pix");
+    setDeliveryType(o.delivery_type || "pickup");
+    setNotes(o.notes || "");
+    setObservation(o.observation || "");
+    setFeePackaging({ enabled: !!o.fee_packaging, value: String(o.fee_packaging || "") });
+    setFeeTopper({ enabled: !!o.fee_topper, value: String(o.fee_topper || "") });
+    setFeeDecoration({ enabled: !!o.fee_decoration, value: String(o.fee_decoration || "") });
+    setFeeDelivery({ enabled: !!o.fee_delivery, value: String(o.fee_delivery || "") });
+    setFeeCard({ enabled: !!o.fee_card_percent, value: String(o.fee_card_percent || "") });
+    setDialogOpen(true);
   };
 
   const resetForm = () => {
@@ -138,66 +170,85 @@ const Orders = () => {
     setSelectedOrder(null);
   };
 
-  const duplicateOrder = async (o: any) => {
-    const { id, created_at, updated_at, clients: _, ...rest } = o;
-    await supabase.from("orders").insert({ ...rest, status: "pending" });
-    toast({ title: "Encomenda duplicada! ✅" });
-    fetchData();
-  };
 
   const buildMessage = (order: any) => {
     const clientName = order.clients?.name || "Cliente";
     const clientAddr = order.clients?.address || "";
     const confAddr = profile?.address || "";
-    
-    let msg = `✅ *Confirmação de Pedido*\n\n`;
-    msg += `👤 Cliente: ${clientName}\n`;
-    msg += `📋 ${order.category || ""}\n`;
-    if (order.size) msg += `📏 Tamanho: ${order.size}\n`;
-    if (order.filling) msg += `🍰 Recheio: ${order.filling}\n`;
-    if (order.topping) msg += `🎨 Cobertura: ${order.topping}\n`;
-    msg += `📅 Data: ${order.event_date ? new Date(order.event_date).toLocaleDateString("pt-BR") : "A definir"}\n`;
-    msg += `💰 Total: R$ ${Number(order.total_value || 0).toFixed(2)}\n`;
-    msg += `💳 Pagamento: ${order.payment_method?.toUpperCase() || "PIX"} - ${order.payment_percent || 100}%\n`;
+    const storeName = profile?.store_name || "";
+    const dateStr = order.event_date ? new Date(order.event_date).toLocaleDateString("pt-BR") : "a definir";
+    const timeStr = order.event_date && order.event_date.includes("T") ? new Date(order.event_date).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
+    const totalStr = `R$ ${Number(order.total_value || 0).toFixed(2)}`;
 
-    if (order.delivery_type === "pickup" && confAddr) {
-      msg += `\n📍 *Retirada no endereço:*\n${confAddr}\n`;
-    } else if (order.delivery_type === "delivery" && clientAddr) {
-      msg += `\n📍 *Entrega no endereço:*\n${clientAddr}\n`;
+    const details = [];
+    if (order.category) details.push(`📋 *Produto:* ${order.category}`);
+    if (order.size) details.push(`📏 *Tamanho:* ${order.size}`);
+    if (order.dough) details.push(`🍞 *Massa:* ${order.dough}`);
+    if (order.filling) details.push(`🍰 *Recheio:* ${order.filling}`);
+    if (order.topping) details.push(`🎨 *Cobertura:* ${order.topping}`);
+    details.push(`📅 *Data:* ${dateStr}${timeStr ? ` às ${timeStr}` : ""}`);
+    details.push(`💰 *Valor total:* ${totalStr}`);
+    details.push(`💳 *Pagamento:* ${order.payment_method?.toUpperCase() || "PIX"}`);
+    const detailsStr = details.join("\n");
+
+    const deliveryInfo = order.delivery_type === "pickup" && confAddr
+      ? `\n\n📍 *Local de retirada:*\n${confAddr}`
+      : order.delivery_type === "delivery" && clientAddr
+      ? `\n\n📍 *Endereço de entrega:*\n${clientAddr}`
+      : "";
+
+    if (order.status === "pending" || order.status === "scheduled") {
+      // Orçamento
+      let msg = `Olá, ${clientName}! 😊\n\n`;
+      msg += `Tudo bem? Segue o orçamento do seu pedido:\n\n`;
+      msg += detailsStr;
+      if (order.observation) msg += `\n📝 *Observação:* ${order.observation}`;
+      msg += deliveryInfo;
+      msg += `\n\nAssim que confirmar com o pagamento, me envia o comprovante para eu agendar a produção, tá? 💕`;
+      msg += `\n\nQualquer dúvida, estou à disposição! 🙏`;
+      return msg;
     }
 
-    if (order.notes) msg += `\n📝 ${order.notes}\n`;
-
-    // Payment warning
-    if (order.payment_percent < 100) {
-      msg += `\n⚠️ *Informamos que a encomenda somente será entregue após o pagamento total do pedido.*\n`;
+    if (order.status === "production") {
+      // Agendado / em produção
+      let msg = `Olá, ${clientName}! 😊\n\n`;
+      msg += `Passando para confirmar que o seu pedido foi agendado e já está em produção! 🎉\n\n`;
+      msg += detailsStr;
+      msg += deliveryInfo;
+      msg += `\n\nEstou preparando tudo com muito carinho pra você! 💕`;
+      msg += `\n\nQualquer novidade, te aviso por aqui! 😘`;
+      return msg;
     }
 
-    // Care instructions
-    msg += `\n✨ Olá ${clientName}, seu pedido foi finalizado com muito carinho!\n`;
-    msg += `\n🚗 *Dicas importantes para transporte:*\n`;
-    msg += `• Transportar sempre em superfície plana\n`;
-    msg += `• Evitar sol e calor\n`;
-    msg += `• Não colocar objetos sobre a caixa\n`;
-    msg += `• Manter refrigerado se necessário\n`;
+    if (order.status === "finished" || order.status === "delivered") {
+      // Finalizado
+      let msg = `Olá, ${clientName}! 😊\n\n`;
+      msg += `Que alegria! Seu pedido ficou pronto e foi feito com muito amor e carinho! ✨🎂\n\n`;
+      msg += detailsStr;
+      msg += deliveryInfo;
+      msg += `\n\n🚗 *Dicas importantes para o transporte:*\n`;
+      msg += `• Transportar sempre em superfície plana\n`;
+      msg += `• Evitar sol e calor\n`;
+      msg += `• Não colocar objetos sobre a caixa\n`;
+      msg += `• Manter refrigerado se necessário\n`;
+      msg += `\n⚠️ *Após a retirada ou entrega, não nos responsabilizamos por danos causados durante transporte inadequado ou armazenamento incorreto.*`;
+      msg += `\n\nEspero que você ame! Me manda uma foto depois? 📸💕`;
+      return msg;
+    }
 
-    msg += `\n⚠️ *Após a retirada ou entrega do produto, não nos responsabilizamos por danos causados durante transporte inadequado ou armazenamento incorreto.*`;
-
+    // Fallback genérico
+    let msg = `Olá, ${clientName}! 😊\n\n`;
+    msg += detailsStr;
+    msg += deliveryInfo;
     return msg;
   };
 
-  const openWhatsAppPreview = (order: any) => {
-    setWhatsappPreview(buildMessage(order));
-    setWhatsappOrder(order);
+  const sendWhatsAppDirect = (order: any) => {
+    const msg = buildMessage(order);
+    const phone = order.clients?.whatsapp?.replace(/\D/g, "") || "";
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
   };
 
-  const sendWhatsApp = () => {
-    if (!whatsappOrder || !whatsappPreview) return;
-    const phone = whatsappOrder.clients?.whatsapp?.replace(/\D/g, "") || "";
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(whatsappPreview)}`, "_blank");
-    setWhatsappPreview(null);
-    setWhatsappOrder(null);
-  };
 
   const pendingCount = orders.filter(o => o.status === "pending" || o.status === "scheduled").length;
   const productionCount = orders.filter(o => o.status === "production").length;
@@ -261,16 +312,13 @@ const Orders = () => {
                       {o.status === "pending" || o.status === "scheduled" ? "Iniciar produção" : o.status === "production" ? "Finalizar" : "Marcar entregue"}
                     </Button>
                   )}
-                  <Button size="sm" variant="outline" onClick={() => openWhatsAppPreview(o)} className="rounded-xl h-9">
+                  <Button size="sm" variant="outline" onClick={() => sendWhatsAppDirect(o)} className="rounded-xl h-9 text-success border-success/30 hover:bg-success/10">
                     <WhatsAppIcon className="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(buildMessage(o)); toast({ title: "Copiado! 📋" }); }} className="rounded-xl h-9">
-                    <Link2 className="w-4 h-4" />
+                  <Button size="sm" variant="outline" onClick={() => openEditDialog(o)} className="rounded-xl h-9">
+                    <Pencil className="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => duplicateOrder(o)} className="rounded-xl h-9">
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => deleteOrder(o.id)} className="rounded-xl h-9 text-destructive">
+                  <Button size="sm" variant="outline" onClick={() => deleteOrder(o.id)} className="rounded-xl h-9 text-destructive border-destructive/30 hover:bg-destructive/10">
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -280,25 +328,12 @@ const Orders = () => {
         </div>
       )}
 
-      {/* WhatsApp Preview Dialog */}
-      <Dialog open={!!whatsappPreview} onOpenChange={() => setWhatsappPreview(null)}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>📱 Pré-visualização da mensagem</DialogTitle>
-            <p className="text-xs text-muted-foreground">Revise e edite antes de enviar</p>
-          </DialogHeader>
-          <Textarea value={whatsappPreview || ""} onChange={(e) => setWhatsappPreview(e.target.value)} className="min-h-[300px] rounded-xl text-sm" />
-          <Button onClick={sendWhatsApp} className="w-full rounded-xl h-12 font-bold bg-success hover:bg-success/90 text-success-foreground gap-2">
-            <WhatsAppIcon className="w-5 h-5" /> Enviar no WhatsApp
-          </Button>
-        </DialogContent>
-      </Dialog>
 
-      {/* New Order Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {/* Order Dialog (Create / Edit) */}
+      <Dialog open={dialogOpen} onOpenChange={(v) => { setDialogOpen(v); if (!v) { setEditingOrder(null); resetForm(); } }}>
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Nova Encomenda</DialogTitle>
+            <DialogTitle>{editingOrder ? "Editar Encomenda" : "Nova Encomenda"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             {/* Client */}
@@ -450,8 +485,8 @@ const Orders = () => {
               </div>
             </div>
 
-            <Button onClick={handleCreate} className="w-full rounded-xl h-14 btn-3d font-bold gap-2 text-base">
-              <Cake className="w-5 h-5" /> Criar Pedido
+            <Button onClick={handleSave} className="w-full rounded-xl h-14 btn-3d font-bold gap-2 text-base">
+              <Cake className="w-5 h-5" /> {editingOrder ? "Salvar Alterações" : "Criar Pedido"}
             </Button>
           </div>
         </DialogContent>
