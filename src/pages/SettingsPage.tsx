@@ -117,9 +117,10 @@ const SettingsPage = () => {
   };
 
   const addFixedCost = () => {
-    if (!newFixedName.trim() || !newFixedAmount) return;
-    setFixedCosts([...fixedCosts, { category: newFixedName.trim(), amount: Number(newFixedAmount), frequency: newFixedFreq }]);
-    setNewFixedName(""); setNewFixedAmount(""); setNewFixedFreq("mensal");
+    const costName = newFixedCategory === "Outros" && newFixedCustomName.trim() ? newFixedCustomName.trim() : newFixedCategory;
+    if (!costName || !newFixedAmount) return;
+    setFixedCosts([...fixedCosts, { category: costName, amount: Number(newFixedAmount), frequency: newFixedFreq }]);
+    setNewFixedCategory(""); setNewFixedCustomName(""); setNewFixedAmount(""); setNewFixedFreq("mensal");
   };
 
   const addVariableCost = () => {
