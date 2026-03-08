@@ -44,7 +44,7 @@ const bottomNav = [
   { label: "Painel", icon: LayoutDashboard, path: "/" },
   { label: "Preços", icon: DollarSign, path: "/pricing", highlight: true },
   { label: "Encomendas", icon: ShoppingBag, path: "/orders" },
-  { label: "Finanças", icon: Wallet, path: "/finance" },
+  { label: "Planos", icon: Crown, path: "/plans" },
 ];
 
 interface AppLayoutProps {
