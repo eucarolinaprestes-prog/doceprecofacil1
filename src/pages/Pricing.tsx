@@ -160,7 +160,7 @@ const Pricing = () => {
     setSelectedIngredients([...selectedIngredients, {
       id: `manual-${Date.now()}`, name: manualIng.name, unit: manualIng.unit,
       cost_per_unit: Number(manualIng.cost) / (Number(manualIng.qty) || 1),
-      quantity_used: Number(manualIng.qty) || 1, isManual: true,
+      quantity_used: manualIng.qty || "1", isManual: true,
     }]);
     setManualIng({ name: "", qty: "", unit: "g", cost: "" });
     setShowIngManual(false);
