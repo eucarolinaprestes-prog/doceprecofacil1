@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Info, BookOpen
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 type PricingMode = "select" | "product" | "recipe";
