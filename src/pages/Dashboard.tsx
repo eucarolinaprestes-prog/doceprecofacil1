@@ -152,7 +152,7 @@ const Dashboard = () => {
         <button
           onClick={() => navigate("/shopping")}
           className="rounded-2xl h-16 text-white font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
-          style={{ background: "linear-gradient(135deg, hsl(340 70% 58%), hsl(340 65% 65%))", boxShadow: "0 4px 0 0 hsl(340 70% 48%), 0 8px 16px -4px hsl(340 70% 58% / 0.35)" }}
+          style={{ background: "linear-gradient(135deg, hsl(40 80% 55%), hsl(45 75% 60%))", boxShadow: "0 4px 0 0 hsl(40 80% 42%), 0 8px 16px -4px hsl(40 80% 55% / 0.35)" }}
         >
           <ShoppingCart className="w-5 h-5" />
           <span>Calculadora de Compras</span>
