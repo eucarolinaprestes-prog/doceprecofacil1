@@ -306,10 +306,10 @@ const Pricing = () => {
             <span className="text-sm font-semibold flex-1 min-w-0 truncate">{item.name}</span>
           )}
           <Input
-            type="number"
+            inputMode="decimal"
             placeholder="Qtd"
             value={item.quantity_used || ""}
-            onChange={(e) => updateSelectedQty(item.id, Number(e.target.value), type)}
+            onChange={(e) => updateSelectedQty(item.id, Number(e.target.value) || 0, type)}
             className="w-[72px] h-9 rounded-lg text-sm text-center bg-background shrink-0"
           />
           <span className="text-xs text-muted-foreground shrink-0 w-6">{item.unit}</span>
