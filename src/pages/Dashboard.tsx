@@ -203,7 +203,7 @@ const Dashboard = () => {
                   onClick={() => hasOrder && inMonth ? setSelectedDate(selectedDate === dateStr ? null : dateStr) : setSelectedDate(null)}
                   className={`flex flex-col items-center py-2 rounded-xl text-xs font-semibold relative transition-all cursor-pointer ${
                     !inMonth ? "opacity-20" :
-                    isToday(day) ? "gradient-primary text-primary-foreground shadow-lg scale-105" :
+                    isToday(day) ? "text-white shadow-lg scale-105" :
                     hasOrder && isFuture ? "bg-success text-success-foreground font-extrabold shadow-sm" :
                     hasOrder ? "bg-success/15 text-success font-extrabold border border-success/30" :
                     "text-foreground hover:bg-muted/50"
