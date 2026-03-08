@@ -6,7 +6,7 @@ import { CurrencyInput } from "@/components/ui/currency-input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Lightbulb, BookOpen, Pencil } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Lightbulb, BookOpen, Pencil, Camera } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,7 +16,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 type PricingMode = "select" | "product" | "recipe";
 
 const stepLabelsProduct = ["Produto", "Ingredientes", "Mão de Obra", "Estratégia", "Salvar"];
-const stepLabelsRecipe = ["Ingredientes", "Resumo"];
+const stepLabelsRecipe = ["Receita", "Ingredientes", "Rendimento", "Resumo"];
 const categories = ["Massa", "Recheio", "Bolo", "Fatias", "Cupcakes", "Salgados", "Doces", "Outros"];
 const recipeCategories = ["Massa", "Recheio", "Cobertura", "Mousse", "Calda", "Creme", "Outros"];
 const saleTypes = [
@@ -72,6 +72,8 @@ const Pricing = () => {
   const [recipeYieldQty, setRecipeYieldQty] = useState("");
   const [recipeYieldUnit, setRecipeYieldUnit] = useState("");
   const [customRecipeYieldUnit, setCustomRecipeYieldUnit] = useState("");
+  const [recipePhotoPreview, setRecipePhotoPreview] = useState("");
+  const [recipePhotoFile, setRecipePhotoFile] = useState<File | null>(null);
 
   // Step 1 shared
   const [stockIngredients, setStockIngredients] = useState<StockItem[]>([]);
@@ -132,6 +134,7 @@ const Pricing = () => {
           setRecipeCategory(recipe.category || "");
           setRecipeYieldQty(String(recipe.yield_quantity || ""));
           setRecipeYieldUnit(recipe.yield_unit || "");
+          if ((recipe as any).photo_url) setRecipePhotoPreview((recipe as any).photo_url);
           if (Array.isArray(recipe.ingredients_json)) {
             setSelectedIngredients((recipe.ingredients_json as any[]).map((item: any) => ({
               id: item.id || `loaded-${Date.now()}-${Math.random()}`,
@@ -253,6 +256,19 @@ const Pricing = () => {
     if (!user) return;
     setSaving(true);
     try {
+      let photoUrl = recipePhotoPreview;
+
+      // Upload photo if new file selected
+      if (recipePhotoFile) {
+        const fileExt = recipePhotoFile.name.split(".").pop();
+        const filePath = `recipes/${user.id}/${Date.now()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from("uploads").upload(filePath, recipePhotoFile);
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage.from("uploads").getPublicUrl(filePath);
+          photoUrl = urlData.publicUrl;
+        }
+      }
+
       const finalCat = recipeCategory === "Outros" && customRecipeCategory.trim() ? customRecipeCategory.trim() : recipeCategory;
       const payload = {
         name: recipeName,
@@ -261,6 +277,7 @@ const Pricing = () => {
         total_cost: ingredientsCost,
         yield_quantity: recipeYieldNum,
         yield_unit: finalRecipeYieldUnit,
+        photo_url: photoUrl,
       };
       if (editingRecipeId) {
         await supabase.from("recipes").update(payload).eq("id", editingRecipeId);
@@ -272,6 +289,13 @@ const Pricing = () => {
       navigate("/supplies?tab=recipes");
     } catch { toast({ title: "Erro ao salvar", variant: "destructive" }); }
     finally { setSaving(false); }
+  };
+
+  const handleRecipePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setRecipePhotoFile(file);
+    setRecipePhotoPreview(URL.createObjectURL(file));
   };
 
   const goNext = () => {
@@ -389,13 +413,36 @@ const Pricing = () => {
           </div>
         </div>
 
-        {/* Step 0: Name + Ingredients + Yield (all in one) */}
+        {/* Step 0: Nome + Foto */}
         {step === 0 && (
           <div className="space-y-5">
+            <h2 className="text-xl font-extrabold text-foreground">Dados da Receita</h2>
+
+            <label className="block cursor-pointer">
+              <div className="w-full h-36 rounded-2xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center gap-2 bg-secondary/20 hover:bg-secondary/40 transition-colors overflow-hidden relative">
+                {recipePhotoPreview ? (
+                  <img src={recipePhotoPreview} alt="Foto da receita" className="w-full h-full object-cover" />
+                ) : (
+                  <>
+                    <Camera className="w-8 h-8 text-primary/50" />
+                    <span className="text-sm text-primary/60 font-medium">Toque para adicionar foto</span>
+                  </>
+                )}
+              </div>
+              <input type="file" accept="image/*" onChange={handleRecipePhoto} className="hidden" />
+            </label>
+
             <div className="space-y-1.5">
               <label className="text-sm font-semibold text-primary">Nome da receita *</label>
               <Input placeholder="Ex: Massa de chocolate" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
             </div>
+          </div>
+        )}
+
+        {/* Step 1: Ingredientes */}
+        {step === 1 && (
+          <div className="space-y-5">
+            <h2 className="text-xl font-extrabold text-foreground">Ingredientes da receita</h2>
 
             <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
               <SelectTrigger className="h-12 rounded-xl bg-success/10 border-success/30 text-success font-bold">
@@ -410,36 +457,42 @@ const Pricing = () => {
 
             {selectedIngredients.map(item => renderItemRow(item, "ingredient"))}
 
-            {/* Yield / Rendimento */}
-            <Card className="border border-primary/20 bg-primary/5">
-              <CardContent className="p-4 space-y-3">
-                <h3 className="text-base font-bold text-foreground">📏 Rendimento da receita</h3>
-                <Hint>Ex: 2 kg de recheio, 3 discos, 500 ml de calda</Hint>
-                <div className="flex gap-2">
-                  <input
-                    inputMode="decimal"
-                    placeholder="Ex: 2"
-                    value={recipeYieldQty}
-                    onChange={(e) => setRecipeYieldQty(e.target.value)}
-                    className="h-12 rounded-xl flex-1 border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-                  />
-                  <div className="flex-1">
-                    <Select value={recipeYieldUnit} onValueChange={setRecipeYieldUnit}>
-                      <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Medida..." /></SelectTrigger>
-                      <SelectContent>
-                        {yieldUnits.map(u => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-                {recipeYieldUnit === "outros" && (
-                  <div>
-                    <Input placeholder="Digite a unidade de medida..." value={customRecipeYieldUnit} onChange={(e) => setCustomRecipeYieldUnit(e.target.value)} className="h-11 rounded-xl" />
-                    <Hint>Ex: bandeja, forma, porção...</Hint>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <div className="bg-secondary p-4 rounded-xl flex justify-between items-center">
+              <span className="font-bold text-foreground">Custo dos ingredientes</span>
+              <span className="text-xl font-extrabold text-primary">R$ {ingredientsCost.toFixed(2)}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Rendimento */}
+        {step === 2 && (
+          <div className="space-y-5">
+            <h2 className="text-xl font-extrabold text-foreground">Rendimento da receita</h2>
+            <Hint>Ex: 2 kg de recheio, 3 discos, 500 ml de calda</Hint>
+
+            <div className="flex gap-2">
+              <input
+                inputMode="decimal"
+                placeholder="Ex: 2"
+                value={recipeYieldQty}
+                onChange={(e) => setRecipeYieldQty(e.target.value)}
+                className="h-12 rounded-xl flex-1 border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+              />
+              <div className="flex-1">
+                <Select value={recipeYieldUnit} onValueChange={setRecipeYieldUnit}>
+                  <SelectTrigger className="h-12 rounded-xl"><SelectValue placeholder="Medida..." /></SelectTrigger>
+                  <SelectContent>
+                    {yieldUnits.map(u => <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {recipeYieldUnit === "outros" && (
+              <div>
+                <Input placeholder="Digite a unidade de medida..." value={customRecipeYieldUnit} onChange={(e) => setCustomRecipeYieldUnit(e.target.value)} className="h-11 rounded-xl" />
+                <Hint>Ex: bandeja, forma, porção...</Hint>
+              </div>
+            )}
 
             <div className="bg-success/10 border border-success/20 p-4 rounded-xl space-y-2">
               <div className="flex justify-between items-center">
@@ -456,12 +509,14 @@ const Pricing = () => {
           </div>
         )}
 
-        {/* Step 1: Summary */}
-        {step === 1 && (
+        {/* Step 3: Resumo */}
+        {step === 3 && (
           <div className="space-y-5">
             <div className="text-center">
-              <p className="text-3xl">📋</p>
-              <h2 className="text-xl font-extrabold text-foreground mt-2">Resumo da Receita</h2>
+              {recipePhotoPreview && (
+                <img src={recipePhotoPreview} alt="Foto" className="w-20 h-20 rounded-2xl object-cover mx-auto mb-3 shadow-md" />
+              )}
+              <h2 className="text-xl font-extrabold text-foreground">Resumo da Receita</h2>
             </div>
             <Card className="border border-border"><CardContent className="p-5 space-y-3">
               <div className="flex justify-between text-sm"><span className="text-muted-foreground">Receita</span><span className="font-bold">{recipeName}</span></div>
@@ -488,8 +543,8 @@ const Pricing = () => {
           </div>
         )}
 
-        {step < 1 && (
-          <Button onClick={goNext} disabled={!recipeName.trim()} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
+        {step < 3 && (
+          <Button onClick={goNext} disabled={step === 0 ? !recipeName.trim() : false} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
             Próximo <ChevronRight className="w-5 h-5" />
           </Button>
         )}
@@ -595,7 +650,6 @@ const Pricing = () => {
               </div>
             </div>
 
-            
 
             {showIngManual && (
               <Card className="border border-border"><CardContent className="p-4 space-y-3">
