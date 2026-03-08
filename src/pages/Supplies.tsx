@@ -90,14 +90,14 @@ const Supplies = () => {
     setDialogOpen(false); resetForm(); fetchAll();
   };
 
-  const handleDelete = async (id: string, table: string) => {
+  const handleDelete = async (id: string, table: "ingredients" | "packaging") => {
     await supabase.from(table).delete().eq("id", id);
     toast({ title: "Excluído" }); fetchAll();
   };
 
-  const handleDuplicate = async (item: any, table: string) => {
+  const handleDuplicate = async (item: any, table: "ingredients" | "packaging") => {
     const { id, created_at, updated_at, ...rest } = item;
-    await supabase.from(table).insert({ ...rest, name: `${rest.name} (cópia)` });
+    await supabase.from(table).insert({ ...rest, name: `${rest.name} (cópia)` } as any);
     toast({ title: "Duplicado! ✅" }); fetchAll();
   };
 
