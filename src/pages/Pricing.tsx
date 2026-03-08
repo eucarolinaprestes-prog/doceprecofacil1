@@ -642,7 +642,6 @@ const Pricing = () => {
 
             {showIngManual && (
               <Card className="border border-border"><CardContent className="p-4 space-y-3">
-                <Hint>Adicione um ingrediente que não está no seu estoque</Hint>
                 <Input placeholder="Nome do ingrediente" value={manualIng.name} onChange={(e) => setManualIng({ ...manualIng, name: e.target.value })} className="h-11 rounded-xl" />
                 <div className="flex gap-2">
                   <Input type="number" placeholder="Qtd comprada" value={manualIng.qty} onChange={(e) => setManualIng({ ...manualIng, qty: e.target.value })} className="h-11 rounded-xl flex-1" />
