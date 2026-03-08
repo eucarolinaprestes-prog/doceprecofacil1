@@ -117,7 +117,7 @@ const Orders = () => {
 
   const resetForm = () => {
     setClientId(""); setEventDate(""); setEventTime(""); setStatus("pending");
-    setOrderCategory(""); setSize(""); setDough(""); setFilling(""); setTopping("");
+    setOrderCategory(""); setCustomOrderCategory(""); setSize(""); setDough(""); setFilling(""); setTopping("");
     setTotalValue(""); setPaymentPercent("100"); setCustomPercent(""); setPaymentMethod("pix");
     setDeliveryType("pickup"); setNotes(""); setObservation("");
     setFeePackaging({ enabled: false, value: "" }); setFeeTopper({ enabled: false, value: "" });
