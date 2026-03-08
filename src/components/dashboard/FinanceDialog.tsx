@@ -46,11 +46,11 @@ const FinanceDialog = ({ type, onClose, onSaved }: FinanceDialogProps) => {
     try {
       if (type === "income") {
         await supabase.from("financial_income").insert({
-          user_id: user.id, amount: Number(amount), category, date, payment_method: paymentMethod, client_name: clientName, notes,
+          user_id: user.id, amount: Number(amount), category: finalCategory, date, payment_method: paymentMethod, client_name: clientName, notes,
         });
       } else {
         await supabase.from("financial_expense").insert({
-          user_id: user.id, amount: Number(amount), category, date, supplier, description,
+          user_id: user.id, amount: Number(amount), category: finalCategory, date, supplier, description,
         });
       }
       toast({ title: type === "income" ? "Entrada registrada! 💚" : "Saída registrada! 📝" });
