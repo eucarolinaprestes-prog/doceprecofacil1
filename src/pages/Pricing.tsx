@@ -674,11 +674,11 @@ const Pricing = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-success/10 border border-success/20 p-4 rounded-xl text-center">
-              <p className="text-xs font-bold text-success">Lucro</p>
-              <p className="text-2xl font-extrabold text-success">R$ {profitValue.toFixed(2)}</p>
+            <div className="bg-success p-4 rounded-xl text-center shadow-md">
+              <p className="text-xs font-bold text-success-foreground/80">Lucro</p>
+              <p className="text-2xl font-extrabold text-success-foreground">R$ {profitValue.toFixed(2)}</p>
             </div>
-            <div className="bg-primary p-4 rounded-xl text-center">
+            <div className="bg-primary p-4 rounded-xl text-center shadow-md">
               <p className="text-xs font-bold text-primary-foreground/80">Margem</p>
               <p className="text-3xl font-extrabold text-primary-foreground">{profitMargin[0]}%</p>
             </div>
