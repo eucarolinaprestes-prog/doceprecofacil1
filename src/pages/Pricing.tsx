@@ -836,31 +836,8 @@ const Pricing = () => {
               </div>
             </CardContent></Card>
           )}
-        </div>
-      )}
 
-      {/* STEP 4: Summary + Tips */}
-      {step === 4 && (
-        <div className="space-y-5">
-          <div className="text-center">
-            {productPhotoPreview && (<img src={productPhotoPreview} alt="Foto" className="w-20 h-20 rounded-2xl object-cover mx-auto mb-3 shadow-md" />)}
-            <h2 className="text-xl font-extrabold text-foreground">Resumo do Produto</h2>
-            <Hint>Confira todos os dados antes de salvar. Tudo certo? Toque em Salvar!</Hint>
-          </div>
-
-          <Card className="border border-border"><CardContent className="p-5 space-y-3">
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Produto</span><span className="font-bold">{productName}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Tipo de venda</span><span className="font-bold">{finalSaleType}</span></div>
-            <div className="border-t border-border my-2" />
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Custo Total</span><span className="font-bold text-success">R$ {baseCost.toFixed(2)}</span></div>
-            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Lucro ({profitMargin[0]}%)</span><span className="font-bold text-success">R$ {profitValue.toFixed(2)}</span></div>
-            <div className="flex justify-between items-center">
-              <span className="font-extrabold">Preço de Venda</span>
-              <span className="text-2xl font-extrabold text-success">R$ {suggestedPrice.toFixed(2)}</span>
-            </div>
-          </CardContent></Card>
-
-          {/* Dicas */}
+          {/* Dicas abaixo do gráfico */}
           <Card className="border border-success/30 bg-success/5"><CardContent className="p-5 space-y-3">
             <div className="flex items-center gap-2 mb-1">
               <Star className="w-5 h-5 text-success" />
@@ -885,6 +862,29 @@ const Pricing = () => {
               <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Separe o lucro da empresa do seu pró-labore. O lucro da empresa deve ser reinvestido no negócio.</p>
               <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Reserve pelo menos 10% do faturamento para um fundo de emergência.</p>
               <p className="text-xs text-foreground">💡 <strong>Dica:</strong> Nunca cobre abaixo do custo total, mesmo para amigos e família. Ofereça descontos pequenos no lucro.</p>
+            </div>
+          </CardContent></Card>
+        </div>
+      )}
+
+      {/* STEP 4: Summary */}
+      {step === 4 && (
+        <div className="space-y-5">
+          <div className="text-center">
+            {productPhotoPreview && (<img src={productPhotoPreview} alt="Foto" className="w-20 h-20 rounded-2xl object-cover mx-auto mb-3 shadow-md" />)}
+            <h2 className="text-xl font-extrabold text-foreground">Resumo do Produto</h2>
+            <Hint>Confira todos os dados antes de salvar. Tudo certo? Toque em Salvar!</Hint>
+          </div>
+
+          <Card className="border border-border"><CardContent className="p-5 space-y-3">
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Produto</span><span className="font-bold">{productName}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Tipo de venda</span><span className="font-bold">{finalSaleType}</span></div>
+            <div className="border-t border-border my-2" />
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Custo Total</span><span className="font-bold text-success">R$ {baseCost.toFixed(2)}</span></div>
+            <div className="flex justify-between text-sm"><span className="text-muted-foreground">Lucro ({profitMargin[0]}%)</span><span className="font-bold text-success">R$ {profitValue.toFixed(2)}</span></div>
+            <div className="flex justify-between items-center">
+              <span className="font-extrabold">Preço de Venda</span>
+              <span className="text-2xl font-extrabold text-success">R$ {suggestedPrice.toFixed(2)}</span>
             </div>
           </CardContent></Card>
 
