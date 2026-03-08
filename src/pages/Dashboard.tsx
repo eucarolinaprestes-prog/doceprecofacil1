@@ -43,13 +43,6 @@ const Dashboard = () => {
   const totalExpense = expenses.reduce((s, e) => s + Number(e.amount), 0);
   const profit = totalIncome - totalExpense;
 
-  const orderDates = orders.reduce((acc: Record<string, number>, o) => {
-    if (o.event_date) {
-      const d = format(new Date(o.event_date), "yyyy-MM-dd");
-      acc[d] = (acc[d] || 0) + 1;
-    }
-    return acc;
-  }, {});
 
   return (
     <div className="space-y-5">
