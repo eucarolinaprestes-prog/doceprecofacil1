@@ -248,10 +248,17 @@ const Orders = () => {
     return msg;
   };
 
-  const sendWhatsAppDirect = (order: any) => {
-    const msg = buildMessage(order);
-    const phone = order.clients?.whatsapp?.replace(/\D/g, "") || "";
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, "_blank");
+  const openWhatsAppPreview = (order: any) => {
+    setWhatsappPreview(buildMessage(order));
+    setWhatsappOrder(order);
+  };
+
+  const sendWhatsApp = () => {
+    if (!whatsappOrder || !whatsappPreview) return;
+    const phone = whatsappOrder.clients?.whatsapp?.replace(/\D/g, "") || "";
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(whatsappPreview)}`, "_blank");
+    setWhatsappPreview(null);
+    setWhatsappOrder(null);
   };
 
 
