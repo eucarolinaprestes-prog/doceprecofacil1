@@ -43,6 +43,7 @@ const Orders = () => {
   const [eventTime, setEventTime] = useState("");
   const [status, setStatus] = useState("pending");
   const [orderCategory, setOrderCategory] = useState("");
+  const [customOrderCategory, setCustomOrderCategory] = useState("");
   const [size, setSize] = useState("");
   const [dough, setDough] = useState("");
   const [filling, setFilling] = useState("");
