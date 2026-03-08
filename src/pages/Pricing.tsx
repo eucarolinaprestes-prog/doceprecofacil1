@@ -151,7 +151,7 @@ const Pricing = () => {
   const addFromStock = (item: StockItem, type: "ingredient" | "packaging") => {
     const list = type === "ingredient" ? selectedIngredients : selectedPackaging;
     if (list.find(i => i.id === item.id)) return;
-    const newItem = { id: item.id, name: item.name, unit: item.unit, cost_per_unit: item.cost_per_unit, quantity_used: 0 };
+    const newItem: SelectedItem = { id: item.id, name: item.name, unit: item.unit, cost_per_unit: item.cost_per_unit, quantity_used: "" };
     type === "ingredient" ? setSelectedIngredients([...list, newItem]) : setSelectedPackaging([...list, newItem]);
   };
 
