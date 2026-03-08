@@ -338,11 +338,11 @@ const Orders = () => {
       )}
 
 
-      {/* New Order Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {/* Order Dialog (Create / Edit) */}
+      <Dialog open={dialogOpen} onOpenChange={(v) => { setDialogOpen(v); if (!v) { setEditingOrder(null); resetForm(); } }}>
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Nova Encomenda</DialogTitle>
+            <DialogTitle>{editingOrder ? "Editar Encomenda" : "Nova Encomenda"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             {/* Client */}
