@@ -209,34 +209,108 @@ export type Database = {
         }
         Relationships: []
       }
+      menu_products: {
+        Row: {
+          available_today: boolean
+          category_id: string | null
+          created_at: string
+          description: string | null
+          featured: boolean
+          id: string
+          name: string
+          photo_url: string | null
+          price: number
+          sort_order: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          available_today?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          name: string
+          photo_url?: string | null
+          price?: number
+          sort_order?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          available_today?: boolean
+          category_id?: string | null
+          created_at?: string
+          description?: string | null
+          featured?: boolean
+          id?: string
+          name?: string
+          photo_url?: string | null
+          price?: number
+          sort_order?: number | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "menu_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       menu_settings: {
         Row: {
           business_hours: string | null
+          button_color: string | null
           cover_photo_url: string | null
           created_at: string
           description: string | null
           id: string
           logo_url: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          showcase_mode: boolean | null
+          store_name: string | null
+          tagline: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           business_hours?: string | null
+          button_color?: string | null
           cover_photo_url?: string | null
           created_at?: string
           description?: string | null
           id?: string
           logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          showcase_mode?: boolean | null
+          store_name?: string | null
+          tagline?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           business_hours?: string | null
+          button_color?: string | null
           cover_photo_url?: string | null
           created_at?: string
           description?: string | null
           id?: string
           logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          showcase_mode?: boolean | null
+          store_name?: string | null
+          tagline?: string | null
           updated_at?: string
           user_id?: string
         }
