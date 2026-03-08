@@ -19,6 +19,7 @@ import Packaging from "@/pages/Packaging";
 import Finance from "@/pages/Finance";
 import Shopping from "@/pages/Shopping";
 import DigitalMenu from "@/pages/DigitalMenu";
+import PublicMenu from "@/pages/PublicMenu";
 import BusinessInfo from "@/pages/BusinessInfo";
 import Plans from "@/pages/Plans";
 import SettingsPage from "@/pages/SettingsPage";
