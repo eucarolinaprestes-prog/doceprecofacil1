@@ -274,8 +274,35 @@ const Pricing = () => {
   ];
 
   const canAdvanceProduct = () => {
-    if (step === 0) return productName.trim() && saleType;
+    if (step === 0) return !!(productName.trim() && saleType && productYieldQty && Number(productYieldQty) > 0);
+    if (step === 1) return selectedIngredients.length > 0;
+    if (step === 2) return !!(prepTime && Number(prepTime) > 0);
     return true;
+  };
+
+  const getStepError = () => {
+    if (mode === "product") {
+      if (step === 0) {
+        if (!productName.trim()) return "Preencha o nome do produto";
+        if (!saleType) return "Selecione o tipo de venda";
+        if (!productYieldQty || Number(productYieldQty) <= 0) return "Informe o rendimento";
+      }
+      if (step === 1) {
+        if (selectedIngredients.length === 0) return "Adicione pelo menos 1 ingrediente";
+      }
+      if (step === 2) {
+        if (!prepTime || Number(prepTime) <= 0) return "Informe o tempo de produção";
+      }
+    }
+    if (mode === "recipe") {
+      if (step === 0 && !recipeName.trim()) return "Preencha o nome da receita";
+      if (step === 1 && selectedIngredients.length === 0) return "Adicione pelo menos 1 ingrediente";
+      if (step === 2) {
+        if (!recipeYieldQty || Number(recipeYieldQty) <= 0) return "Informe o rendimento";
+        if (!recipeYieldUnit) return "Selecione a unidade de medida";
+      }
+    }
+    return null;
   };
 
   const handleProductPhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
