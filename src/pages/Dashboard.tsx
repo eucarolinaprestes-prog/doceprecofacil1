@@ -245,36 +245,31 @@ const Dashboard = () => {
             const dayOrders = orders.filter(o => o.event_date && format(new Date(o.event_date), "yyyy-MM-dd") === selectedDate);
             if (dayOrders.length === 0) return null;
             return (
-              <div className="mt-4 rounded-xl border border-success/30 bg-success/5 p-3 space-y-3 relative">
-                <button onClick={() => setSelectedDate(null)} className="absolute top-2 right-2 w-6 h-6 rounded-full bg-muted flex items-center justify-center">
-                  <X className="w-3 h-3 text-muted-foreground" />
-                </button>
-                <p className="text-xs font-bold text-success">
-                  📋 Encomendas em {new Date(selectedDate + "T12:00:00").toLocaleDateString("pt-BR")}
-                </p>
-                {dayOrders.map(o => (
-                  <div key={o.id} className="rounded-lg bg-background p-3 border border-border space-y-1">
-                    <p className="text-sm font-bold text-foreground">{o.clients?.name || "Cliente"}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {o.category || "Encomenda"} {o.size ? `• ${o.size}` : ""}
-                    </p>
-                    <div className="flex justify-between text-xs mt-1">
-                      <span className="text-muted-foreground">Valor total</span>
-                      <span className="font-bold text-foreground">R$ {Number(o.total_value || 0).toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">Pago ({o.payment_percent || 100}%)</span>
-                      <span className="font-bold text-success">R$ {(Number(o.total_value || 0) * (o.payment_percent || 100) / 100).toFixed(2)}</span>
-                    </div>
-                    {(o.payment_percent || 100) < 100 && (
-                      <div className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">Falta</span>
-                        <span className="font-bold text-destructive">R$ {(Number(o.total_value || 0) * (1 - (o.payment_percent || 100) / 100)).toFixed(2)}</span>
+              <div className="mt-3 space-y-2">
+                {dayOrders.map(o => {
+                  const total = Number(o.total_value || 0);
+                  const paidPercent = o.payment_percent || 100;
+                  const paid = total * paidPercent / 100;
+                  const remaining = total - paid;
+                  return (
+                    <div key={o.id} className="rounded-xl bg-success/10 border border-success/30 p-3 flex flex-col gap-1.5 relative">
+                      <button onClick={() => setSelectedDate(null)} className="absolute top-2 right-2 w-5 h-5 rounded-full bg-muted/80 flex items-center justify-center">
+                        <X className="w-3 h-3 text-muted-foreground" />
+                      </button>
+                      <p className="text-sm font-extrabold text-foreground">👤 {o.clients?.name || "Cliente"}</p>
+                      <p className="text-xs text-muted-foreground">🎂 {o.category || "Encomenda"}{o.size ? ` • ${o.size}` : ""}{o.filling ? ` • ${o.filling}` : ""}</p>
+                      <p className="text-xs text-muted-foreground">📅 {new Date(selectedDate + "T12:00:00").toLocaleDateString("pt-BR")}</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-xs font-bold text-foreground">💰 R$ {total.toFixed(2)}</span>
+                        {paidPercent < 100 ? (
+                          <span className="text-xs font-bold text-destructive">Falta R$ {remaining.toFixed(2)}</span>
+                        ) : (
+                          <span className="text-xs font-bold text-success">✅ Pago</span>
+                        )}
                       </div>
-                    )}
-                    <p className="text-[10px] text-muted-foreground capitalize">Status: {o.status === "pending" ? "Pendente" : o.status === "in_production" ? "Em produção" : o.status === "delivered" ? "Entregue" : o.status}</p>
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
               </div>
             );
           })()}
