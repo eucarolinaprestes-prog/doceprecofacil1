@@ -376,7 +376,6 @@ const Orders = () => {
             }`}
             style={statusFilter === tab.value ? { boxShadow: "0 4px 0 0 hsl(150 50% 30%), 0 6px 12px -2px hsl(150 50% 40% / 0.3)" } : { boxShadow: "0 4px 0 0 hsl(30 60% 40%)" }}
           >
-            <span className="text-sm block">{tab.icon}</span>
             <span className="block text-xs text-white">{tab.label}</span>
             <span className="block text-xl font-extrabold mt-0.5 text-white">{tab.count}</span>
           </button>
@@ -395,7 +394,6 @@ const Orders = () => {
             }`}
             style={statusFilter === tab.value ? { boxShadow: "0 4px 0 0 hsl(150 50% 30%), 0 6px 12px -2px hsl(150 50% 40% / 0.3)" } : { boxShadow: "0 4px 0 0 hsl(30 60% 40%)" }}
           >
-            <span className="text-sm block">{tab.icon}</span>
             <span className="block text-xs text-white">{tab.label}</span>
             <span className="block text-xl font-extrabold mt-0.5 text-white">{tab.count}</span>
           </button>
