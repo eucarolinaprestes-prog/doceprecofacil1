@@ -177,10 +177,24 @@ const Orders = () => {
     const clientName = order.clients?.name || "Cliente";
     const clientAddr = order.clients?.address || "";
     const confAddr = profile?.address || "";
-    const storeName = profile?.store_name || "";
+    const storeName = profile?.store_name || "nossa confeitaria";
     const dateStr = order.event_date ? new Date(order.event_date).toLocaleDateString("pt-BR") : "a definir";
     const timeStr = order.event_date && order.event_date.includes("T") ? new Date(order.event_date).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
-    const totalStr = `R$ ${Number(order.total_value || 0).toFixed(2)}`;
+    const total = Number(order.total_value || 0);
+    const totalStr = `R$ ${total.toFixed(2)}`;
+    const paidPercent = Number(order.payment_percent || 100);
+    const paidValue = total * (paidPercent / 100);
+    const remainingValue = total - paidValue;
+    const remainingPercent = 100 - paidPercent;
+
+    // Extras/fees detail
+    const extras = [];
+    if (Number(order.fee_packaging || 0) > 0) extras.push(`• Embalagem: R$ ${Number(order.fee_packaging).toFixed(2)}`);
+    if (Number(order.fee_topper || 0) > 0) extras.push(`• Topo de bolo: R$ ${Number(order.fee_topper).toFixed(2)}`);
+    if (Number(order.fee_decoration || 0) > 0) extras.push(`• Decoração: R$ ${Number(order.fee_decoration).toFixed(2)}`);
+    if (Number(order.fee_delivery || 0) > 0) extras.push(`• Taxa de entrega: R$ ${Number(order.fee_delivery).toFixed(2)}`);
+    if (Number(order.fee_card_percent || 0) > 0) extras.push(`• Taxa da maquininha: ${Number(order.fee_card_percent)}%`);
+    const extrasStr = extras.length > 0 ? `\n\n🧾 *Taxas adicionais:*\n${extras.join("\n")}` : "";
 
     const details = [];
     if (order.category) details.push(`📋 *Produto:* ${order.category}`);
@@ -188,48 +202,68 @@ const Orders = () => {
     if (order.dough) details.push(`🍞 *Massa:* ${order.dough}`);
     if (order.filling) details.push(`🍰 *Recheio:* ${order.filling}`);
     if (order.topping) details.push(`🎨 *Cobertura:* ${order.topping}`);
+    if (order.observation) details.push(`📝 *Observação:* ${order.observation}`);
     details.push(`📅 *Data:* ${dateStr}${timeStr ? ` às ${timeStr}` : ""}`);
     details.push(`💰 *Valor total:* ${totalStr}`);
-    details.push(`💳 *Pagamento:* ${order.payment_method?.toUpperCase() || "PIX"}`);
+    details.push(`💳 *Forma de pagamento:* ${order.payment_method?.toUpperCase() || "PIX"}`);
     const detailsStr = details.join("\n");
 
+    // Payment info
+    let paymentInfo = "";
+    if (paidPercent < 100 && paidPercent > 0) {
+      paymentInfo = `\n\n💵 *Pagamento:*\n`;
+      paymentInfo += `✅ Valor pago (${paidPercent}%): *R$ ${paidValue.toFixed(2)}*\n`;
+      paymentInfo += `⏳ Valor restante (${remainingPercent}%): *R$ ${remainingValue.toFixed(2)}*\n`;
+      paymentInfo += `\n⚠️ *O produto só será entregue após o pagamento total do pedido.*`;
+    }
+
+    // Delivery info
     let deliveryInfo = "";
     if (order.delivery_type === "pickup" && confAddr) {
       deliveryInfo = `\n\n📍 *Retirada no endereço:*\n${confAddr}`;
-      if (timeStr) deliveryInfo += `\n🕐 *Horário para retirada:* ${timeStr}`;
+      if (timeStr) deliveryInfo += `\n🕐 *Horário para retirada:* até ${timeStr}`;
     } else if (order.delivery_type === "delivery" && clientAddr) {
       deliveryInfo = `\n\n📍 *O pedido será entregue no endereço:*\n${clientAddr}`;
       if (timeStr) deliveryInfo += `\n🕐 *Previsão de entrega:* ${timeStr}`;
     }
 
+    // === PENDENTE / ORÇAMENTO ===
     if (order.status === "pending" || order.status === "scheduled") {
-      // Orçamento
       let msg = `Olá, ${clientName}! 😊\n\n`;
-      msg += `Tudo bem? Segue o orçamento do seu pedido:\n\n`;
+      msg += `Tudo bem com você? Segue o orçamento detalhado do seu pedido:\n\n`;
       msg += detailsStr;
-      if (order.observation) msg += `\n📝 *Observação:* ${order.observation}`;
+      msg += extrasStr;
+      msg += paymentInfo;
       msg += deliveryInfo;
-      msg += `\n\nAssim que confirmar com o pagamento, me envia o comprovante para eu agendar a produção, tá? 💕`;
+      msg += `\n\nAssim que confirmar, me envia o comprovante de pagamento para eu agendar a produção, tá? 💕`;
       msg += `\n\nQualquer dúvida, estou à disposição! 🙏`;
       return msg;
     }
 
+    // === EM PRODUÇÃO / AGENDADO ===
     if (order.status === "production") {
-      // Agendado / em produção
       let msg = `Olá, ${clientName}! 😊\n\n`;
-      msg += `Passando para confirmar que o seu pedido foi agendado e já está em produção! 🎉\n\n`;
+      msg += `Ótima notícia! Seu pedido foi confirmado e já está em produção! 🎉\n\n`;
+      msg += `Confira os detalhes:\n\n`;
       msg += detailsStr;
+      msg += extrasStr;
+      msg += paymentInfo;
       msg += deliveryInfo;
-      msg += `\n\nEstou preparando tudo com muito carinho pra você! 💕`;
+      msg += `\n\nEstou preparando tudo com muito carinho e capricho pra você! 💕`;
       msg += `\n\nQualquer novidade, te aviso por aqui! 😘`;
       return msg;
     }
 
-    if (order.status === "finished" || order.status === "delivered") {
-      // Finalizado
+    // === FINALIZADO ===
+    if (order.status === "finished") {
       let msg = `Olá, ${clientName}! 😊\n\n`;
-      msg += `Que alegria! Seu pedido ficou pronto e foi feito com muito amor e carinho! ✨🎂\n\n`;
+      msg += `Que alegria te avisar que seu pedido ficou pronto! Foi feito com muito amor e carinho especialmente pra você! ✨🎂\n\n`;
       msg += detailsStr;
+      msg += extrasStr;
+      if (paidPercent < 100) {
+        msg += `\n\n💵 *Sobre o pagamento:*\n`;
+        msg += `Lembrando que o valor restante de *R$ ${remainingValue.toFixed(2)}* deve ser pago no momento da ${order.delivery_type === "pickup" ? "retirada" : "entrega"}, tá? 😉`;
+      }
       msg += deliveryInfo;
       msg += `\n\n🚗 *Dicas importantes para o transporte:*\n`;
       msg += `• Transportar sempre em superfície plana\n`;
@@ -237,13 +271,26 @@ const Orders = () => {
       msg += `• Não colocar objetos sobre a caixa\n`;
       msg += `• Manter refrigerado se necessário\n`;
       msg += `\n⚠️ *Após a retirada ou entrega, não nos responsabilizamos por danos causados durante transporte inadequado ou armazenamento incorreto.*`;
-      msg += `\n\nEspero que você ame! Me manda uma foto depois? 📸💕`;
+      msg += `\n\nMal posso esperar pra você ver! 😍`;
       return msg;
     }
 
-    // Fallback genérico
+    // === ENTREGUE ===
+    if (order.status === "delivered") {
+      let msg = `Olá, ${clientName}! 😊\n\n`;
+      msg += `Espero que você tenha amado o seu pedido! Foi preparado com muito carinho e dedicação! 💕✨\n\n`;
+      msg += `Muito obrigada pela confiança em escolher a ${storeName}! Fico muito feliz em fazer parte desse momento especial! 🥰\n\n`;
+      msg += `Se puder, me manda uma foto? Adoraria ver como ficou na sua mesa! 📸\n\n`;
+      msg += `E quando precisar novamente, estou por aqui! Será um prazer te atender sempre! 🎂💖\n\n`;
+      msg += `Um grande abraço! 🤗`;
+      return msg;
+    }
+
+    // Fallback
     let msg = `Olá, ${clientName}! 😊\n\n`;
     msg += detailsStr;
+    msg += extrasStr;
+    msg += paymentInfo;
     msg += deliveryInfo;
     return msg;
   };
