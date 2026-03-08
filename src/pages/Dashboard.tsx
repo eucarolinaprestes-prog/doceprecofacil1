@@ -3,8 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight, CalendarDays, AlertTriangle } from "lucide-react";
-import { format, startOfMonth, endOfMonth, startOfWeek, addDays, isToday, isSameMonth } from "date-fns";
+import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight, CalendarDays, AlertTriangle, ChevronLeft, ChevronRight } from "lucide-react";
+import { format, startOfMonth, endOfMonth, startOfWeek, addDays, addMonths, subMonths, isToday, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import FinanceDialog from "@/components/dashboard/FinanceDialog";
 
@@ -189,18 +189,30 @@ const Dashboard = () => {
       )}
 
       {/* Calendário mensal */}
-      <Card className="card-elevated">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-bold text-foreground flex items-center gap-2"><CalendarDays className="w-4 h-4" /> Calendário de Encomendas</p>
-            <p className="text-xs text-muted-foreground capitalize">{format(calendarMonth, "MMMM yyyy", { locale: ptBR })}</p>
+      <Card className="card-elevated border border-primary/20 overflow-hidden">
+        <div className="gradient-primary px-4 py-3 flex items-center justify-between">
+          <button onClick={() => setCalendarMonth(m => subMonths(m, 1))} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
+            <ChevronLeft className="w-4 h-4 text-primary-foreground" />
+          </button>
+          <div className="text-center">
+            <p className="text-sm font-extrabold text-primary-foreground flex items-center gap-2">
+              <CalendarDays className="w-4 h-4" /> Calendário de Encomendas
+            </p>
+            <p className="text-xs text-primary-foreground/80 font-semibold capitalize mt-0.5">
+              {format(calendarMonth, "MMMM yyyy", { locale: ptBR })}
+            </p>
           </div>
-          <div className="grid grid-cols-7 gap-1 mb-2">
+          <button onClick={() => setCalendarMonth(m => addMonths(m, 1))} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors">
+            <ChevronRight className="w-4 h-4 text-primary-foreground" />
+          </button>
+        </div>
+        <CardContent className="p-4">
+          <div className="grid grid-cols-7 gap-1 mb-3">
             {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(d => (
-              <div key={d} className="text-center text-[10px] font-bold text-muted-foreground uppercase">{d}</div>
+              <div key={d} className="text-center text-[10px] font-extrabold text-primary/70 uppercase tracking-wider">{d}</div>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-1.5">
             {calDays.map((day) => {
               const dateStr = format(day, "yyyy-MM-dd");
               const hasOrder = orderDates[dateStr];
@@ -208,16 +220,16 @@ const Dashboard = () => {
               return (
                 <div
                   key={day.toISOString()}
-                  className={`flex flex-col items-center py-1.5 rounded-lg text-xs font-medium relative ${
-                    !inMonth ? "opacity-30" :
-                    isToday(day) ? "bg-primary text-primary-foreground shadow-sm" :
-                    hasOrder ? "bg-success/15 text-success font-bold" :
-                    "text-foreground"
+                  className={`flex flex-col items-center py-2 rounded-xl text-xs font-semibold relative transition-all ${
+                    !inMonth ? "opacity-20" :
+                    isToday(day) ? "gradient-primary text-primary-foreground shadow-lg scale-105" :
+                    hasOrder ? "bg-primary/10 text-primary font-extrabold border border-primary/20" :
+                    "text-foreground hover:bg-primary/5"
                   }`}
                 >
                   <span className="text-sm font-bold">{format(day, "d")}</span>
                   {hasOrder && inMonth && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-success absolute bottom-0.5" />
+                    <span className={`w-1.5 h-1.5 rounded-full absolute bottom-1 ${isToday(day) ? "bg-primary-foreground" : "bg-primary"}`} />
                   )}
                 </div>
               );

@@ -341,12 +341,14 @@ const Orders = () => {
             {/* Date & Time */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-sm font-semibold">Data de entrega</label>
-                <Input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} className="h-12 rounded-xl" />
+                <label className="text-sm font-semibold flex items-center gap-1.5">📅 Data de entrega</label>
+                <Input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} 
+                  className="h-12 rounded-xl border-2 border-primary/20 bg-primary/5 font-semibold text-foreground focus:border-primary focus:ring-primary/20 [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:rounded-lg [&::-webkit-calendar-picker-indicator]:p-1 [&::-webkit-calendar-picker-indicator]:hover:bg-primary/10" />
               </div>
               <div className="space-y-1">
-                <label className="text-sm font-semibold">Horário</label>
-                <Input type="time" value={eventTime} onChange={(e) => setEventTime(e.target.value)} className="h-12 rounded-xl" />
+                <label className="text-sm font-semibold flex items-center gap-1.5">🕐 Horário</label>
+                <Input type="time" value={eventTime} onChange={(e) => setEventTime(e.target.value)} 
+                  className="h-12 rounded-xl border-2 border-primary/20 bg-primary/5 font-semibold text-foreground focus:border-primary focus:ring-primary/20 [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:rounded-lg [&::-webkit-calendar-picker-indicator]:p-1 [&::-webkit-calendar-picker-indicator]:hover:bg-primary/10" />
               </div>
             </div>
 
