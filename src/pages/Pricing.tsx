@@ -138,7 +138,7 @@ const Pricing = () => {
               name: item.name,
               unit: item.unit,
               cost_per_unit: Number(item.cost_per_unit) || 0,
-              quantity_used: Number(item.quantity_used) || 0,
+              quantity_used: String(Number(item.quantity_used) || 0),
               isManual: true,
             })));
           }
