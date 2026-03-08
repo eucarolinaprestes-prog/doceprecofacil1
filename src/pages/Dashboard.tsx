@@ -159,8 +159,8 @@ const Dashboard = () => {
         </button>
         <button
           onClick={() => navigate("/orders")}
-          className="rounded-2xl h-16 gradient-gold text-white font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
-          style={{ boxShadow: "0 4px 0 0 hsl(30 60% 40%), 0 8px 16px -4px hsl(30 60% 58% / 0.35)" }}
+          className="rounded-2xl h-16 text-white font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
+          style={{ background: "linear-gradient(135deg, hsl(270 45% 65%), hsl(280 40% 72%))", boxShadow: "0 4px 0 0 hsl(270 45% 50%), 0 8px 16px -4px hsl(270 45% 65% / 0.35)" }}
         >
           <ShoppingBag className="w-5 h-5" />
           <span>Nova Encomenda</span>
