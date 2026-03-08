@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ShoppingCart, Trash2, History } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ShoppingCart, Trash2 } from "lucide-react";
 import { CurrencyInput } from "@/components/ui/currency-input";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
@@ -18,23 +19,21 @@ interface ShoppingItem {
   created_at?: string;
 }
 
-const storeOptions = [
-  { label: "Supermercado" },
-  { label: "Mercado" },
-  { label: "Loja de Confeitaria" },
-  { label: "Atacado" },
-];
+const storeOptions = ["Supermercado", "Mercado", "Loja de Confeitaria", "Atacado"];
 
 const Shopping = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
-  const [items, setItems] = useState<ShoppingItem[]>([{ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 }]);
+  // Items per store kept in a map so switching stores doesn't erase data
+  const [storeItems, setStoreItems] = useState<Record<string, ShoppingItem[]>>({});
   const [allItems, setAllItems] = useState<ShoppingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [showHistory, setShowHistory] = useState(false);
   const savingRef = useRef(false);
-  const storeRef = useRef<string | null>(null);
+  const initialLoadDone = useRef(false);
+
+  const emptyRow = (): ShoppingItem => ({ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 });
 
   const fetchAllItems = async () => {
     if (!user) return;
@@ -55,50 +54,47 @@ const Shopping = () => {
     })) || [];
 
     setAllItems(mapped);
+
+    // On initial load, populate storeItems from DB (today's items)
+    if (!initialLoadDone.current) {
+      const today = new Date().toISOString().slice(0, 10);
+      const map: Record<string, ShoppingItem[]> = {};
+      storeOptions.forEach(store => {
+        const items = mapped.filter(i => i.store === store && i.created_at?.slice(0, 10) === today);
+        map[store] = items.length > 0 ? [...items, emptyRow()] : [emptyRow()];
+      });
+      setStoreItems(map);
+      initialLoadDone.current = true;
+    }
+
     setLoading(false);
-    return mapped;
   };
 
   useEffect(() => { fetchAllItems(); }, [user]);
 
-  const loadStoreItems = useCallback((store: string, source: ShoppingItem[]) => {
-    const today = new Date().toISOString().slice(0, 10);
-    const storeItems = source.filter(i =>
-      i.store === store && i.created_at?.slice(0, 10) === today
-    );
-    if (storeItems.length > 0) {
-      setItems([...storeItems, { ingredient_name: "", quantity: 0, unit_price: 0, total: 0 }]);
-    } else {
-      setItems([{ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 }]);
-    }
-  }, []);
+  const items = selectedStore ? (storeItems[selectedStore] || [emptyRow()]) : [];
 
-  const handleSelectStore = async (store: string) => {
-    storeRef.current = store;
-    setSelectedStore(store);
-    setShowHistory(false);
-    const freshItems = await fetchAllItems();
-    if (freshItems) loadStoreItems(store, freshItems);
+  const setItems = (newItems: ShoppingItem[]) => {
+    if (!selectedStore) return;
+    setStoreItems(prev => ({ ...prev, [selectedStore]: newItems }));
   };
 
   const updateItem = (idx: number, field: keyof ShoppingItem, value: string) => {
-    setItems(prev => {
-      const updated = [...prev];
-      if (field === "ingredient_name") {
-        updated[idx] = { ...updated[idx], ingredient_name: value };
-      } else {
-        const num = Number(value) || 0;
-        if (field === "quantity") updated[idx] = { ...updated[idx], quantity: num };
-        if (field === "unit_price") updated[idx] = { ...updated[idx], unit_price: num };
-      }
-      updated[idx] = { ...updated[idx], total: updated[idx].quantity * updated[idx].unit_price };
+    const currentItems = [...items];
+    if (field === "ingredient_name") {
+      currentItems[idx] = { ...currentItems[idx], ingredient_name: value };
+    } else {
+      const num = Number(value) || 0;
+      if (field === "quantity") currentItems[idx] = { ...currentItems[idx], quantity: num };
+      if (field === "unit_price") currentItems[idx] = { ...currentItems[idx], unit_price: num };
+    }
+    currentItems[idx] = { ...currentItems[idx], total: currentItems[idx].quantity * currentItems[idx].unit_price };
 
-      // Auto-add new row
-      if (idx === prev.length - 1 && updated[idx].ingredient_name.trim()) {
-        updated.push({ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 });
-      }
-      return updated;
-    });
+    // Auto-add new row
+    if (idx === currentItems.length - 1 && currentItems[idx].ingredient_name.trim()) {
+      currentItems.push(emptyRow());
+    }
+    setItems(currentItems);
   };
 
   const removeItem = async (idx: number) => {
@@ -107,7 +103,7 @@ const Shopping = () => {
       await supabase.from("shopping_list").delete().eq("id", item.id);
     }
     const updated = items.filter((_, i) => i !== idx);
-    if (updated.length === 0) updated.push({ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 });
+    if (updated.length === 0) updated.push(emptyRow());
     setItems(updated);
     fetchAllItems();
     toast({ title: "Item removido" });
@@ -141,7 +137,7 @@ const Shopping = () => {
         }))
       );
 
-      // Update allItems without resetting the editing items
+      // Silently refresh allItems
       const { data } = await supabase
         .from("shopping_list")
         .select("*")
@@ -163,8 +159,28 @@ const Shopping = () => {
   }, [items, user, selectedStore, allItems]);
 
   const handleBlur = () => {
-    // Small delay to avoid saving when user is just clicking between fields
-    setTimeout(() => saveAll(), 300);
+    setTimeout(() => saveAll(), 400);
+  };
+
+  const clearAllLists = async () => {
+    if (!user) return;
+    const today = new Date().toISOString().slice(0, 10);
+    // Delete all today's items
+    const todayIds = allItems
+      .filter(i => i.created_at?.slice(0, 10) === today)
+      .map(i => i.id)
+      .filter(Boolean);
+
+    if (todayIds.length > 0) {
+      await supabase.from("shopping_list").delete().in("id", todayIds as string[]);
+    }
+
+    // Reset all store items
+    const map: Record<string, ShoppingItem[]> = {};
+    storeOptions.forEach(store => { map[store] = [emptyRow()]; });
+    setStoreItems(map);
+    fetchAllItems();
+    toast({ title: "Lista limpa com sucesso!" });
   };
 
   const grandTotal = items.reduce((sum, i) => sum + (i.quantity * i.unit_price), 0);
@@ -194,29 +210,29 @@ const Shopping = () => {
   return (
     <div className="space-y-5">
       <div className="rounded-2xl bg-primary/10 p-4">
-        <h1 className="text-xl font-extrabold text-foreground">Calculadora de Compras</h1>
+        <h1 className="text-xl font-extrabold text-foreground flex items-center gap-2">🛒 Calculadora de Compras</h1>
         <p className="text-sm text-muted-foreground">Escolha o local e monte sua lista</p>
       </div>
 
-      {/* Store selector */}
+      {/* Store selector - pink background, green when active */}
       <div>
         <p className="text-sm font-bold text-foreground mb-2">Local da compra</p>
         <div className="grid grid-cols-2 gap-2">
           {storeOptions.map(store => (
             <button
-              key={store.label}
-              onClick={() => handleSelectStore(store.label)}
+              key={store}
+              onClick={() => { setSelectedStore(store); setShowHistory(false); }}
               className={`rounded-2xl py-3 px-2 text-center font-bold text-sm transition-all border-2 ${
-                selectedStore === store.label
+                selectedStore === store
                   ? "bg-emerald-500 text-white border-emerald-600 shadow-lg scale-[1.02]"
-                  : "gradient-gold text-white border-warning shadow-md"
+                  : "bg-primary text-white border-primary shadow-md"
               }`}
-              style={selectedStore === store.label
+              style={selectedStore === store
                 ? { boxShadow: "0 4px 0 0 hsl(150 50% 30%)" }
-                : { boxShadow: "0 4px 0 0 hsl(30 60% 40%)" }
+                : { boxShadow: "0 4px 0 0 hsl(340 75% 40%)" }
               }
             >
-              <span className="block text-white">{store.label}</span>
+              <span className="block text-white">{store}</span>
             </button>
           ))}
         </div>
@@ -233,7 +249,7 @@ const Shopping = () => {
           <div className="grid grid-cols-[1fr_60px_80px_32px] gap-2 px-1">
             <span className="text-xs font-bold text-muted-foreground">Item</span>
             <span className="text-xs font-bold text-muted-foreground text-center">Qtd</span>
-            <span className="text-xs font-bold text-muted-foreground text-center">Valor</span>
+            <span className="text-xs font-bold text-muted-foreground text-center">Preço</span>
             <span></span>
           </div>
 
@@ -258,7 +274,7 @@ const Shopping = () => {
                   className="h-10 rounded-xl text-sm text-center"
                 />
                 <CurrencyInput
-                  placeholder="Opcional"
+                  placeholder="0,00"
                   value={item.unit_price ? String(item.unit_price) : ""}
                   onValueChange={(v) => { updateItem(idx, "unit_price", v); }}
                   onBlurCapture={handleBlur}
@@ -281,9 +297,19 @@ const Shopping = () => {
         </>
       )}
 
+      {/* Clear list button */}
+      <Button
+        variant="destructive"
+        onClick={clearAllLists}
+        className="w-full rounded-2xl h-12 font-bold text-sm"
+      >
+        <Trash2 className="w-4 h-4 mr-2" />
+        Limpar Lista Completa
+      </Button>
+
       {/* History toggle */}
       <button
-        onClick={() => { setShowHistory(!showHistory); if (!showHistory) setSelectedStore(null); }}
+        onClick={() => { setShowHistory(!showHistory); }}
         className={`w-full rounded-2xl py-3 px-4 text-center font-bold text-sm transition-all border-2 ${
           showHistory
             ? "bg-primary text-white border-primary shadow-lg"
