@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(today);
+  const [dialogType, setDialogType] = useState<"income" | "expense" | null>(null);
 
   useEffect(() => {
     if (!user) return;
