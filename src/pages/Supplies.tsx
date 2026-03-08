@@ -153,10 +153,9 @@ const Supplies = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 w-full h-12 rounded-xl">
+        <TabsList className="grid grid-cols-2 w-full h-12 rounded-xl">
           <TabsTrigger value="ingredients" className="rounded-xl font-bold text-xs">🥄 Ingredientes</TabsTrigger>
           <TabsTrigger value="packaging" className="rounded-xl font-bold text-xs">📦 Embalagens</TabsTrigger>
-          <TabsTrigger value="recipes" className="rounded-xl font-bold text-xs">📋 Receitas</TabsTrigger>
         </TabsList>
 
         <TabsContent value="ingredients" className="space-y-4 mt-4">
