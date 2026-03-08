@@ -65,6 +65,12 @@ const SettingsPage = () => {
   const [defaultCardFee, setDefaultCardFee] = useState("");
   const [revenueGoal, setRevenueGoal] = useState("");
 
+  // Edit cost state
+  const [editingFixedIdx, setEditingFixedIdx] = useState<number | null>(null);
+  const [editingVarIdx, setEditingVarIdx] = useState<number | null>(null);
+  const [editAmount, setEditAmount] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+
   const hourlyRate =
     Number(desiredSalary) > 0 && Number(workDays) > 0 && Number(workHours) > 0
       ? Number(desiredSalary) / (Number(workDays) * 4.33 * Number(workHours))
