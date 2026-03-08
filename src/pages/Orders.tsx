@@ -368,10 +368,10 @@ const Orders = () => {
           <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
             className={`rounded-2xl py-3 px-2 text-center font-bold text-xs transition-all border-2 ${
               statusFilter === tab.value
-                ? "gradient-primary text-primary-foreground border-primary shadow-lg scale-[1.02]"
-                : "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+                ? "gradient-gold text-white border-warning shadow-lg scale-[1.02]"
+                : "bg-warning/10 text-warning border-warning/20 hover:bg-warning/20"
             }`}
-            style={statusFilter === tab.value ? { boxShadow: "0 4px 0 0 hsl(340 75% 38%), 0 6px 12px -2px hsl(340 75% 55% / 0.3)" } : {}}
+            style={statusFilter === tab.value ? { boxShadow: "0 4px 0 0 hsl(30 60% 40%), 0 6px 12px -2px hsl(30 60% 58% / 0.3)" } : {}}
           >
             <span className="text-sm block">{tab.icon}</span>
             <span className="block text-xs">{tab.label}</span>
@@ -387,10 +387,10 @@ const Orders = () => {
           <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
             className={`rounded-2xl py-3 px-2 text-center font-bold text-xs transition-all border-2 ${
               statusFilter === tab.value
-                ? "gradient-primary text-primary-foreground border-primary shadow-lg scale-[1.02]"
-                : "bg-primary/10 text-primary border-primary/20 hover:bg-primary/20"
+                ? "gradient-gold text-white border-warning shadow-lg scale-[1.02]"
+                : "bg-warning/10 text-warning border-warning/20 hover:bg-warning/20"
             }`}
-            style={statusFilter === tab.value ? { boxShadow: "0 4px 0 0 hsl(340 75% 38%), 0 6px 12px -2px hsl(340 75% 55% / 0.3)" } : {}}
+            style={statusFilter === tab.value ? { boxShadow: "0 4px 0 0 hsl(30 60% 40%), 0 6px 12px -2px hsl(30 60% 58% / 0.3)" } : {}}
           >
             <span className="text-sm block">{tab.icon}</span>
             <span className="block text-xs">{tab.label}</span>
