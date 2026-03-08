@@ -260,7 +260,7 @@ const Orders = () => {
                     </Button>
                   )}
                   <Button size="sm" variant="outline" onClick={() => openWhatsAppPreview(o)} className="rounded-xl h-9">
-                    <MessageCircle className="w-4 h-4" />
+                    <WhatsAppIcon className="w-4 h-4" />
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(buildMessage(o)); toast({ title: "Copiado! 📋" }); }} className="rounded-xl h-9">
                     <Link2 className="w-4 h-4" />
