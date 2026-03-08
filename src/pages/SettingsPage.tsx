@@ -350,10 +350,6 @@ const SettingsPage = () => {
             <CardContent className="p-5 space-y-3">
               <h3 className="text-base font-extrabold text-foreground flex items-center gap-2"><Target className="w-4 h-4" /> Configurações financeiras</h3>
               <div className="space-y-1">
-                <label className="text-sm font-semibold text-foreground">Taxa da maquininha padrão (%)</label>
-                <Input type="number" placeholder="Ex: 3" value={defaultCardFee} onChange={(e) => setDefaultCardFee(e.target.value)} className="h-12 rounded-xl" />
-              </div>
-              <div className="space-y-1">
                 <label className="text-sm font-semibold text-foreground">Meta de faturamento mensal (R$)</label>
                 <Input type="number" placeholder="Ex: 5000" value={revenueGoal} onChange={(e) => setRevenueGoal(e.target.value)} className="h-12 rounded-xl" />
               </div>
