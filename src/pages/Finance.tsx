@@ -7,10 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { TrendingUp, TrendingDown, Trash2, Wallet, CreditCard, Smartphone } from "lucide-react";
+import { TrendingUp, TrendingDown, Trash2, Wallet, CreditCard, Smartphone, BarChart3 } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 
 const incomeCategories = ["Bolos", "Encomendas", "Fatias", "Doces", "Salgados", "Cupcakes", "Outros"];
 const expenseCategories = ["Ingredientes", "Embalagens", "Luz", "Gás", "Uber/99", "Aplicativos", "Entregador", "Compras", "Outros"];
@@ -29,6 +29,7 @@ const Finance = () => {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogType, setDialogType] = useState<"income" | "expense" | null>(null);
+  const [showReport, setShowReport] = useState(false);
 
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -80,6 +81,12 @@ const Finance = () => {
   }, {});
   const chartData = Object.entries(expenseByCategory).map(([name, value]) => ({ name, value }));
 
+  const reportBarData = [
+    { name: "Entradas", value: totalIncome, fill: "hsl(152, 70%, 38%)" },
+    { name: "Saídas", value: totalExpense, fill: "hsl(0, 84%, 60%)" },
+    { name: "Lucro", value: Math.max(0, balance), fill: "hsl(152, 70%, 38%)" },
+  ];
+
   if (loading) return <div className="text-center py-16 text-muted-foreground">Carregando...</div>;
 
   return (
@@ -104,7 +111,7 @@ const Finance = () => {
         <Card className="card-elevated border-destructive/20">
           <CardContent className="p-4 text-center">
             <TrendingDown className="w-6 h-6 mx-auto mb-1 text-destructive" />
-            <p className="text-xs text-muted-foreground">Lançamentos</p>
+            <p className="text-xs text-muted-foreground">Saídas</p>
             <p className="text-xl font-extrabold text-destructive">R$ {totalExpense.toFixed(2)}</p>
           </CardContent>
         </Card>
@@ -113,7 +120,7 @@ const Finance = () => {
       {/* Balance indicator */}
       <Card className={`card-elevated ${balance >= 0 ? "border-success/30 bg-success/5" : "border-destructive/30 bg-destructive/5"}`}>
         <CardContent className="p-4 text-center">
-          <p className="text-xs text-muted-foreground">{balance >= 0 ? "Você está no positivo! 🎉" : "Atenção! Você está no negativo 😟"}</p>
+          <p className="text-xs text-muted-foreground">{balance >= 0 ? "🎉 Seu negócio está no positivo este mês!" : "😟 Atenção: suas saídas estão maiores que as entradas."}</p>
           <p className={`text-2xl font-extrabold ${balance >= 0 ? "text-success" : "text-destructive"}`}>
             {balance >= 0 ? "+" : ""}R$ {balance.toFixed(2)}
           </p>
@@ -128,6 +135,11 @@ const Finance = () => {
           + Saída
         </Button>
       </div>
+
+      {/* Fechamento de Caixa */}
+      <Button onClick={() => setShowReport(true)} className="w-full rounded-xl h-14 font-bold text-base gap-2 gradient-gold text-white" style={{ boxShadow: "0 4px 0 0 hsl(30 60% 40%), 0 6px 12px -2px hsl(30 60% 58% / 0.3)" }}>
+        <BarChart3 className="w-5 h-5" /> 📋 Fechamento de Caixa
+      </Button>
 
       {/* Expense chart */}
       {chartData.length > 0 && (
@@ -146,7 +158,51 @@ const Finance = () => {
         </Card>
       )}
 
-      {/* Dialog */}
+      {/* Fechamento de Caixa Dialog */}
+      <Dialog open={showReport} onOpenChange={setShowReport}>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><BarChart3 className="w-5 h-5" /> Fechamento de Caixa</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={reportBarData}>
+                <XAxis dataKey="name" tick={{ fontSize: 11, fontWeight: 700 }} axisLine={false} tickLine={false} />
+                <YAxis hide />
+                <Tooltip formatter={(v: number) => `R$ ${v.toFixed(2)}`} />
+                <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                  {reportBarData.map((d, i) => <Cell key={i} fill={d.fill} />)}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-success/10 p-3 rounded-xl text-center">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase">Entradas</p>
+                <p className="text-lg font-extrabold text-success">R$ {totalIncome.toFixed(2)}</p>
+              </div>
+              <div className="bg-destructive/10 p-3 rounded-xl text-center">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase">Saídas</p>
+                <p className="text-lg font-extrabold text-destructive">R$ {totalExpense.toFixed(2)}</p>
+              </div>
+              <div className={`${balance >= 0 ? "bg-success/10" : "bg-destructive/10"} p-3 rounded-xl text-center`}>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase">{balance >= 0 ? "Lucro" : "Prejuízo"}</p>
+                <p className={`text-lg font-extrabold ${balance >= 0 ? "text-success" : "text-destructive"}`}>R$ {Math.abs(balance).toFixed(2)}</p>
+              </div>
+            </div>
+
+            <Card className={`${balance >= 0 ? "bg-success/5 border-success/20" : "bg-destructive/5 border-destructive/20"}`}>
+              <CardContent className="p-4 text-center">
+                <p className={`text-sm font-bold ${balance >= 0 ? "text-success" : "text-destructive"}`}>
+                  {balance >= 0 ? "🎉 Seu negócio está no positivo este mês!" : "⚠️ Atenção: suas saídas estão maiores que as entradas."}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Income/Expense Dialog */}
       <Dialog open={!!dialogType} onOpenChange={() => setDialogType(null)}>
         <DialogContent>
           <DialogHeader>

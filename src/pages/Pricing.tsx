@@ -5,15 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, Trash2, Upload, CheckCircle2, Info, Cake, BookOpen, Pencil } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
-const stepLabels = ["Produto", "Ingredientes", "Mão de Obra", "Estratégia", "Salvar"];
+// ============ MODE SELECTOR ============
+type PricingMode = "select" | "product" | "recipe";
+
+const stepLabelsProduct = ["Produto", "Ingredientes", "Mão de Obra", "Estratégia", "Salvar"];
+const stepLabelsRecipe = ["Nome", "Categoria", "Ingredientes", "Resumo"];
 const categories = ["Massa", "Recheio", "Bolo", "Fatias", "Cupcakes", "Salgados", "Doces"];
+const recipeCategories = ["Massa", "Recheio", "Cobertura", "Mousse", "Calda", "Creme", "Outro"];
 const saleTypes = [
   { value: "unidade(s)", label: "Unidade" },
   { value: "fatia(s)", label: "Fatias" },
@@ -30,17 +35,22 @@ const Pricing = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [mode, setMode] = useState<PricingMode>("select");
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
-  // Step 0
+  // Product step 0
   const [productName, setProductName] = useState("");
   const [productDesc, setProductDesc] = useState("");
   const [category, setCategory] = useState("");
   const [saleType, setSaleType] = useState("");
   const [yieldQty, setYieldQty] = useState("");
 
-  // Step 1
+  // Recipe
+  const [recipeName, setRecipeName] = useState("");
+  const [recipeCategory, setRecipeCategory] = useState("");
+
+  // Step 1 shared
   const [stockIngredients, setStockIngredients] = useState<StockItem[]>([]);
   const [stockPackaging, setStockPackaging] = useState<StockItem[]>([]);
   const [selectedIngredients, setSelectedIngredients] = useState<SelectedItem[]>([]);
@@ -50,14 +60,14 @@ const Pricing = () => {
   const [manualIng, setManualIng] = useState({ name: "", qty: "", unit: "g", cost: "" });
   const [manualPkg, setManualPkg] = useState({ name: "", qty: "", unit: "un", cost: "" });
 
-  // Step 2
+  // Step 2 product
   const [hourlyRate, setHourlyRate] = useState(0);
   const [salaryConfigured, setSalaryConfigured] = useState(false);
   const [prepTime, setPrepTime] = useState("");
   const [fixedCostPercent, setFixedCostPercent] = useState([15]);
   const [totalFixedCosts, setTotalFixedCosts] = useState(0);
 
-  // Step 3
+  // Step 3 product
   const [profitMargin, setProfitMargin] = useState([30]);
   const [ifoodEnabled, setIfoodEnabled] = useState(false);
   const [ifoodFee, setIfoodFee] = useState("12");
@@ -69,16 +79,16 @@ const Pricing = () => {
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [{ data: profile }, { data: ing }, { data: pkg }, { data: fc }] = await Promise.all([
+      const [{ data: profileData }, { data: ing }, { data: pkg }, { data: fc }] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user.id).single(),
         supabase.from("ingredients").select("*").eq("user_id", user.id).order("name"),
         supabase.from("packaging").select("*").eq("user_id", user.id).order("name"),
         supabase.from("fixed_costs").select("*").eq("user_id", user.id),
       ]);
-      if (profile) {
-        const salary = Number(profile.desired_salary) || 0;
-        const days = Number(profile.work_days_per_week) || 5;
-        const hours = Number(profile.work_hours_per_day) || 8;
+      if (profileData) {
+        const salary = Number(profileData.desired_salary) || 0;
+        const days = Number(profileData.work_days_per_week) || 5;
+        const hours = Number(profileData.work_hours_per_day) || 8;
         if (salary > 0) { setHourlyRate(salary / (days * 4.33 * hours)); setSalaryConfigured(true); }
       }
       setStockIngredients(ing?.map((i: any) => ({ id: i.id, name: i.name, unit: i.unit, cost_per_unit: Number(i.cost_per_unit) || 0, quantity_purchased: i.quantity_purchased, total_cost: i.total_cost })) || []);
@@ -150,12 +160,12 @@ const Pricing = () => {
     { name: "Lucro", value: Math.max(0, finalProfit) },
   ].filter(d => d.value > 0);
 
-  const canAdvance = () => {
+  const canAdvanceProduct = () => {
     if (step === 0) return productName.trim() && category && saleType && yieldQty;
     return true;
   };
 
-  const handleSave = async () => {
+  const handleSaveProduct = async () => {
     if (!user) return;
     setSaving(true);
     try {
@@ -172,18 +182,186 @@ const Pricing = () => {
     finally { setSaving(false); }
   };
 
-  const goNext = () => { if (canAdvance()) setStep(step + 1); };
-  const goBack = () => setStep(Math.max(0, step - 1));
+  const handleSaveRecipe = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      await supabase.from("recipes").insert({
+        user_id: user.id, name: recipeName, category: recipeCategory,
+        ingredients_json: selectedIngredients as any, total_cost: ingredientsCost,
+      });
+      toast({ title: "Receita salva com sucesso! 🎉" });
+      navigate("/supplies");
+    } catch { toast({ title: "Erro ao salvar", variant: "destructive" }); }
+    finally { setSaving(false); }
+  };
 
+  const goNext = () => {
+    if (mode === "product" && canAdvanceProduct()) setStep(step + 1);
+    if (mode === "recipe") setStep(step + 1);
+  };
+  const goBack = () => {
+    if (step === 0) { setMode("select"); return; }
+    setStep(Math.max(0, step - 1));
+  };
+
+  const stepLabels = mode === "product" ? stepLabelsProduct : stepLabelsRecipe;
+
+  // ============ MODE SELECTOR ============
+  if (mode === "select") {
+    return (
+      <div className="space-y-6 pb-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-extrabold text-foreground">O que você quer precificar?</h1>
+          <p className="text-sm text-muted-foreground">Escolha uma opção abaixo para começar</p>
+        </div>
+
+        <div className="grid gap-4">
+          <button
+            onClick={() => { setMode("product"); setStep(0); }}
+            className="rounded-2xl p-6 flex items-center gap-4 gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+            style={{ boxShadow: "0 6px 0 0 hsl(340 75% 38%), 0 10px 20px -4px hsl(340 75% 55% / 0.4)" }}
+          >
+            <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+              <Cake className="w-7 h-7" />
+            </div>
+            <div className="text-left">
+              <p className="text-lg font-extrabold">🎂 Precificar Produto Final</p>
+              <p className="text-sm opacity-80">Bolo, doce, salgado com custo completo</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => { setMode("recipe"); setStep(0); }}
+            className="rounded-2xl p-6 flex items-center gap-4 gradient-gold text-white shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+            style={{ boxShadow: "0 6px 0 0 hsl(30 60% 40%), 0 10px 20px -4px hsl(30 60% 58% / 0.4)" }}
+          >
+            <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
+              <BookOpen className="w-7 h-7" />
+            </div>
+            <div className="text-left">
+              <p className="text-lg font-extrabold">🧁 Precificar Receitas</p>
+              <p className="text-sm opacity-80">Massa, recheio, cobertura separados</p>
+            </div>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ============ RECIPE MODE ============
+  if (mode === "recipe") {
+    return (
+      <div className="space-y-5 pb-6">
+        {/* Progress */}
+        <div className="flex items-center gap-3">
+          <button onClick={goBack} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+            <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+          </button>
+          <div className="flex-1">
+            <div className="flex gap-1.5">
+              {stepLabels.map((_, i) => (
+                <div key={i} className={`h-1.5 flex-1 rounded-full transition-all ${i <= step ? "bg-primary" : "bg-muted"}`} />
+              ))}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 text-center">{stepLabels[step]} • Etapa {step + 1} de {stepLabels.length}</p>
+          </div>
+        </div>
+
+        {/* Step 0: Name */}
+        {step === 0 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-extrabold text-foreground">Nome da receita</h2>
+            <Input placeholder="Ex: Massa de chocolate" value={recipeName} onChange={(e) => setRecipeName(e.target.value)} className="h-12 rounded-xl" />
+          </div>
+        )}
+
+        {/* Step 1: Category */}
+        {step === 1 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-extrabold text-foreground">Categoria da receita</h2>
+            <div className="flex flex-wrap gap-2">
+              {recipeCategories.map(c => (
+                <button key={c} onClick={() => setRecipeCategory(c)}
+                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${recipeCategory === c ? "bg-success text-success-foreground shadow-md" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}>
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Ingredients (only from stock, no packaging) */}
+        {step === 2 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-extrabold text-foreground">Ingredientes da receita</h2>
+            <p className="text-sm text-muted-foreground">Selecione do seu estoque de ingredientes</p>
+
+            <Select onValueChange={(id) => { const item = stockIngredients.find(i => i.id === id); if (item) addFromStock(item, "ingredient"); }}>
+              <SelectTrigger className="h-12 rounded-xl bg-success/10 border-success/30 text-success font-bold">
+                <span>+ Adicionar ingrediente do estoque</span>
+              </SelectTrigger>
+              <SelectContent>{stockIngredients.map(i => <SelectItem key={i.id} value={i.id}>{i.name} (R$ {i.cost_per_unit.toFixed(4)}/{i.unit})</SelectItem>)}</SelectContent>
+            </Select>
+
+            {selectedIngredients.map(item => (
+              <div key={item.id} className="flex items-center gap-2 bg-secondary/40 p-3 rounded-xl">
+                <span className="text-sm font-medium flex-1 truncate">{item.name}</span>
+                <Input type="number" placeholder="Qtd" value={item.quantity_used || ""} onChange={(e) => updateSelectedQty(item.id, Number(e.target.value), "ingredient")} className="w-16 h-9 rounded-lg text-sm text-center bg-background" />
+                <span className="text-xs text-muted-foreground">{item.unit}</span>
+                <span className="text-xs font-bold text-primary min-w-[55px] text-right">R$ {(item.cost_per_unit * item.quantity_used).toFixed(2)}</span>
+                <button onClick={() => removeSelected(item.id, "ingredient")} className="text-destructive p-1"><Trash2 className="w-4 h-4" /></button>
+              </div>
+            ))}
+
+            <div className="bg-success/10 border border-success/20 p-4 rounded-xl flex justify-between items-center">
+              <span className="font-bold text-foreground">Custo total da receita</span>
+              <span className="text-xl font-extrabold text-success">R$ {ingredientsCost.toFixed(2)}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Summary */}
+        {step === 3 && (
+          <div className="space-y-5">
+            <div className="text-center">
+              <p className="text-3xl">📋</p>
+              <h2 className="text-xl font-extrabold text-foreground mt-2">Resumo da Receita</h2>
+            </div>
+            <Card className="border border-border"><CardContent className="p-5 space-y-3">
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Receita</span><span className="font-bold">{recipeName}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Categoria</span><span className="font-bold">{recipeCategory}</span></div>
+              <div className="flex justify-between text-sm"><span className="text-muted-foreground">Ingredientes</span><span className="font-bold">{selectedIngredients.length}</span></div>
+              <div className="border-t border-border my-2" />
+              <div className="flex justify-between items-center">
+                <span className="font-extrabold">Custo Total</span>
+                <span className="text-2xl font-extrabold text-success">R$ {ingredientsCost.toFixed(2)}</span>
+              </div>
+            </CardContent></Card>
+
+            <Button onClick={handleSaveRecipe} disabled={saving} className="w-full rounded-2xl h-14 text-lg font-bold bg-success hover:bg-success/90 text-success-foreground gap-2" style={{ boxShadow: "0 4px 0 0 hsl(152 70% 28%), 0 6px 12px -2px hsl(152 70% 38% / 0.3)" }}>
+              <CheckCircle2 className="w-6 h-6" /> {saving ? "Salvando..." : "SALVAR RECEITA"}
+            </Button>
+          </div>
+        )}
+
+        {step < 3 && (
+          <Button onClick={goNext} disabled={step === 0 ? !recipeName.trim() : step === 1 ? !recipeCategory : false} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
+            Próximo <ChevronRight className="w-5 h-5" />
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  // ============ PRODUCT MODE (existing) ============
   return (
     <div className="space-y-5 pb-6">
       {/* Progress */}
       <div className="flex items-center gap-3">
-        {step > 0 && (
-          <button onClick={goBack} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-            <ChevronLeft className="w-5 h-5 text-muted-foreground" />
-          </button>
-        )}
+        <button onClick={goBack} className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+          <ChevronLeft className="w-5 h-5 text-muted-foreground" />
+        </button>
         <div className="flex-1">
           <div className="flex gap-1.5">
             {stepLabels.map((_, i) => (
@@ -224,7 +402,7 @@ const Pricing = () => {
             <div className="flex flex-wrap gap-2">
               {categories.map(c => (
                 <button key={c} onClick={() => setCategory(c)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${category === c ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}>
+                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${category === c ? "bg-success text-success-foreground shadow-md" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}>
                   {c}
                 </button>
               ))}
@@ -236,7 +414,7 @@ const Pricing = () => {
             <div className="flex flex-wrap gap-2">
               {saleTypes.map(t => (
                 <button key={t.value} onClick={() => setSaleType(t.value)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${saleType === t.value ? "bg-primary text-primary-foreground shadow-md" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}>
+                  className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${saleType === t.value ? "bg-success text-success-foreground shadow-md" : "bg-secondary text-muted-foreground hover:bg-secondary/80"}`}>
                   {t.label}
                 </button>
               ))}
@@ -353,7 +531,7 @@ const Pricing = () => {
             {salaryConfigured ? (
               <p className="text-sm text-muted-foreground">✅ Valor da sua hora: <strong className="text-primary">R$ {hourlyRate.toFixed(2)}</strong></p>
             ) : (
-              <p className="text-sm text-muted-foreground">⚠️ Configure seu salário no Financeiro</p>
+              <p className="text-sm text-muted-foreground">⚠️ Configure seu salário nas Configurações → Financeiro</p>
             )}
           </div>
 
@@ -492,14 +670,14 @@ const Pricing = () => {
             </div>
           </CardContent></Card>
 
-          <Button onClick={handleSave} disabled={saving} className="w-full rounded-2xl h-14 text-lg font-bold btn-3d gap-2">
+          <Button onClick={handleSaveProduct} disabled={saving} className="w-full rounded-2xl h-14 text-lg font-bold btn-3d gap-2">
             <CheckCircle2 className="w-6 h-6" /> {saving ? "Salvando..." : "SALVAR PRODUTO"}
           </Button>
         </div>
       )}
 
       {step < 4 && (
-        <Button onClick={goNext} disabled={!canAdvance()} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
+        <Button onClick={goNext} disabled={!canAdvanceProduct()} className="w-full rounded-2xl h-14 text-base font-bold btn-3d gap-2">
           Próximo <ChevronRight className="w-5 h-5" />
         </Button>
       )}

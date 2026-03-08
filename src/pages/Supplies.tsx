@@ -6,19 +6,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Package, Trash2, Pencil, Copy, Milk } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Package, Trash2, Pencil, Copy, Milk, Box, BookOpen } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
 const ingredientUnits = ["g", "ml", "kg", "l"];
+const packagingUnits = ["unidade", "pacote", "caixa fechada"];
 
 const Supplies = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [items, setItems] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState("ingredients");
+  const [ingredients, setIngredients] = useState<any[]>([]);
+  const [packagingItems, setPackagingItems] = useState<any[]>([]);
+  const [recipes, setRecipes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [dialogType, setDialogType] = useState<"ingredient" | "packaging">("ingredient");
 
   const [name, setName] = useState("");
   const [unit, setUnit] = useState("g");
@@ -28,30 +34,44 @@ const Supplies = () => {
   const [currentStock, setCurrentStock] = useState("");
   const [minStock, setMinStock] = useState("");
 
-  const fetchItems = async () => {
+  const fetchAll = async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase.from("ingredients").select("*").eq("user_id", user.id).order("name");
-    setItems(data || []);
+    const [{ data: ing }, { data: pkg }, { data: rec }] = await Promise.all([
+      supabase.from("ingredients").select("*").eq("user_id", user.id).order("name"),
+      supabase.from("packaging").select("*").eq("user_id", user.id).order("name"),
+      supabase.from("recipes").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+    ]);
+    setIngredients(ing || []);
+    setPackagingItems(pkg || []);
+    setRecipes(rec || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchItems(); }, [user]);
+  useEffect(() => { fetchAll(); }, [user]);
 
   const resetForm = () => {
     setName(""); setUnit("g"); setTotalCost(""); setQuantityPurchased("");
     setSupplier(""); setEditingId(null); setCurrentStock(""); setMinStock("");
   };
 
-  const openEdit = (item: any) => {
+  const openNewDialog = (type: "ingredient" | "packaging") => {
+    resetForm();
+    setDialogType(type);
+    setUnit(type === "ingredient" ? "g" : "unidade");
+    setDialogOpen(true);
+  };
+
+  const openEdit = (item: any, type: "ingredient" | "packaging") => {
     setName(item.name); setUnit(item.unit); setTotalCost(String(item.total_cost));
     setQuantityPurchased(String(item.quantity_purchased)); setSupplier(item.supplier || "");
     setCurrentStock(String(item.current_stock || 0)); setMinStock(String(item.min_stock || 0));
-    setEditingId(item.id); setDialogOpen(true);
+    setEditingId(item.id); setDialogType(type); setDialogOpen(true);
   };
 
   const handleSave = async () => {
     if (!user || !name.trim()) return;
+    const table = dialogType === "ingredient" ? "ingredients" : "packaging";
     const payload = {
       user_id: user.id, name: name.trim(), unit,
       total_cost: Number(totalCost) || 0,
@@ -61,47 +81,134 @@ const Supplies = () => {
       min_stock: Number(minStock) || 0,
     };
     if (editingId) {
-      await supabase.from("ingredients").update(payload).eq("id", editingId);
+      await supabase.from(table).update(payload).eq("id", editingId);
       toast({ title: "Atualizado! ✅" });
     } else {
-      await supabase.from("ingredients").insert(payload);
+      await supabase.from(table).insert(payload);
       toast({ title: "Adicionado! ✅" });
     }
-    setDialogOpen(false); resetForm(); fetchItems();
+    setDialogOpen(false); resetForm(); fetchAll();
   };
 
-  const handleDelete = async (id: string) => {
-    await supabase.from("ingredients").delete().eq("id", id);
-    toast({ title: "Excluído" }); fetchItems();
+  const handleDelete = async (id: string, table: "ingredients" | "packaging") => {
+    await supabase.from(table).delete().eq("id", id);
+    toast({ title: "Excluído" }); fetchAll();
   };
 
-  const handleDuplicate = async (item: any) => {
+  const handleDuplicate = async (item: any, table: "ingredients" | "packaging") => {
     const { id, created_at, updated_at, ...rest } = item;
-    await supabase.from("ingredients").insert({ ...rest, name: `${rest.name} (cópia)` });
-    toast({ title: "Duplicado! ✅" }); fetchItems();
+    await supabase.from(table).insert({ ...rest, name: `${rest.name} (cópia)` } as any);
+    toast({ title: "Duplicado! ✅" }); fetchAll();
   };
+
+  const handleDeleteRecipe = async (id: string) => {
+    await supabase.from("recipes").delete().eq("id", id);
+    toast({ title: "Receita excluída" }); fetchAll();
+  };
+
+  const handleDuplicateRecipe = async (r: any) => {
+    const { id, created_at, updated_at, ...rest } = r;
+    await supabase.from("recipes").insert({ ...rest, name: `${rest.name} (cópia)` });
+    toast({ title: "Receita duplicada! ✅" }); fetchAll();
+  };
+
+  const renderItemList = (items: any[], table: "ingredients" | "packaging", type: "ingredient" | "packaging") => {
+    if (items.length === 0) {
+      return <EmptyState icon={type === "ingredient" ? Milk : Box} title={`Nenhum ${type === "ingredient" ? "ingrediente" : "embalagem"} cadastrado`} description="Comece cadastrando seus insumos." actionLabel="Adicionar" onAction={() => openNewDialog(type)} />;
+    }
+    return (
+      <div className="grid gap-3">
+        {items.map((item) => {
+          const lowStock = Number(item.min_stock) > 0 && Number(item.current_stock) <= Number(item.min_stock);
+          return (
+            <Card key={item.id} className={`card-elevated ${lowStock ? "border-l-4 border-l-destructive" : ""}`}>
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <p className="font-bold text-foreground truncate">{item.name}</p>
+                  <p className="text-sm text-muted-foreground">R$ {Number(item.total_cost).toFixed(2)} / {item.quantity_purchased} {item.unit}</p>
+                  <p className="text-xs font-bold text-primary">Custo: R$ {Number(item.cost_per_unit || 0).toFixed(4)}/{item.unit}</p>
+                  {Number(item.current_stock) > 0 && <p className="text-xs text-muted-foreground">Estoque: {item.current_stock} {item.unit}</p>}
+                  {lowStock && <p className="text-xs font-bold text-destructive mt-0.5">⚠️ Estoque baixo!</p>}
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <Button variant="ghost" size="icon" onClick={() => openEdit(item, type)}><Pencil className="w-4 h-4 text-primary" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleDuplicate(item, table)}><Copy className="w-4 h-4 text-muted-foreground" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id, table)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    );
+  };
+
+  if (loading) return <div className="text-center py-16 text-muted-foreground">Carregando...</div>;
 
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
         <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center mx-auto shadow-lg">
-          <Milk className="w-7 h-7 text-white" />
+          <Package className="w-7 h-7 text-white" />
         </div>
         <h1 className="text-2xl font-extrabold text-foreground">Insumos</h1>
-        <p className="text-sm text-muted-foreground">Cadastre seus ingredientes para usar na precificação 🧁</p>
+        <p className="text-sm text-muted-foreground">Gerencie ingredientes, embalagens e receitas 🧁</p>
       </div>
 
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-3 w-full h-12 rounded-xl">
+          <TabsTrigger value="ingredients" className="rounded-xl font-bold text-xs">🥄 Ingredientes</TabsTrigger>
+          <TabsTrigger value="packaging" className="rounded-xl font-bold text-xs">📦 Embalagens</TabsTrigger>
+          <TabsTrigger value="recipes" className="rounded-xl font-bold text-xs">📋 Receitas</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="ingredients" className="space-y-4 mt-4">
+          <Button onClick={() => openNewDialog("ingredient")} className="w-full rounded-xl h-12 btn-3d text-base font-bold gap-2">+ Adicionar ingrediente</Button>
+          {renderItemList(ingredients, "ingredients", "ingredient")}
+        </TabsContent>
+
+        <TabsContent value="packaging" className="space-y-4 mt-4">
+          <Button onClick={() => openNewDialog("packaging")} className="w-full rounded-xl h-12 btn-3d text-base font-bold gap-2">+ Adicionar embalagem</Button>
+          {renderItemList(packagingItems, "packaging", "packaging")}
+        </TabsContent>
+
+        <TabsContent value="recipes" className="space-y-4 mt-4">
+          {recipes.length === 0 ? (
+            <EmptyState icon={BookOpen} title="Nenhuma receita cadastrada" description="Precifique receitas na aba Precificação." />
+          ) : (
+            <div className="grid gap-3">
+              {recipes.map((r) => {
+                const ingCount = Array.isArray(r.ingredients_json) ? r.ingredients_json.length : 0;
+                return (
+                  <Card key={r.id} className="card-elevated">
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-foreground truncate">{r.name}</p>
+                        <p className="text-xs text-muted-foreground">{r.category} • {ingCount} ingrediente(s)</p>
+                        <p className="text-sm font-bold text-success">Custo: R$ {Number(r.total_cost || 0).toFixed(2)}</p>
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <Button variant="ghost" size="icon" onClick={() => handleDuplicateRecipe(r)}><Copy className="w-4 h-4 text-muted-foreground" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteRecipe(r.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Shared Dialog for ingredients/packaging */}
       <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) resetForm(); }}>
-        <DialogTrigger asChild>
-          <Button className="w-full rounded-xl h-12 btn-3d text-base font-bold gap-2">+ Adicionar ingrediente</Button>
-        </DialogTrigger>
         <DialogContent>
-          <DialogHeader><DialogTitle>{editingId ? "Editar" : "Novo"} ingrediente</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editingId ? "Editar" : "Novo"} {dialogType === "ingredient" ? "ingrediente" : "embalagem"}</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <Input placeholder="Ex: Farinha de trigo" value={name} onChange={(e) => setName(e.target.value)} className="h-12 rounded-xl" />
+            <Input placeholder={dialogType === "ingredient" ? "Ex: Farinha de trigo" : "Ex: Caixa kraft"} value={name} onChange={(e) => setName(e.target.value)} className="h-12 rounded-xl" />
             <Select value={unit} onValueChange={setUnit}>
               <SelectTrigger className="h-12 rounded-xl"><SelectValue /></SelectTrigger>
-              <SelectContent>{ingredientUnits.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+              <SelectContent>{(dialogType === "ingredient" ? ingredientUnits : packagingUnits).map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
             </Select>
             <div className="grid grid-cols-2 gap-3">
               <Input type="number" step="0.01" placeholder="Valor pago (R$)" value={totalCost} onChange={(e) => setTotalCost(e.target.value)} className="h-12 rounded-xl" />
@@ -116,35 +223,6 @@ const Supplies = () => {
           </div>
         </DialogContent>
       </Dialog>
-
-      {loading ? (
-        <div className="text-center py-16 text-muted-foreground">Carregando...</div>
-      ) : items.length === 0 ? (
-        <EmptyState icon={Package} title="Nenhum ingrediente cadastrado" description="Cadastre seus insumos para usar na precificação." actionLabel="Adicionar" onAction={() => setDialogOpen(true)} />
-      ) : (
-        <div className="grid gap-3">
-          {items.map((item) => {
-            const lowStock = Number(item.min_stock) > 0 && Number(item.current_stock) <= Number(item.min_stock);
-            return (
-              <Card key={item.id} className={`card-elevated ${lowStock ? "border-l-4 border-l-destructive" : ""}`}>
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-bold text-foreground truncate">{item.name}</p>
-                    <p className="text-sm text-muted-foreground">R$ {Number(item.total_cost).toFixed(2)} / {item.quantity_purchased} {item.unit}</p>
-                    <p className="text-xs font-bold text-primary">Custo: R$ {Number(item.cost_per_unit || 0).toFixed(4)}/{item.unit}</p>
-                    {lowStock && <p className="text-xs font-bold text-destructive mt-0.5">⚠️ Estoque baixo!</p>}
-                  </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Button variant="ghost" size="icon" onClick={() => openEdit(item)}><Pencil className="w-4 h-4 text-primary" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDuplicate(item)}><Copy className="w-4 h-4 text-muted-foreground" /></Button>
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(item.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 };

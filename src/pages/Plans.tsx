@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Crown, Star, Medal, Gem, Check, Sparkles } from "lucide-react";
+import { Crown, Star, Award, Gem, Check, Sparkles } from "lucide-react";
 
 const plans = [
   {
@@ -10,7 +10,6 @@ const plans = [
     icon: Star,
     gradient: "from-gray-400 via-gray-300 to-gray-200",
     borderColor: "border-gray-300",
-    iconColor: "text-gray-500",
     btnClass: "bg-gray-500 hover:bg-gray-600 text-white",
     features: ["Precificação básica", "Até 5 produtos", "Suporte por e-mail"],
     current: true,
@@ -19,10 +18,9 @@ const plans = [
     name: "Prata",
     price: "R$ 9,90",
     period: "semanal",
-    icon: Medal,
+    icon: Award,
     gradient: "from-slate-400 via-slate-300 to-slate-200",
     borderColor: "border-slate-300",
-    iconColor: "text-slate-500",
     btnClass: "bg-slate-500 hover:bg-slate-600 text-white",
     features: ["Precificação ilimitada", "Até 20 produtos", "Suporte prioritário"],
   },
@@ -30,10 +28,9 @@ const plans = [
     name: "Ouro",
     price: "R$ 27",
     period: "mensal",
-    icon: Medal,
+    icon: Award,
     gradient: "from-amber-400 via-yellow-300 to-amber-200",
     borderColor: "border-amber-300",
-    iconColor: "text-amber-500",
     btnClass: "bg-amber-500 hover:bg-amber-600 text-white",
     popular: true,
     features: ["Tudo do Prata", "Cardápio digital", "Encomendas ilimitadas", "Suporte VIP"],
@@ -45,7 +42,6 @@ const plans = [
     icon: Gem,
     gradient: "from-rose-400 via-pink-300 to-rose-200",
     borderColor: "border-primary/40",
-    iconColor: "text-primary",
     btnClass: "bg-primary hover:bg-primary/90 text-primary-foreground btn-3d",
     features: ["Tudo do Ouro", "Relatórios avançados", "WhatsApp automático", "Suporte VIP 24h"],
   },
@@ -97,8 +93,8 @@ const Plans = () => {
                   </div>
                 ))}
                 {plan.current ? (
-                  <Button disabled className="w-full rounded-xl mt-3 h-12 text-base font-bold bg-muted text-muted-foreground cursor-not-allowed">
-                    PLANO ATUAL
+                  <Button disabled className="w-full rounded-xl mt-3 h-12 text-base font-bold bg-success/20 text-success cursor-not-allowed border border-success/30">
+                    ✅ PLANO ATUAL
                   </Button>
                 ) : (
                   <Button className={`w-full rounded-xl mt-3 h-12 text-base font-bold ${plan.btnClass} animate-pulse`}>

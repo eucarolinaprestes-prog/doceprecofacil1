@@ -2,20 +2,17 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
-  Calculator,
+  DollarSign,
   ShoppingBag,
   Users,
-  DollarSign,
   Package,
   ShoppingCart,
-  BookOpen,
   Crown,
   Settings,
   LogOut,
   Menu,
   Bell,
   Wallet,
-  Box,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -29,10 +26,8 @@ const sidebarNav = [
   { label: "Encomendas", icon: ShoppingBag, path: "/orders" },
   { label: "Clientes", icon: Users, path: "/clients" },
   { label: "Insumos", icon: Package, path: "/supplies" },
-  { label: "Embalagens", icon: Box, path: "/packaging" },
   { label: "Suas Finanças", icon: Wallet, path: "/finance" },
   { label: "Calculadora de Compras", icon: ShoppingCart, path: "/shopping" },
-  { label: "Cardápio Digital", icon: BookOpen, path: "/menu" },
   { label: "Planos", icon: Crown, path: "/plans" },
   { label: "Configurações", icon: Settings, path: "/settings" },
 ];
@@ -121,7 +116,6 @@ const AppLayout = ({ children }: AppLayoutProps) => {
         <div className="flex items-center gap-2">
           <button className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center relative">
             <Bell className="w-5 h-5 text-primary" />
-            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary rounded-full text-[10px] text-primary-foreground font-bold flex items-center justify-center">0</span>
           </button>
           <Button variant="ghost" size="sm" onClick={() => { signOut(); navigate("/auth"); }} className="text-muted-foreground hover:text-destructive hidden md:flex">
             <LogOut className="w-4 h-4" />
