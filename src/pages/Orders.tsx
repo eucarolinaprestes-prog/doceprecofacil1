@@ -321,13 +321,15 @@ const Orders = () => {
   };
 
 
-  const pendingCount = orders.filter(o => o.status === "pending" || o.status === "scheduled").length;
+  const pendingCount = orders.filter(o => o.status === "pending").length;
+  const scheduledCount = orders.filter(o => o.status === "scheduled").length;
   const productionCount = orders.filter(o => o.status === "production").length;
   const finishedCount = orders.filter(o => o.status === "finished").length;
   const deliveredCount = orders.filter(o => o.status === "delivered").length;
 
   const filteredOrders = (statusFilter === "all" ? orders : orders.filter(o => {
-    if (statusFilter === "pending") return o.status === "pending" || o.status === "scheduled";
+    if (statusFilter === "pending") return o.status === "pending";
+    if (statusFilter === "scheduled") return o.status === "scheduled";
     if (statusFilter === "production") return o.status === "production";
     if (statusFilter === "finished") return o.status === "finished";
     if (statusFilter === "delivered") return o.status === "delivered";
@@ -338,7 +340,7 @@ const Orders = () => {
     return dateA.localeCompare(dateB);
   });
 
-  const nextStatus: Record<string, string> = { pending: "production", scheduled: "production", production: "finished", finished: "delivered" };
+  const nextStatus: Record<string, string> = { pending: "scheduled", scheduled: "production", production: "finished", finished: "delivered" };
 
   if (loading) return <div className="text-center py-16 text-muted-foreground">Carregando...</div>;
 
