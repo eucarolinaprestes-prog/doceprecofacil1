@@ -34,8 +34,8 @@ input[type="number"] {
     --muted: 340 25% 93%;
     --muted-foreground: 340 10% 45%;
 
-    --accent: 30 60% 58%;
-    --accent-foreground: 30 60% 12%;
+    --accent: 45 85% 52%;
+    --accent-foreground: 45 90% 12%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
@@ -48,8 +48,8 @@ input[type="number"] {
 
     --rose-gold: 340 40% 56%;
     --rose-gold-foreground: 0 0% 100%;
-    --gold: 30 60% 58%;
-    --gold-foreground: 30 60% 12%;
+    --gold: 45 85% 52%;
+    --gold-foreground: 45 90% 12%;
     --pink-light: 340 60% 96%;
     --pink-medium: 340 65% 86%;
     --success: 152 70% 38%;
@@ -163,7 +163,7 @@ input[type="number"] {
     background: linear-gradient(135deg, hsl(340 75% 55%), hsl(340 65% 62%));
   }
   .gradient-gold {
-    background: linear-gradient(135deg, hsl(30 60% 52%), hsl(35 70% 62%));
+    background: linear-gradient(135deg, hsl(45 85% 52%), hsl(50 80% 58%));
   }
   .gradient-rose {
     background: linear-gradient(135deg, hsl(340 75% 55%), hsl(320 60% 58%));

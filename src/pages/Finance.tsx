@@ -15,7 +15,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, BarChart, Bar, XAxis,
 
 const incomeCategories = ["Bolos", "Encomendas", "Fatias", "Doces", "Salgados", "Cupcakes", "Outros"];
 const expenseCategories = ["Ingredientes", "Embalagens", "Luz", "Gás", "Uber/99", "Aplicativos", "Entregador", "Compras", "Outros"];
-const COLORS = ["hsl(152, 70%, 38%)", "hsl(30, 60%, 58%)", "hsl(340, 75%, 55%)", "hsl(280, 50%, 55%)", "hsl(200, 60%, 50%)", "hsl(38, 92%, 50%)", "hsl(0, 84%, 60%)"];
+const COLORS = ["hsl(152, 70%, 38%)", "hsl(45, 85%, 52%)", "hsl(340, 75%, 55%)", "hsl(280, 50%, 55%)", "hsl(200, 60%, 50%)", "hsl(38, 92%, 50%)", "hsl(0, 84%, 60%)"];
 
 const paymentMethods = [
   { value: "pix", label: "Pix", icon: Smartphone },
@@ -96,7 +96,7 @@ const Finance = () => {
     <div className="space-y-6">
       <div className="text-center space-y-2">
         <div className="w-14 h-14 rounded-2xl gradient-gold flex items-center justify-center mx-auto shadow-lg">
-          <Wallet className="w-7 h-7 text-white" />
+          <Wallet className="w-7 h-7 text-yellow-950" />
         </div>
         <h1 className="text-2xl font-extrabold text-foreground">Suas Finanças</h1>
         <p className="text-sm text-muted-foreground">Controle suas entradas e saídas de forma simples 💰</p>
@@ -140,7 +140,7 @@ const Finance = () => {
       </div>
 
       {/* Fechamento de Caixa */}
-      <Button onClick={() => setShowReport(true)} className="w-full rounded-xl h-14 font-bold text-base gap-2 gradient-gold text-white" style={{ boxShadow: "0 4px 0 0 hsl(30 60% 40%), 0 6px 12px -2px hsl(30 60% 58% / 0.3)" }}>
+      <Button onClick={() => setShowReport(true)} className="w-full rounded-xl h-14 font-bold text-base gap-2 gradient-gold text-yellow-950" style={{ boxShadow: "0 4px 0 0 hsl(45 85% 42%), 0 6px 12px -2px hsl(45 85% 52% / 0.3)" }}>
         <BarChart3 className="w-5 h-5" /> 📋 Fechamento de Caixa
       </Button>
 

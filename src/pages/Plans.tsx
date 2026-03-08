@@ -41,7 +41,7 @@ const Plans = () => {
     <div className="space-y-8">
       <div className="text-center space-y-3">
         <div className="w-16 h-16 rounded-2xl gradient-gold flex items-center justify-center mx-auto shadow-lg">
-          <Crown className="w-8 h-8 text-white" />
+          <Crown className="w-8 h-8 text-yellow-950" />
         </div>
         <h1 className="text-2xl font-extrabold text-foreground">Escolha seu plano</h1>
         <p className="text-sm text-muted-foreground max-w-xs mx-auto">Invista no seu negócio e tenha acesso a todas as ferramentas 💎</p>
