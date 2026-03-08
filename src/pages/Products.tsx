@@ -55,7 +55,7 @@ const Products = () => {
 
       {products.length === 0 ? (
         <EmptyState
-          icon={Package}
+          icon={Cake}
           title="Nenhum produto ainda"
           description="Precifique seu primeiro produto para vê-lo aqui."
           actionLabel="Precificar agora"
