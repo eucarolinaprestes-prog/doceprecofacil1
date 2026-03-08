@@ -112,7 +112,7 @@ const Supplies = () => {
     toast({ title: "Receita duplicada! ✅" }); fetchAll();
   };
 
-  const renderItemList = (items: any[], table: string, type: "ingredient" | "packaging") => {
+  const renderItemList = (items: any[], table: "ingredients" | "packaging", type: "ingredient" | "packaging") => {
     if (items.length === 0) {
       return <EmptyState icon={type === "ingredient" ? Milk : Box} title={`Nenhum ${type === "ingredient" ? "ingrediente" : "embalagem"} cadastrado`} description="Comece cadastrando seus insumos." actionLabel="Adicionar" onAction={() => openNewDialog(type)} />;
     }
