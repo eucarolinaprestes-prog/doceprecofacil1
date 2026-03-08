@@ -386,7 +386,7 @@ const Orders = () => {
                     <p className="text-xs text-muted-foreground">{o.category || "—"}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</p>
+                    <p className="text-lg font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</p>
                     {o.event_date && (
                       <p className="text-[10px] font-semibold text-muted-foreground mt-0.5">
                         📅 {new Date(o.event_date).toLocaleDateString("pt-BR")}
@@ -394,10 +394,41 @@ const Orders = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Payment details for scheduled/production/finished */}
+                {(o.status === "scheduled" || o.status === "production" || o.status === "finished") && (
+                  <div className="flex gap-2 text-[10px] font-semibold">
+                    {(() => {
+                      const total = Number(o.total_value || 0);
+                      const pct = Number(o.payment_percent || 100);
+                      const paid = total * (pct / 100);
+                      const remaining = total - paid;
+                      return (
+                        <>
+                          <span className="px-2 py-1 rounded-lg bg-success/10 text-success">Pago: R$ {paid.toFixed(2)}</span>
+                          {remaining > 0 && (
+                            <span className="px-2 py-1 rounded-lg bg-warning/10 text-warning">Falta: R$ {remaining.toFixed(2)}</span>
+                          )}
+                          {remaining <= 0 && (
+                            <span className="px-2 py-1 rounded-lg bg-success/10 text-success">✅ Pago total</span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* Delivered: show total paid */}
+                {o.status === "delivered" && (
+                  <div className="text-[10px] font-semibold">
+                    <span className="px-2 py-1 rounded-lg bg-success/10 text-success">✅ Valor total pago: R$ {Number(o.total_value || 0).toFixed(2)}</span>
+                  </div>
+                )}
+
                 <div className="flex gap-2 flex-wrap">
                   {nextStatus[o.status] && (
                     <Button size="sm" onClick={() => updateStatus(o.id, nextStatus[o.status])} className="rounded-xl btn-3d font-bold text-xs h-9">
-                      {o.status === "pending" || o.status === "scheduled" ? "Confirmar" : o.status === "production" ? "Finalizar" : o.status === "finished" ? "Marcar entregue" : ""}
+                      {o.status === "pending" ? "Agendar" : o.status === "scheduled" ? "Iniciar produção" : o.status === "production" ? "Finalizar" : o.status === "finished" ? "Marcar entregue" : ""}
                     </Button>
                   )}
                   <Button size="sm" variant="outline" onClick={() => openWhatsAppPreview(o)} className="rounded-xl h-9 text-success border-success/30 hover:bg-success/10">
