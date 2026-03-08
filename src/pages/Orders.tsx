@@ -228,29 +228,41 @@ const Orders = () => {
     }
 
     // === PENDENTE / ORÇAMENTO ===
-    if (order.status === "pending" || order.status === "scheduled") {
+    if (order.status === "pending") {
       let msg = `Olá, ${clientName}! 😊\n\n`;
       msg += `Tudo bem com você? Segue o orçamento detalhado do seu pedido:\n\n`;
       msg += detailsStr;
       msg += extrasStr;
-      msg += paymentInfo;
+      msg += `\n\n💰 *Valor total: ${totalStr}*`;
       msg += deliveryInfo;
-      msg += `\n\nAssim que confirmar, me envia o comprovante de pagamento para eu agendar a produção, tá? 💕`;
+      msg += `\n\nAssim que confirmar, me envia o comprovante de pagamento para eu agendar, tá? 💕`;
       msg += `\n\nQualquer dúvida, estou à disposição! 🙏`;
       return msg;
     }
 
-    // === AGENDADO (em produção) ===
-    if (order.status === "production") {
+    // === AGENDADO (confirmado, pagou) ===
+    if (order.status === "scheduled") {
       let msg = `Olá, ${clientName}! 😊\n\n`;
-      msg += `Ótima notícia! Seu pedido foi confirmado e agendado! 🎉\n\n`;
+      msg += `Ótima notícia! Seu pedido foi confirmado e agendado com sucesso! 🎉\n\n`;
       msg += `Confira os detalhes:\n\n`;
       msg += detailsStr;
       msg += extrasStr;
       msg += paymentInfo;
       msg += deliveryInfo;
-      msg += `\n\nEstou preparando tudo com muito carinho e capricho pra você! 💕`;
-      msg += `\n\nQualquer novidade, te aviso por aqui! 😘`;
+      msg += `\n\nFique tranquila que vou te manter informada sobre o andamento! 💕`;
+      msg += `\n\nQualquer dúvida, estou por aqui! 😘`;
+      return msg;
+    }
+
+    // === EM PRODUÇÃO ===
+    if (order.status === "production") {
+      let msg = `Olá, ${clientName}! 😊\n\n`;
+      msg += `Seu pedido já está em produção! Estou preparando tudo com muito carinho e capricho! 🎂✨\n\n`;
+      msg += detailsStr;
+      msg += extrasStr;
+      msg += paymentInfo;
+      msg += deliveryInfo;
+      msg += `\n\nAssim que ficar pronto, te aviso! 💕`;
       return msg;
     }
 
