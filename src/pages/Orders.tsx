@@ -98,7 +98,7 @@ const Orders = () => {
       payment_method: paymentMethod,
       total_value: finalValue,
       notes,
-      category: orderCategory,
+      category: orderCategory === "Outros" && customOrderCategory.trim() ? customOrderCategory.trim() : orderCategory,
       size, filling, topping, dough,
       delivery_type: deliveryType,
       observation,
