@@ -88,8 +88,8 @@ const Dashboard = () => {
       {/* CTA Hero */}
       <button
         onClick={() => navigate("/pricing")}
-        className="w-full rounded-2xl p-6 flex items-center justify-between gradient-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
-        style={{ boxShadow: "0 6px 0 0 hsl(340 75% 38%), 0 10px 20px -4px hsl(340 75% 55% / 0.4)" }}
+        className="w-full rounded-2xl p-6 flex items-center justify-between text-white shadow-lg hover:shadow-xl transition-all active:scale-[0.98]"
+        style={{ background: "linear-gradient(135deg, hsl(340 70% 58%), hsl(340 65% 65%))", boxShadow: "0 6px 0 0 hsl(340 70% 48%), 0 10px 20px -4px hsl(340 70% 58% / 0.4)" }}
       >
         <div className="text-left">
           <p className="text-lg font-extrabold">Oi, {displayName}! 👋</p>
