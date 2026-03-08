@@ -646,9 +646,7 @@ const Pricing = () => {
               <p className="text-center text-sm text-muted-foreground py-3">Nenhum ingrediente adicionado ainda. Toque em "+ Estoque" ou "+ Avulso" acima!</p>
             )}
 
-            {selectedIngredients.map(item => (
-              <ItemRow key={item.id} item={item} type="ingredient" />
-            ))}
+            {selectedIngredients.map(item => renderItemRow(item, "ingredient"))}
           </div>
 
           <div className="space-y-3">
