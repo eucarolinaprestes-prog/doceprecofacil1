@@ -17,8 +17,8 @@ type PricingMode = "select" | "product" | "recipe";
 
 const stepLabelsProduct = ["Produto", "Ingredientes", "Mão de Obra", "Estratégia", "Salvar"];
 const stepLabelsRecipe = ["Nome", "Categoria", "Ingredientes", "Resumo"];
-const categories = ["Massa", "Recheio", "Bolo", "Fatias", "Cupcakes", "Salgados", "Doces"];
-const recipeCategories = ["Massa", "Recheio", "Cobertura", "Mousse", "Calda", "Creme", "Outro"];
+const categories = ["Massa", "Recheio", "Bolo", "Fatias", "Cupcakes", "Salgados", "Doces", "Outros"];
+const recipeCategories = ["Massa", "Recheio", "Cobertura", "Mousse", "Calda", "Creme", "Outros"];
 const saleTypes = [
   { value: "unidade(s)", label: "Unidade" },
   { value: "fatia(s)", label: "Fatias" },
@@ -43,12 +43,14 @@ const Pricing = () => {
   const [productName, setProductName] = useState("");
   const [productDesc, setProductDesc] = useState("");
   const [category, setCategory] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
   const [saleType, setSaleType] = useState("");
   const [yieldQty, setYieldQty] = useState("");
 
   // Recipe
   const [recipeName, setRecipeName] = useState("");
   const [recipeCategory, setRecipeCategory] = useState("");
+  const [customRecipeCategory, setCustomRecipeCategory] = useState("");
 
   // Step 1 shared
   const [stockIngredients, setStockIngredients] = useState<StockItem[]>([]);
@@ -170,7 +172,7 @@ const Pricing = () => {
     setSaving(true);
     try {
       await supabase.from("products").insert({
-        user_id: user.id, name: productName, description: productDesc, category,
+        user_id: user.id, name: productName, description: productDesc, category: category === "Outros" && customCategory.trim() ? customCategory.trim() : category,
         yield_quantity: Number(yieldQty) || 1, yield_unit: saleType,
         preparation_time: Number(prepTime) || 0, total_cost: baseCost,
         suggested_price: suggestedPrice, profit_margin: profitMargin[0],
@@ -187,7 +189,7 @@ const Pricing = () => {
     setSaving(true);
     try {
       await supabase.from("recipes").insert({
-        user_id: user.id, name: recipeName, category: recipeCategory,
+        user_id: user.id, name: recipeName, category: recipeCategory === "Outros" && customRecipeCategory.trim() ? customRecipeCategory.trim() : recipeCategory,
         ingredients_json: selectedIngredients as any, total_cost: ingredientsCost,
       });
       toast({ title: "Receita salva com sucesso! 🎉" });
@@ -288,6 +290,9 @@ const Pricing = () => {
                 </button>
               ))}
             </div>
+            {recipeCategory === "Outros" && (
+              <Input placeholder="Especifique a categoria..." value={customRecipeCategory} onChange={(e) => setCustomRecipeCategory(e.target.value)} className="h-12 rounded-xl" />
+            )}
           </div>
         )}
 
@@ -407,6 +412,9 @@ const Pricing = () => {
                 </button>
               ))}
             </div>
+            {category === "Outros" && (
+              <Input placeholder="Especifique a categoria..." value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} className="h-12 rounded-xl mt-2" />
+            )}
           </div>
 
           <div className="space-y-1.5">

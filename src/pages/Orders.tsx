@@ -43,6 +43,7 @@ const Orders = () => {
   const [eventTime, setEventTime] = useState("");
   const [status, setStatus] = useState("pending");
   const [orderCategory, setOrderCategory] = useState("");
+  const [customOrderCategory, setCustomOrderCategory] = useState("");
   const [size, setSize] = useState("");
   const [dough, setDough] = useState("");
   const [filling, setFilling] = useState("");
@@ -97,7 +98,7 @@ const Orders = () => {
       payment_method: paymentMethod,
       total_value: finalValue,
       notes,
-      category: orderCategory,
+      category: orderCategory === "Outros" && customOrderCategory.trim() ? customOrderCategory.trim() : orderCategory,
       size, filling, topping, dough,
       delivery_type: deliveryType,
       observation,
@@ -116,7 +117,7 @@ const Orders = () => {
 
   const resetForm = () => {
     setClientId(""); setEventDate(""); setEventTime(""); setStatus("pending");
-    setOrderCategory(""); setSize(""); setDough(""); setFilling(""); setTopping("");
+    setOrderCategory(""); setCustomOrderCategory(""); setSize(""); setDough(""); setFilling(""); setTopping("");
     setTotalValue(""); setPaymentPercent("100"); setCustomPercent(""); setPaymentMethod("pix");
     setDeliveryType("pickup"); setNotes(""); setObservation("");
     setFeePackaging({ enabled: false, value: "" }); setFeeTopper({ enabled: false, value: "" });
@@ -323,6 +324,9 @@ const Orders = () => {
                   </button>
                 ))}
               </div>
+              {orderCategory === "Outros" && (
+                <Input placeholder="Especifique a categoria..." value={customOrderCategory} onChange={(e) => setCustomOrderCategory(e.target.value)} className="h-12 rounded-xl mt-2" />
+              )}
             </div>
 
             {/* Details */}

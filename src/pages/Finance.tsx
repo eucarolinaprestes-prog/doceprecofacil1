@@ -33,6 +33,7 @@ const Finance = () => {
 
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [clientName, setClientName] = useState("");
@@ -55,18 +56,19 @@ const Finance = () => {
 
   const handleSave = async () => {
     if (!user || !amount) return;
+    const finalCat = category === "Outros" && customCategory.trim() ? customCategory.trim() : category;
     if (dialogType === "income") {
       await supabase.from("financial_income").insert({
-        user_id: user.id, amount: Number(amount), category, date, payment_method: paymentMethod, client_name: clientName, notes,
+        user_id: user.id, amount: Number(amount), category: finalCat, date, payment_method: paymentMethod, client_name: clientName, notes,
       });
     } else {
       await supabase.from("financial_expense").insert({
-        user_id: user.id, amount: Number(amount), category, date, supplier, description,
+        user_id: user.id, amount: Number(amount), category: finalCat, date, supplier, description,
       });
     }
     toast({ title: dialogType === "income" ? "Entrada registrada! 💚" : "Saída registrada! 📝" });
     setDialogType(null);
-    setAmount(""); setCategory(""); setNotes(""); setSupplier(""); setDescription(""); setClientName("");
+    setAmount(""); setCategory(""); setCustomCategory(""); setNotes(""); setSupplier(""); setDescription(""); setClientName("");
     fetchData();
   };
 
@@ -225,6 +227,9 @@ const Finance = () => {
                   ))}
                 </SelectContent>
               </Select>
+              {category === "Outros" && (
+                <Input placeholder="Especifique a categoria..." value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} className="h-12 rounded-xl mt-2" />
+              )}
             </div>
             <div className="space-y-1">
               <label className="text-xs font-semibold text-muted-foreground">Data</label>

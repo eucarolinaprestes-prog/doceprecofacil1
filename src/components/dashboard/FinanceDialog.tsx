@@ -28,6 +28,7 @@ const FinanceDialog = ({ type, onClose, onSaved }: FinanceDialogProps) => {
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [clientName, setClientName] = useState("");
@@ -36,17 +37,19 @@ const FinanceDialog = ({ type, onClose, onSaved }: FinanceDialogProps) => {
   const [description, setDescription] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const finalCategory = category === "Outros" && customCategory.trim() ? customCategory.trim() : category;
+
   const handleSave = async () => {
     if (!user || !amount || !category) return;
     setSaving(true);
     try {
       if (type === "income") {
         await supabase.from("financial_income").insert({
-          user_id: user.id, amount: Number(amount), category, date, payment_method: paymentMethod, client_name: clientName, notes,
+          user_id: user.id, amount: Number(amount), category: finalCategory, date, payment_method: paymentMethod, client_name: clientName, notes,
         });
       } else {
         await supabase.from("financial_expense").insert({
-          user_id: user.id, amount: Number(amount), category, date, supplier, description,
+          user_id: user.id, amount: Number(amount), category: finalCategory, date, supplier, description,
         });
       }
       toast({ title: type === "income" ? "Entrada registrada! 💚" : "Saída registrada! 📝" });
@@ -86,9 +89,17 @@ const FinanceDialog = ({ type, onClose, onSaved }: FinanceDialogProps) => {
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger><SelectValue placeholder="Selecione..." /></SelectTrigger>
               <SelectContent>
-                {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
               </SelectContent>
             </Select>
+            {category === "Outros" && (
+              <Input
+                placeholder="Especifique a categoria..."
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                className="mt-2"
+              />
+            )}
           </div>
 
           <div>
