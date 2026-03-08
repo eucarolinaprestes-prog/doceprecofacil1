@@ -171,7 +171,7 @@ const Pricing = () => {
     setSelectedPackaging([...selectedPackaging, {
       id: `manual-${Date.now()}`, name: manualPkg.name, unit: manualPkg.unit,
       cost_per_unit: Number(manualPkg.cost) / (Number(manualPkg.qty) || 1),
-      quantity_used: Number(manualPkg.qty) || 1, isManual: true,
+      quantity_used: manualPkg.qty || "1", isManual: true,
     }]);
     setManualPkg({ name: "", qty: "", unit: "un", cost: "" });
     setShowPkgManual(false);
