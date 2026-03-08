@@ -29,7 +29,6 @@ const FinanceDialog = ({ type, onClose, onSaved }: FinanceDialogProps) => {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
-  const [category, setCategory] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [paymentMethod, setPaymentMethod] = useState("pix");
   const [clientName, setClientName] = useState("");
