@@ -161,10 +161,9 @@ const SettingsPage = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 w-full h-12 rounded-xl">
+        <TabsList className="grid grid-cols-2 w-full h-12 rounded-xl">
           <TabsTrigger value="profile" className="rounded-xl font-bold text-xs">Perfil</TabsTrigger>
           <TabsTrigger value="financial" className="rounded-xl font-bold text-xs">Financeiro</TabsTrigger>
-          <TabsTrigger value="notifications" className="rounded-xl font-bold text-xs">Notificações</TabsTrigger>
         </TabsList>
 
         {/* PROFILE TAB */}
