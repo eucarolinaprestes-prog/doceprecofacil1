@@ -85,7 +85,7 @@ const Products = () => {
                     <img src={p.photo_url} alt={p.name} className="w-full h-40 rounded-xl object-cover shadow-sm" />
                   ) : (
                     <div className="w-full h-28 rounded-xl bg-secondary flex items-center justify-center">
-                      <Package className="w-10 h-10 text-muted-foreground" />
+                      <Cake className="w-10 h-10 text-muted-foreground" />
                     </div>
                   )}
 
