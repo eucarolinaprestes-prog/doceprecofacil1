@@ -13,7 +13,7 @@ import { Package, Trash2, Pencil, Copy, Milk, Box } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
-const ingredientUnits = ["g", "ml", "kg", "l"];
+const ingredientUnits = ["g", "ml", "kg", "l", "unidade"];
 const packagingUnits = ["unidade", "pacote", "caixa fechada"];
 
 const Supplies = () => {
