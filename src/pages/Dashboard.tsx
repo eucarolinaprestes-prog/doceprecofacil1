@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight, CalendarDays } from "lucide-react";
+import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight, CalendarDays, AlertTriangle } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, addDays, isToday, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import FinanceDialog from "@/components/dashboard/FinanceDialog";
