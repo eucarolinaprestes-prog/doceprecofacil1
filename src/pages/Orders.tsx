@@ -321,16 +321,13 @@ const Orders = () => {
                       {o.status === "pending" || o.status === "scheduled" ? "Iniciar produção" : o.status === "production" ? "Finalizar" : "Marcar entregue"}
                     </Button>
                   )}
-                  <Button size="sm" variant="outline" onClick={() => openWhatsAppPreview(o)} className="rounded-xl h-9">
+                  <Button size="sm" variant="outline" onClick={() => sendWhatsAppDirect(o)} className="rounded-xl h-9 text-success border-success/30 hover:bg-success/10">
                     <WhatsAppIcon className="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => { navigator.clipboard.writeText(buildMessage(o)); toast({ title: "Copiado! 📋" }); }} className="rounded-xl h-9">
-                    <Link2 className="w-4 h-4" />
+                  <Button size="sm" variant="outline" onClick={() => openEditDialog(o)} className="rounded-xl h-9">
+                    <Pencil className="w-4 h-4" />
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => duplicateOrder(o)} className="rounded-xl h-9">
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={() => deleteOrder(o.id)} className="rounded-xl h-9 text-destructive">
+                  <Button size="sm" variant="outline" onClick={() => deleteOrder(o.id)} className="rounded-xl h-9 text-destructive border-destructive/30 hover:bg-destructive/10">
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
