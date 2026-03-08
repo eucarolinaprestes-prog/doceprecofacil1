@@ -237,8 +237,6 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
-        </CardContent>
-      </Card>
 
       {/* Alertas de estoque baixo */}
       {lowStockItems.length > 0 && (
