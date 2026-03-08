@@ -611,12 +611,6 @@ const Pricing = () => {
                 <button onClick={() => setShowIngManual(!showIngManual)} className="h-9 rounded-full bg-muted text-muted-foreground text-xs font-bold px-4">+ Avulso</button>
               </div>
             </div>
-  const handleRecipePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setRecipePhotoFile(file);
-    setRecipePhotoPreview(URL.createObjectURL(file));
-  };
 
 
 
