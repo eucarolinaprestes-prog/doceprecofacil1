@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Cake, Link2, Trash2, Copy, ChevronLeft, CreditCard, Smartphone, Pencil } from "lucide-react";
+import { Cake, Trash2, ChevronLeft, CreditCard, Smartphone, Pencil } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
