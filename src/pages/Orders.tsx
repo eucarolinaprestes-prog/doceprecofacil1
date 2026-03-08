@@ -368,14 +368,14 @@ const Orders = () => {
           <button key={tab.value} onClick={() => setStatusFilter(tab.value)}
             className={`rounded-2xl py-3 px-2 text-center font-bold text-xs transition-all border-2 ${
               statusFilter === tab.value
-                ? "gradient-gold text-white border-warning shadow-lg scale-[1.02]"
-                : "bg-warning/10 text-warning border-warning/20 hover:bg-warning/20"
+                ? "bg-emerald-500 text-white border-emerald-600 shadow-lg scale-[1.02]"
+                : "gradient-gold text-white border-warning shadow-md"
             }`}
-            style={statusFilter === tab.value ? { boxShadow: "0 4px 0 0 hsl(30 60% 40%), 0 6px 12px -2px hsl(30 60% 58% / 0.3)" } : {}}
+            style={statusFilter === tab.value ? { boxShadow: "0 4px 0 0 hsl(150 50% 30%), 0 6px 12px -2px hsl(150 50% 40% / 0.3)" } : { boxShadow: "0 4px 0 0 hsl(30 60% 40%)" }}
           >
             <span className="text-sm block">{tab.icon}</span>
-            <span className="block text-xs">{tab.label}</span>
-            <span className="block text-xl font-extrabold mt-0.5">{tab.count}</span>
+            <span className="block text-xs text-white">{tab.label}</span>
+            <span className="block text-xl font-extrabold mt-0.5 text-white">{tab.count}</span>
           </button>
         ))}
       </div>
