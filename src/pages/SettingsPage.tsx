@@ -155,9 +155,9 @@ const SettingsPage = () => {
     <div className="space-y-6 pb-6">
       <div className="text-center space-y-2">
         <div className="w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center mx-auto shadow-lg">
-          <Settings className="w-7 h-7 text-white" />
+          <Building2 className="w-7 h-7 text-white" />
         </div>
-        <h1 className="text-2xl font-extrabold text-foreground">Configurações</h1>
+        <h1 className="text-2xl font-extrabold text-foreground">Informações da Empresa</h1>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
