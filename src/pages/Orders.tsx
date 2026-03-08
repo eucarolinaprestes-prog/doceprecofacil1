@@ -237,7 +237,7 @@ const Orders = () => {
 
       {/* Order list */}
       {filteredOrders.length === 0 ? (
-        <EmptyState icon={ShoppingBag} title="Nenhuma encomenda" description="Crie sua primeira encomenda." />
+        <EmptyState icon={Cake} title="Nenhuma encomenda" description="Crie sua primeira encomenda." />
       ) : (
         <div className="space-y-3">
           {filteredOrders.map((o) => (
