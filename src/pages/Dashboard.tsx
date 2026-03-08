@@ -4,16 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight } from "lucide-react";
-import { format, startOfWeek, addDays, isToday, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 const Dashboard = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const today = new Date();
-  const weekStart = startOfWeek(today, { weekStartsOn: 0 });
-  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  const name = profile?.name || "Confeiteira";
+  const displayName = profile?.name || "Confeiteira";
 
   const [incomes, setIncomes] = useState<any[]>([]);
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -45,13 +43,6 @@ const Dashboard = () => {
   const totalExpense = expenses.reduce((s, e) => s + Number(e.amount), 0);
   const profit = totalIncome - totalExpense;
 
-  const orderDates = orders.reduce((acc: Record<string, number>, o) => {
-    if (o.event_date) {
-      const d = format(new Date(o.event_date), "yyyy-MM-dd");
-      acc[d] = (acc[d] || 0) + 1;
-    }
-    return acc;
-  }, {});
 
   return (
     <div className="space-y-5">
@@ -65,7 +56,7 @@ const Dashboard = () => {
         style={{ boxShadow: "0 6px 0 0 hsl(340 75% 38%), 0 10px 20px -4px hsl(340 75% 55% / 0.4)" }}
       >
         <div className="text-left">
-          <p className="text-lg font-extrabold">Oi, {name}! 👋</p>
+          <p className="text-lg font-extrabold">Oi, {displayName}! 👋</p>
           <p className="text-sm font-bold opacity-90 mt-0.5">Vamos precificar hoje?</p>
         </div>
         <div className="w-14 h-14 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
@@ -164,34 +155,6 @@ const Dashboard = () => {
         </Card>
       )}
 
-      {/* Calendário semanal */}
-      <Card className="card-elevated">
-        <CardContent className="p-4">
-          <p className="text-sm font-bold text-foreground mb-3">📅 Semana atual</p>
-          <div className="grid grid-cols-7 gap-2">
-            {weekDays.map((day) => {
-              const dateStr = format(day, "yyyy-MM-dd");
-              const hasOrder = orderDates[dateStr];
-              return (
-                <div
-                  key={day.toISOString()}
-                  className={`flex flex-col items-center py-3 px-1 rounded-xl text-xs font-medium ${
-                    isToday(day)
-                      ? "bg-primary text-primary-foreground shadow-md"
-                      : hasOrder
-                      ? "bg-success/10 text-success border border-success/20"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  <span className="capitalize text-[10px]">{format(day, "EEE", { locale: ptBR })}</span>
-                  <span className="text-lg font-extrabold">{format(day, "d")}</span>
-                  {hasOrder && <span className="w-1.5 h-1.5 rounded-full bg-success mt-0.5" />}
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
