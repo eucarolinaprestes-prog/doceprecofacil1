@@ -350,15 +350,31 @@ const SettingsPage = () => {
                 <div className="space-y-2">
                   {variableCosts.map((cost, idx) => (
                     <div key={idx} className="flex items-center gap-2 bg-secondary/40 p-3 rounded-xl">
-                      <span className="text-sm font-medium text-foreground flex-1 truncate">{cost.category}</span>
-                      <span className="text-xs text-muted-foreground">{cost.frequency}</span>
-                      <span className="text-sm font-bold text-accent">R$ {cost.amount.toFixed(2)}</span>
-                      <button onClick={() => setVariableCosts(variableCosts.filter((_, i) => i !== idx))} className="text-destructive p-1"><Trash2 className="w-4 h-4" /></button>
+                      {editingVarIdx === idx ? (
+                        <>
+                          <Input value={editCategory} onChange={e => setEditCategory(e.target.value)} className="h-9 rounded-lg flex-1 text-sm" />
+                          <CurrencyInput value={editAmount} onValueChange={setEditAmount} className="h-9 rounded-lg w-28 text-sm" />
+                          <button onClick={() => {
+                            const updated = [...variableCosts];
+                            updated[idx] = { ...updated[idx], category: editCategory, amount: Number(editAmount) };
+                            setVariableCosts(updated);
+                            setEditingVarIdx(null);
+                          }} className="text-success p-1"><CheckCircle2 className="w-4 h-4" /></button>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-sm font-medium text-foreground flex-1 truncate">{cost.category}</span>
+                          <span className="text-xs text-muted-foreground">{cost.frequency}</span>
+                          <span className="text-sm font-bold text-primary">R$ {cost.amount.toFixed(2)}</span>
+                          <button onClick={() => { setEditingVarIdx(idx); setEditCategory(cost.category); setEditAmount(String(cost.amount)); }} className="text-primary p-1"><Pencil className="w-4 h-4" /></button>
+                          <button onClick={() => setVariableCosts(variableCosts.filter((_, i) => i !== idx))} className="text-destructive p-1"><Trash2 className="w-4 h-4" /></button>
+                        </>
+                      )}
                     </div>
                   ))}
-                  <div className="flex justify-between items-center bg-accent/10 p-3 rounded-xl">
-                    <span className="text-sm font-bold">Total mensal</span>
-                    <span className="text-lg font-extrabold text-accent">R$ {variableTotal.toFixed(2)}</span>
+                  <div className="flex justify-between items-center bg-success p-3 rounded-xl">
+                    <span className="text-sm font-bold text-success-foreground">Total mensal</span>
+                    <span className="text-lg font-extrabold text-success-foreground">R$ {variableTotal.toFixed(2)}</span>
                   </div>
                 </div>
               )}
