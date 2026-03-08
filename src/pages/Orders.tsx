@@ -373,9 +373,9 @@ const Orders = () => {
             }`}
             style={statusFilter === tab.value ? { boxShadow: "0 4px 0 0 hsl(340 75% 38%), 0 6px 12px -2px hsl(340 75% 55% / 0.3)" } : {}}
           >
-            <span className="text-lg block">{tab.icon}</span>
-            <span className="block mt-0.5">{tab.label}</span>
-            <span className="block text-[10px] opacity-80 mt-0.5">{tab.count}</span>
+            <span className="text-sm block">{tab.icon}</span>
+            <span className="block text-xs">{tab.label}</span>
+            <span className="block text-xl font-extrabold mt-0.5">{tab.count}</span>
           </button>
         ))}
       </div>
