@@ -202,8 +202,8 @@ const Pricing = () => {
   };
 
   // Calculations
-  const ingredientsCost = selectedIngredients.reduce((s, i) => s + i.cost_per_unit * i.quantity_used, 0);
-  const packagingCost = selectedPackaging.reduce((s, i) => s + i.cost_per_unit * i.quantity_used, 0);
+  const ingredientsCost = selectedIngredients.reduce((s, i) => s + i.cost_per_unit * (Number(i.quantity_used) || 0), 0);
+  const packagingCost = selectedPackaging.reduce((s, i) => s + i.cost_per_unit * (Number(i.quantity_used) || 0), 0);
   const laborCost = hourlyRate * (Number(prepTime) || 0) / 60;
   const fixedCostValue = totalFixedCosts * (fixedCostPercent[0] / 100);
   const baseCost = ingredientsCost + packagingCost + laborCost + fixedCostValue;
