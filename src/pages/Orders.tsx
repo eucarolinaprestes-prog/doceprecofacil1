@@ -228,29 +228,41 @@ const Orders = () => {
     }
 
     // === PENDENTE / ORÇAMENTO ===
-    if (order.status === "pending" || order.status === "scheduled") {
+    if (order.status === "pending") {
       let msg = `Olá, ${clientName}! 😊\n\n`;
       msg += `Tudo bem com você? Segue o orçamento detalhado do seu pedido:\n\n`;
       msg += detailsStr;
       msg += extrasStr;
-      msg += paymentInfo;
+      msg += `\n\n💰 *Valor total: ${totalStr}*`;
       msg += deliveryInfo;
-      msg += `\n\nAssim que confirmar, me envia o comprovante de pagamento para eu agendar a produção, tá? 💕`;
+      msg += `\n\nAssim que confirmar, me envia o comprovante de pagamento para eu agendar, tá? 💕`;
       msg += `\n\nQualquer dúvida, estou à disposição! 🙏`;
       return msg;
     }
 
-    // === AGENDADO (em produção) ===
-    if (order.status === "production") {
+    // === AGENDADO (confirmado, pagou) ===
+    if (order.status === "scheduled") {
       let msg = `Olá, ${clientName}! 😊\n\n`;
-      msg += `Ótima notícia! Seu pedido foi confirmado e agendado! 🎉\n\n`;
+      msg += `Ótima notícia! Seu pedido foi confirmado e agendado com sucesso! 🎉\n\n`;
       msg += `Confira os detalhes:\n\n`;
       msg += detailsStr;
       msg += extrasStr;
       msg += paymentInfo;
       msg += deliveryInfo;
-      msg += `\n\nEstou preparando tudo com muito carinho e capricho pra você! 💕`;
-      msg += `\n\nQualquer novidade, te aviso por aqui! 😘`;
+      msg += `\n\nFique tranquila que vou te manter informada sobre o andamento! 💕`;
+      msg += `\n\nQualquer dúvida, estou por aqui! 😘`;
+      return msg;
+    }
+
+    // === EM PRODUÇÃO ===
+    if (order.status === "production") {
+      let msg = `Olá, ${clientName}! 😊\n\n`;
+      msg += `Seu pedido já está em produção! Estou preparando tudo com muito carinho e capricho! 🎂✨\n\n`;
+      msg += detailsStr;
+      msg += extrasStr;
+      msg += paymentInfo;
+      msg += deliveryInfo;
+      msg += `\n\nAssim que ficar pronto, te aviso! 💕`;
       return msg;
     }
 
@@ -309,13 +321,15 @@ const Orders = () => {
   };
 
 
-  const pendingCount = orders.filter(o => o.status === "pending" || o.status === "scheduled").length;
+  const pendingCount = orders.filter(o => o.status === "pending").length;
+  const scheduledCount = orders.filter(o => o.status === "scheduled").length;
   const productionCount = orders.filter(o => o.status === "production").length;
   const finishedCount = orders.filter(o => o.status === "finished").length;
   const deliveredCount = orders.filter(o => o.status === "delivered").length;
 
   const filteredOrders = (statusFilter === "all" ? orders : orders.filter(o => {
-    if (statusFilter === "pending") return o.status === "pending" || o.status === "scheduled";
+    if (statusFilter === "pending") return o.status === "pending";
+    if (statusFilter === "scheduled") return o.status === "scheduled";
     if (statusFilter === "production") return o.status === "production";
     if (statusFilter === "finished") return o.status === "finished";
     if (statusFilter === "delivered") return o.status === "delivered";
@@ -326,7 +340,7 @@ const Orders = () => {
     return dateA.localeCompare(dateB);
   });
 
-  const nextStatus: Record<string, string> = { pending: "production", scheduled: "production", production: "finished", finished: "delivered" };
+  const nextStatus: Record<string, string> = { pending: "scheduled", scheduled: "production", production: "finished", finished: "delivered" };
 
   if (loading) return <div className="text-center py-16 text-muted-foreground">Carregando...</div>;
 
@@ -346,11 +360,12 @@ const Orders = () => {
 
       {/* Status tabs */}
       <Tabs value={statusFilter} onValueChange={setStatusFilter}>
-        <TabsList className="grid grid-cols-4 w-full h-12 rounded-xl">
-          <TabsTrigger value="pending" className="rounded-xl font-bold text-[10px] px-1">Pendentes ({pendingCount})</TabsTrigger>
-          <TabsTrigger value="production" className="rounded-xl font-bold text-[10px] px-1">Produção ({productionCount})</TabsTrigger>
-          <TabsTrigger value="finished" className="rounded-xl font-bold text-[10px] px-1">Finalização ({finishedCount})</TabsTrigger>
-          <TabsTrigger value="delivered" className="rounded-xl font-bold text-[10px] px-1">Entregues ({deliveredCount})</TabsTrigger>
+        <TabsList className="grid grid-cols-5 w-full h-12 rounded-xl">
+          <TabsTrigger value="pending" className="rounded-xl font-bold text-[9px] px-0.5">Pendentes ({pendingCount})</TabsTrigger>
+          <TabsTrigger value="scheduled" className="rounded-xl font-bold text-[9px] px-0.5">Agendados ({scheduledCount})</TabsTrigger>
+          <TabsTrigger value="production" className="rounded-xl font-bold text-[9px] px-0.5">Produção ({productionCount})</TabsTrigger>
+          <TabsTrigger value="finished" className="rounded-xl font-bold text-[9px] px-0.5">Finalizado ({finishedCount})</TabsTrigger>
+          <TabsTrigger value="delivered" className="rounded-xl font-bold text-[9px] px-0.5">Entregues ({deliveredCount})</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -371,7 +386,7 @@ const Orders = () => {
                     <p className="text-xs text-muted-foreground">{o.category || "—"}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xl font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</p>
+                    <p className="text-lg font-extrabold text-primary">R$ {Number(o.total_value || 0).toFixed(2)}</p>
                     {o.event_date && (
                       <p className="text-[10px] font-semibold text-muted-foreground mt-0.5">
                         📅 {new Date(o.event_date).toLocaleDateString("pt-BR")}
@@ -379,10 +394,41 @@ const Orders = () => {
                     )}
                   </div>
                 </div>
+
+                {/* Payment details for scheduled/production/finished */}
+                {(o.status === "scheduled" || o.status === "production" || o.status === "finished") && (
+                  <div className="flex gap-2 text-[10px] font-semibold">
+                    {(() => {
+                      const total = Number(o.total_value || 0);
+                      const pct = Number(o.payment_percent || 100);
+                      const paid = total * (pct / 100);
+                      const remaining = total - paid;
+                      return (
+                        <>
+                          <span className="px-2 py-1 rounded-lg bg-success/10 text-success">Pago: R$ {paid.toFixed(2)}</span>
+                          {remaining > 0 && (
+                            <span className="px-2 py-1 rounded-lg bg-warning/10 text-warning">Falta: R$ {remaining.toFixed(2)}</span>
+                          )}
+                          {remaining <= 0 && (
+                            <span className="px-2 py-1 rounded-lg bg-success/10 text-success">✅ Pago total</span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                )}
+
+                {/* Delivered: show total paid */}
+                {o.status === "delivered" && (
+                  <div className="text-[10px] font-semibold">
+                    <span className="px-2 py-1 rounded-lg bg-success/10 text-success">✅ Valor total pago: R$ {Number(o.total_value || 0).toFixed(2)}</span>
+                  </div>
+                )}
+
                 <div className="flex gap-2 flex-wrap">
                   {nextStatus[o.status] && (
                     <Button size="sm" onClick={() => updateStatus(o.id, nextStatus[o.status])} className="rounded-xl btn-3d font-bold text-xs h-9">
-                      {o.status === "pending" || o.status === "scheduled" ? "Confirmar" : o.status === "production" ? "Finalizar" : o.status === "finished" ? "Marcar entregue" : ""}
+                      {o.status === "pending" ? "Agendar" : o.status === "scheduled" ? "Iniciar produção" : o.status === "production" ? "Finalizar" : o.status === "finished" ? "Marcar entregue" : ""}
                     </Button>
                   )}
                   <Button size="sm" variant="outline" onClick={() => openWhatsAppPreview(o)} className="rounded-xl h-9 text-success border-success/30 hover:bg-success/10">
