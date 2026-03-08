@@ -74,14 +74,11 @@ const FinanceDialog = ({ type, onClose, onSaved }: FinanceDialogProps) => {
         <div className="space-y-4">
           <div>
             <label className="text-xs font-semibold text-muted-foreground mb-1 block">Valor (R$)</label>
-            <Input
-              type="number"
+            <CurrencyInput
               placeholder="0,00"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onValueChange={setAmount}
               className="text-lg font-bold"
-              step="0.01"
-              min="0"
             />
           </div>
 
