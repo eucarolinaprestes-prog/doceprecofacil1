@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight, CalendarDays } from "lucide-react";
+import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight, CalendarDays, AlertTriangle } from "lucide-react";
 import { format, startOfMonth, endOfMonth, startOfWeek, addDays, isToday, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import FinanceDialog from "@/components/dashboard/FinanceDialog";
@@ -18,6 +18,7 @@ const Dashboard = () => {
   const [expenses, setExpenses] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
+  const [lowStockItems, setLowStockItems] = useState<any[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(today);
   const [dialogType, setDialogType] = useState<"income" | "expense" | null>(null);
 
@@ -30,10 +31,26 @@ const Dashboard = () => {
       supabase.from("financial_income").select("*").eq("user_id", user.id).gte("date", monthStart).lte("date", monthEnd),
       supabase.from("financial_expense").select("*").eq("user_id", user.id).gte("date", monthStart).lte("date", monthEnd),
       supabase.from("orders").select("*, clients(name)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
-    ]).then(([{ data: inc }, { data: exp }, { data: ord }]) => {
+      supabase.from("ingredients").select("id, name, current_stock, min_stock, unit").eq("user_id", user.id),
+      supabase.from("packaging").select("id, name, current_stock, min_stock, unit").eq("user_id", user.id),
+    ]).then(([{ data: inc }, { data: exp }, { data: ord }, { data: ing }, { data: pkg }]) => {
       setIncomes(inc || []);
       setExpenses(exp || []);
       setOrders(ord || []);
+
+      // Low stock alerts
+      const lowItems: any[] = [];
+      (ing || []).forEach(i => {
+        if (i.min_stock && i.min_stock > 0 && (i.current_stock || 0) <= i.min_stock) {
+          lowItems.push({ ...i, type: "ingredient" });
+        }
+      });
+      (pkg || []).forEach(p => {
+        if (p.min_stock && p.min_stock > 0 && (p.current_stock || 0) <= p.min_stock) {
+          lowItems.push({ ...p, type: "packaging" });
+        }
+      });
+      setLowStockItems(lowItems);
 
       const activity: any[] = [];
       (inc || []).slice(0, 3).forEach(i => activity.push({ type: "income", text: `Entrada: R$ ${Number(i.amount).toFixed(2)}`, sub: i.category, date: i.date }));
@@ -208,6 +225,43 @@ const Dashboard = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Alertas de estoque baixo */}
+      {lowStockItems.length > 0 && (
+        <Card className="card-elevated border-warning/40">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-8 h-8 rounded-full bg-warning/20 flex items-center justify-center">
+                <AlertTriangle className="w-4 h-4 text-warning" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-foreground">⚠️ Estoque baixo</p>
+                <p className="text-[10px] text-muted-foreground">{lowStockItems.length} {lowStockItems.length === 1 ? "item precisa" : "itens precisam"} de reposição</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              {lowStockItems.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => navigate(`/supplies?tab=${item.type === "ingredient" ? "ingredients" : "packaging"}`)}
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-warning/10 border border-warning/20 cursor-pointer hover:bg-warning/15 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{item.name}</p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {item.type === "ingredient" ? "Ingrediente" : "Embalagem"}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold text-warning">{Number(item.current_stock || 0)} {item.unit}</p>
+                    <p className="text-[10px] text-muted-foreground">mín: {item.min_stock} {item.unit}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <FinanceDialog type={dialogType} onClose={() => setDialogType(null)} onSaved={fetchData} />
     </div>
