@@ -10,7 +10,7 @@ import FinanceDialog from "@/components/dashboard/FinanceDialog";
 
 
 const Dashboard = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, businessId } = useAuth();
   const navigate = useNavigate();
   const today = new Date();
   const displayName = profile?.name?.trim();
