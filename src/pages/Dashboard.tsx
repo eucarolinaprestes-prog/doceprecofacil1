@@ -367,7 +367,7 @@ const Dashboard = () => {
         </Card>
       )}
 
-      <FinanceDialog key={dialogType ?? "closed"} type={dialogType} onClose={() => setDialogType(null)} onSaved={fetchData} />
+      <FinanceDialog key={dialogType ?? "closed"} type={dialogType} onClose={() => setDialogType(null)} onSaved={() => fetchData()} />
     </div>
   );
 };
