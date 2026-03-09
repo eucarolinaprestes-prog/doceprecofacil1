@@ -50,7 +50,7 @@ const Supplies = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchAll(); }, [user]);
+  useEffect(() => { fetchAll(); }, [user, businessId]);
 
   const resetForm = () => {
     setName(""); setUnit("g"); setTotalCost(""); setQuantityPurchased("");

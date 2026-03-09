@@ -23,7 +23,7 @@ const Products = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchProducts(); }, [user]);
+  useEffect(() => { fetchProducts(); }, [user, businessId]);
 
   const handleDelete = async (id: string) => {
     await supabase.from("products").delete().eq("id", id);

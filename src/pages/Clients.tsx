@@ -28,7 +28,7 @@ const Clients = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchClients(); }, [user]);
+  useEffect(() => { fetchClients(); }, [user, businessId]);
 
   const resetForm = () => { setName(""); setWhatsapp(""); setAddress(""); setEditingId(null); };
 

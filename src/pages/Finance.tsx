@@ -54,7 +54,7 @@ const Finance = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, [user]);
+  useEffect(() => { fetchData(); }, [user, businessId]);
 
   const handleSave = async () => {
     if (!user || !amount) return;

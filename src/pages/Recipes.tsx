@@ -24,7 +24,7 @@ const Recipes = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchRecipes(); }, [user]);
+  useEffect(() => { fetchRecipes(); }, [user, businessId]);
 
   const handleDelete = async (id: string) => {
     await supabase.from("recipes").delete().eq("id", id);

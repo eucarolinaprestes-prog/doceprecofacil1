@@ -79,7 +79,7 @@ const Orders = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, [user]);
+  useEffect(() => { fetchData(); }, [user, businessId]);
 
   const paidPercent = paymentPercent === "outro" ? Number(customPercent) || 0 : Number(paymentPercent);
   const extraFees = (feePackaging.enabled ? Number(feePackaging.value) || 0 : 0) +
