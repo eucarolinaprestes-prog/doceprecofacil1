@@ -4,9 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight, CalendarDays, AlertTriangle, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { format, startOfMonth, endOfMonth, startOfWeek, addDays, addMonths, subMonths, isToday, isSameMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfWeek, addDays, addMonths, subMonths, isToday, isSameMonth, subDays, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import FinanceDialog from "@/components/dashboard/FinanceDialog";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 const Dashboard = () => {
   const { user, profile } = useAuth();
@@ -23,11 +24,15 @@ const Dashboard = () => {
   const [calendarMonth, setCalendarMonth] = useState(today);
   const [dialogType, setDialogType] = useState<"income" | "expense" | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [chartData, setChartData] = useState<{ date: string; entradas: number; saidas: number; lucro: number }[]>([]);
 
   const fetchData = () => {
     if (!user) return;
     const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
     const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
+
+    // Fetch last 7 days for chart
+    const last7Days = Array.from({ length: 7 }, (_, i) => format(subDays(today, 6 - i), "yyyy-MM-dd"));
 
     Promise.all([
       supabase.from("financial_income").select("*").eq("user_id", user.id).gte("date", monthStart).lte("date", monthEnd),
@@ -39,6 +44,29 @@ const Dashboard = () => {
       setIncomes(inc || []);
       setExpenses(exp || []);
       setOrders(ord || []);
+
+      // Build chart data for last 7 days
+      const chartDataMap: Record<string, { entradas: number; saidas: number }> = {};
+      last7Days.forEach(d => { chartDataMap[d] = { entradas: 0, saidas: 0 }; });
+      
+      (inc || []).forEach(i => {
+        if (chartDataMap[i.date]) {
+          chartDataMap[i.date].entradas += Number(i.amount);
+        }
+      });
+      (exp || []).forEach(e => {
+        if (chartDataMap[e.date]) {
+          chartDataMap[e.date].saidas += Number(e.amount);
+        }
+      });
+      
+      const newChartData = last7Days.map(d => ({
+        date: format(parseISO(d), "dd/MM", { locale: ptBR }),
+        entradas: chartDataMap[d].entradas,
+        saidas: chartDataMap[d].saidas,
+        lucro: chartDataMap[d].entradas - chartDataMap[d].saidas,
+      }));
+      setChartData(newChartData);
 
       // Low stock alerts
       const lowItems: any[] = [];
@@ -132,7 +160,82 @@ const Dashboard = () => {
       </Card>
 
 
-      {/* Botões de ação */}
+      {/* Gráficos Financeiros - Últimos 7 dias */}
+      <div className="grid grid-cols-1 gap-4">
+        <Card className="card-elevated overflow-hidden">
+          <CardContent className="p-4">
+            <p className="text-sm font-bold text-foreground mb-3">📈 Entradas (últimos 7 dias)</p>
+            <div className="h-32">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorEntradas" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Entradas"]} />
+                  <Area type="monotone" dataKey="entradas" stroke="hsl(var(--success))" strokeWidth={2} fill="url(#colorEntradas)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="card-elevated overflow-hidden">
+          <CardContent className="p-4">
+            <p className="text-sm font-bold text-foreground mb-3">📉 Saídas (últimos 7 dias)</p>
+            <div className="h-32">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorSaidas" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Saídas"]} />
+                  <Area type="monotone" dataKey="saidas" stroke="hsl(var(--destructive))" strokeWidth={2} fill="url(#colorSaidas)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="card-elevated overflow-hidden">
+          <CardContent className="p-4">
+            <p className="text-sm font-bold text-foreground mb-3">💰 Lucro (últimos 7 dias)</p>
+            <div className="h-32">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorLucroPos" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--success))" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(var(--success))" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorLucroNeg" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--destructive))" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="hsl(var(--destructive))" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.5} />
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Lucro"]} />
+                  <Area type="monotone" dataKey="lucro" stroke={profit >= 0 ? "hsl(var(--success))" : "hsl(var(--destructive))"} strokeWidth={2} fill={profit >= 0 ? "url(#colorLucroPos)" : "url(#colorLucroNeg)"} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={() => setDialogType("income")}
