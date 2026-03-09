@@ -111,10 +111,11 @@ const DigitalMenu = () => {
 
   const reload = useCallback(async () => {
     if (!user) return;
+    if (!businessId) return;
     const [{ data: prods }, { data: cats }, { data: ms }] = await Promise.all([
-      (supabase.from("menu_products") as any).select("*").eq("user_id", user.id).order("sort_order"),
-      supabase.from("menu_categories").select("*").eq("user_id", user.id).order("sort_order"),
-      (supabase.from("menu_settings") as any).select("*").eq("user_id", user.id).single(),
+      (supabase.from("menu_products") as any).select("*").eq("business_id", businessId).order("sort_order"),
+      supabase.from("menu_categories").select("*").eq("business_id", businessId).order("sort_order"),
+      (supabase.from("menu_settings") as any).select("*").eq("business_id", businessId).single(),
     ]);
     setProducts(prods || []);
     setCategories(cats || []);
@@ -134,7 +135,7 @@ const DigitalMenu = () => {
       setStoreName(profile?.store_name || "");
     }
     setLoading(false);
-  }, [user, profile]);
+  }, [user, profile, businessId]);
 
   useEffect(() => { reload(); }, [reload]);
 

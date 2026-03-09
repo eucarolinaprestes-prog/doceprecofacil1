@@ -40,16 +40,17 @@ const Supplies = () => {
   const fetchAll = async () => {
     if (!user) return;
     setLoading(true);
+    if (!businessId) return;
     const [{ data: ing }, { data: pkg }] = await Promise.all([
-      supabase.from("ingredients").select("*").eq("user_id", user.id).order("name"),
-      supabase.from("packaging").select("*").eq("user_id", user.id).order("name"),
+      supabase.from("ingredients").select("*").eq("business_id", businessId).order("name"),
+      supabase.from("packaging").select("*").eq("business_id", businessId).order("name"),
     ]);
     setIngredients(ing || []);
     setPackagingItems(pkg || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchAll(); }, [user]);
+  useEffect(() => { fetchAll(); }, [user, businessId]);
 
   const resetForm = () => {
     setName(""); setUnit("g"); setTotalCost(""); setQuantityPurchased("");

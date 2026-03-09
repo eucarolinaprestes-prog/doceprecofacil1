@@ -10,7 +10,7 @@ import FinanceDialog from "@/components/dashboard/FinanceDialog";
 
 
 const Dashboard = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, businessId } = useAuth();
   const navigate = useNavigate();
   const today = new Date();
   const displayName = profile?.name?.trim();
@@ -31,12 +31,13 @@ const Dashboard = () => {
     const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
     const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
 
+    if (!businessId) return;
     Promise.all([
-      supabase.from("financial_income").select("*").eq("user_id", user.id).gte("date", monthStart).lte("date", monthEnd),
-      supabase.from("financial_expense").select("*").eq("user_id", user.id).gte("date", monthStart).lte("date", monthEnd),
-      supabase.from("orders").select("*, clients(name)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(10),
-      supabase.from("ingredients").select("id, name, current_stock, min_stock, unit").eq("user_id", user.id),
-      supabase.from("packaging").select("id, name, current_stock, min_stock, unit").eq("user_id", user.id),
+      supabase.from("financial_income").select("*").eq("business_id", businessId).gte("date", monthStart).lte("date", monthEnd),
+      supabase.from("financial_expense").select("*").eq("business_id", businessId).gte("date", monthStart).lte("date", monthEnd),
+      supabase.from("orders").select("*, clients(name)").eq("business_id", businessId).order("created_at", { ascending: false }).limit(10),
+      supabase.from("ingredients").select("id, name, current_stock, min_stock, unit").eq("business_id", businessId),
+      supabase.from("packaging").select("id, name, current_stock, min_stock, unit").eq("business_id", businessId),
     ]).then(([{ data: inc }, { data: exp }, { data: ord }, { data: ing }, { data: pkg }]) => {
       setIncomes(inc || []);
       setExpenses(exp || []);
@@ -64,7 +65,7 @@ const Dashboard = () => {
     });
   };
 
-  useEffect(() => { fetchData(); }, [user]);
+  useEffect(() => { fetchData(); }, [user, businessId]);
 
   const totalIncome = incomes.reduce((s, i) => s + Number(i.amount), 0);
   const totalExpense = expenses.reduce((s, e) => s + Number(e.amount), 0);

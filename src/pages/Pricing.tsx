@@ -113,10 +113,10 @@ const Pricing = () => {
     const load = async () => {
       const [{ data: profileData }, { data: ing }, { data: pkg }, { data: fc }, { data: rec }] = await Promise.all([
         supabase.from("profiles").select("*").eq("user_id", user.id).single(),
-        supabase.from("ingredients").select("*").eq("user_id", user.id).order("name"),
-        supabase.from("packaging").select("*").eq("user_id", user.id).order("name"),
-        supabase.from("fixed_costs").select("*").eq("user_id", user.id),
-        supabase.from("recipes").select("*").eq("user_id", user.id).order("name"),
+        supabase.from("ingredients").select("*").eq("business_id", businessId).order("name"),
+        supabase.from("packaging").select("*").eq("business_id", businessId).order("name"),
+        supabase.from("fixed_costs").select("*").eq("business_id", businessId),
+        supabase.from("recipes").select("*").eq("business_id", businessId).order("name"),
       ]);
       if (profileData) {
         const salary = Number(profileData.desired_salary) || 0;
@@ -195,7 +195,7 @@ const Pricing = () => {
       }
     };
     load();
-  }, [user]);
+  }, [user, businessId]);
 
   const addFromStock = (item: StockItem, type: "ingredient" | "packaging") => {
     const list = type === "ingredient" ? selectedIngredients : selectedPackaging;

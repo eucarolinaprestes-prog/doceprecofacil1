@@ -18,12 +18,13 @@ const Recipes = () => {
   const fetchRecipes = async () => {
     if (!user) return;
     setLoading(true);
-    const { data } = await supabase.from("recipes").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    if (!businessId) return;
+    const { data } = await supabase.from("recipes").select("*").eq("business_id", businessId).order("created_at", { ascending: false });
     setRecipes(data || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchRecipes(); }, [user]);
+  useEffect(() => { fetchRecipes(); }, [user, businessId]);
 
   const handleDelete = async (id: string) => {
     await supabase.from("recipes").delete().eq("id", id);

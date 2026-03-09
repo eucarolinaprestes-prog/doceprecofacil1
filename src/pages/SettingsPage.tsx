@@ -99,9 +99,9 @@ const SettingsPage = () => {
         setWhatsapp(p.whatsapp || "");
         setLogoUrl(p.logo_url || "");
       }
-      const { data: fc } = await supabase.from("fixed_costs").select("*").eq("user_id", user.id);
+      const { data: fc } = await supabase.from("fixed_costs").select("*").eq("business_id", businessId);
       setFixedCosts(fc?.map((c) => ({ id: c.id, category: c.category, amount: Number(c.amount), frequency: "mensal" })) || []);
-      const { data: vc } = await supabase.from("variable_costs").select("*").eq("user_id", user.id);
+      const { data: vc } = await supabase.from("variable_costs").select("*").eq("business_id", businessId);
       setVariableCosts(vc?.map((c) => ({ id: c.id, category: c.category, amount: Number(c.amount), frequency: "mensal" })) || []);
       setLoading(false);
     };
@@ -145,12 +145,12 @@ const SettingsPage = () => {
         work_hours_per_day: Number(workHours) || 0,
       }).eq("user_id", user.id);
 
-      await supabase.from("fixed_costs").delete().eq("user_id", user.id);
+      await supabase.from("fixed_costs").delete().eq("business_id", businessId);
       if (fixedCosts.length > 0) {
         await supabase.from("fixed_costs").insert(fixedCosts.map((c) => ({ user_id: user.id, business_id: businessId, category: c.category, amount: toMonthly(c.amount, c.frequency) } as any)));
       }
 
-      await supabase.from("variable_costs").delete().eq("user_id", user.id);
+      await supabase.from("variable_costs").delete().eq("business_id", businessId);
       if (variableCosts.length > 0) {
         await supabase.from("variable_costs").insert(variableCosts.map((c) => ({ user_id: user.id, business_id: businessId, category: c.category, amount: toMonthly(c.amount, c.frequency) } as any)));
       }

@@ -36,11 +36,11 @@ const Shopping = () => {
   const emptyRow = (): ShoppingItem => ({ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 });
 
   const fetchAllItems = async () => {
-    if (!user) return;
+    if (!user || !businessId) return;
     const { data } = await supabase
       .from("shopping_list")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("business_id", businessId)
       .order("created_at", { ascending: true });
 
     const mapped = data?.map(d => ({
@@ -70,7 +70,7 @@ const Shopping = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchAllItems(); }, [user]);
+  useEffect(() => { fetchAllItems(); }, [user, businessId]);
 
   const items = selectedStore ? (storeItems[selectedStore] || [emptyRow()]) : [];
 
@@ -145,7 +145,7 @@ const Shopping = () => {
       const { data } = await supabase
         .from("shopping_list")
         .select("*")
-        .eq("user_id", user.id)
+        .eq("business_id", businessId)
         .order("created_at", { ascending: true });
 
       setAllItems(data?.map(d => ({
@@ -393,7 +393,7 @@ const Shopping = () => {
                 variant="destructive"
                 onClick={async () => {
                   if (!user) return;
-                  await supabase.from("shopping_list").delete().eq("user_id", user.id);
+                  await supabase.from("shopping_list").delete().eq("business_id", businessId);
                   setAllItems([]);
                   const map: Record<string, ShoppingItem[]> = {};
                   storeOptions.forEach(store => { map[store] = [emptyRow()]; });

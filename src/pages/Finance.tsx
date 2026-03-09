@@ -44,16 +44,17 @@ const Finance = () => {
 
   const fetchData = async () => {
     if (!user) return;
+    if (!businessId) return;
     const [{ data: inc }, { data: exp }] = await Promise.all([
-      supabase.from("financial_income").select("*").eq("user_id", user.id).order("date", { ascending: false }),
-      supabase.from("financial_expense").select("*").eq("user_id", user.id).order("date", { ascending: false }),
+      supabase.from("financial_income").select("*").eq("business_id", businessId).order("date", { ascending: false }),
+      supabase.from("financial_expense").select("*").eq("business_id", businessId).order("date", { ascending: false }),
     ]);
     setIncomes(inc || []);
     setExpenses(exp || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, [user]);
+  useEffect(() => { fetchData(); }, [user, businessId]);
 
   const handleSave = async () => {
     if (!user || !amount) return;
