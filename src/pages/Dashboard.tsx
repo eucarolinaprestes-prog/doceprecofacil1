@@ -31,6 +31,9 @@ const Dashboard = () => {
     const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
     const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
 
+    // Fetch last 7 days for chart
+    const last7Days = Array.from({ length: 7 }, (_, i) => format(subDays(today, 6 - i), "yyyy-MM-dd"));
+
     Promise.all([
       supabase.from("financial_income").select("*").eq("user_id", user.id).gte("date", monthStart).lte("date", monthEnd),
       supabase.from("financial_expense").select("*").eq("user_id", user.id).gte("date", monthStart).lte("date", monthEnd),
@@ -41,6 +44,29 @@ const Dashboard = () => {
       setIncomes(inc || []);
       setExpenses(exp || []);
       setOrders(ord || []);
+
+      // Build chart data for last 7 days
+      const chartDataMap: Record<string, { entradas: number; saidas: number }> = {};
+      last7Days.forEach(d => { chartDataMap[d] = { entradas: 0, saidas: 0 }; });
+      
+      (inc || []).forEach(i => {
+        if (chartDataMap[i.date]) {
+          chartDataMap[i.date].entradas += Number(i.amount);
+        }
+      });
+      (exp || []).forEach(e => {
+        if (chartDataMap[e.date]) {
+          chartDataMap[e.date].saidas += Number(e.amount);
+        }
+      });
+      
+      const newChartData = last7Days.map(d => ({
+        date: format(parseISO(d), "dd/MM", { locale: ptBR }),
+        entradas: chartDataMap[d].entradas,
+        saidas: chartDataMap[d].saidas,
+        lucro: chartDataMap[d].entradas - chartDataMap[d].saidas,
+      }));
+      setChartData(newChartData);
 
       // Low stock alerts
       const lowItems: any[] = [];
