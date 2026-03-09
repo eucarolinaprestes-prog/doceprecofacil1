@@ -174,6 +174,9 @@ const AppLayout = ({ children }: AppLayoutProps) => {
           </button>
         ))}
       </nav>
+
+      {/* Maria Chat Assistant */}
+      <MariaChat />
     </div>
   );
 };
