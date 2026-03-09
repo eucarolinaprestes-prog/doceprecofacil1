@@ -147,7 +147,7 @@ const SettingsPage = () => {
 
       await supabase.from("fixed_costs").delete().eq("user_id", user.id);
       if (fixedCosts.length > 0) {
-        await supabase.from("fixed_costs").insert(fixedCosts.map((c) => ({ user_id: user.id, category: c.category, amount: toMonthly(c.amount, c.frequency) })));
+        await supabase.from("fixed_costs").insert(fixedCosts.map((c) => ({ user_id: user.id, business_id: businessId, category: c.category, amount: toMonthly(c.amount, c.frequency) } as any)));
       }
 
       await supabase.from("variable_costs").delete().eq("user_id", user.id);
