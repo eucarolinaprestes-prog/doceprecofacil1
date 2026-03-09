@@ -93,7 +93,7 @@ const Dashboard = () => {
         style={{ background: "linear-gradient(135deg, hsl(340 70% 58%), hsl(340 65% 65%))", boxShadow: "0 6px 0 0 hsl(340 70% 48%), 0 10px 20px -4px hsl(340 70% 58% / 0.4)" }}
       >
         <div className="text-left">
-          <p className="text-lg font-extrabold">Oi, {displayName}! 👋</p>
+          <p className="text-lg font-extrabold">{greetingText}</p>
           <p className="text-xl font-extrabold opacity-95 mt-1 tracking-wide uppercase">VAMOS PRECIFICAR HOJE?</p>
         </div>
         <div className="w-16 h-16 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
