@@ -227,7 +227,7 @@ const DigitalMenu = () => {
     if (editProdId) {
       await (supabase.from("menu_products") as any).update(payload).eq("id", editProdId);
     } else {
-      await (supabase.from("menu_products") as any).insert({ ...payload, user_id: user.id, sort_order: products.length });
+      await (supabase.from("menu_products") as any).insert({ ...payload, user_id: user.id, business_id: businessId, sort_order: products.length });
     }
     setProdDialogOpen(false);
     toast({ title: editProdId ? "Produto atualizado!" : "Produto adicionado!" });
