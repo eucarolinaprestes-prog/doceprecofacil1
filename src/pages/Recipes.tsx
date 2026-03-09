@@ -67,9 +67,9 @@ const Recipes = () => {
               <Card key={r.id} className="card-elevated">
                 <CardContent className="p-4 flex items-center gap-3">
                   {(r as any).photo_url ? (
-                    <img src={(r as any).photo_url} alt={r.name} className="w-14 h-14 rounded-xl object-cover shrink-0 shadow-sm" />
+                    <img src={(r as any).photo_url} alt={r.name} className="w-20 h-20 rounded-xl object-contain bg-secondary shrink-0 shadow-sm" />
                   ) : (
-                    <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center shrink-0">
+                    <div className="w-20 h-20 rounded-xl bg-secondary flex items-center justify-center shrink-0">
                       <BookOpen className="w-6 h-6 text-muted-foreground" />
                     </div>
                   )}
