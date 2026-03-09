@@ -937,6 +937,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_audit: {
+        Args: {
+          _action: string
+          _business_id: string
+          _entity: string
+          _entity_id?: string
+          _metadata?: Json
+          _user_id: string
+        }
+        Returns: undefined
+      }
       user_in_business: {
         Args: { _business_id: string; _user_id: string }
         Returns: boolean
