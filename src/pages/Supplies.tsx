@@ -17,7 +17,7 @@ const ingredientUnits = ["g", "ml", "kg", "l", "unidade"];
 const packagingUnits = ["unidade", "pacote", "caixa fechada"];
 
 const Supplies = () => {
-  const { user } = useAuth();
+  const { user, businessId } = useAuth();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") || "ingredients";
