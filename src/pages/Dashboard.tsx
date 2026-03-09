@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [calendarMonth, setCalendarMonth] = useState(today);
   const [dialogType, setDialogType] = useState<"income" | "expense" | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [chartData, setChartData] = useState<{ date: string; entradas: number; saidas: number; lucro: number }[]>([]);
 
   const fetchData = () => {
     if (!user) return;
