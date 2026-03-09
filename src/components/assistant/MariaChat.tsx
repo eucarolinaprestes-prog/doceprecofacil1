@@ -191,10 +191,13 @@ const MariaChat = () => {
               <div className="space-y-4">
                 <div className="bg-muted rounded-2xl rounded-tl-sm p-4">
                   <p className="text-sm">
-                    Oi! Eu sou a <strong>Maria</strong> 🍰
+                    Oi! Eu sou a <strong>Maria</strong>, sua assistente confeiteira! 🍰
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Estou aqui para te ajudar em <strong>qualquer dúvida</strong> sobre o sistema! 
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Posso te ajudar a calcular preços, criar encomendas, controlar estoque e muito mais!
+                    Pode perguntar sobre precificação, receitas, estoque, encomendas, financeiro... o que precisar! 💕
                   </p>
                 </div>
 
