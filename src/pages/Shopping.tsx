@@ -36,13 +36,12 @@ const Shopping = () => {
   const emptyRow = (): ShoppingItem => ({ ingredient_name: "", quantity: 0, unit_price: 0, total: 0 });
 
   const fetchAllItems = async () => {
-    if (!user) return;
+    if (!user || !businessId) return;
     const { data } = await supabase
       .from("shopping_list")
       .select("*")
       .eq("business_id", businessId)
       .order("created_at", { ascending: true });
-    if (!businessId) return;
 
     const mapped = data?.map(d => ({
       id: d.id,
