@@ -65,7 +65,7 @@ const Dashboard = () => {
     });
   };
 
-  useEffect(() => { fetchData(); }, [user]);
+  useEffect(() => { fetchData(); }, [user, businessId]);
 
   const totalIncome = incomes.reduce((s, i) => s + Number(i.amount), 0);
   const totalExpense = expenses.reduce((s, e) => s + Number(e.amount), 0);
