@@ -1,89 +1,53 @@
 
+Objetivo: validar o dashboard ponta a ponta e corrigir divergências para ficar idêntico ao preview.
 
-# Doce Preço Fácil — Correções e Melhorias Completas
+Diagnóstico rápido (com base no código + logs + screenshot OCR):
+- Ainda existe fallback proibido “Confeiteira” em:
+  - `src/pages/Dashboard.tsx` (saudação principal)
+  - `src/components/layout/AppLayout.tsx` (header)
+- `index.html` está com `lang="en"` (favorece tradução automática).
+- Logs mostram warning de `ref` envolvendo `FinanceDialog`/`DialogContent`, que pode afetar renderização do botão “Adicionar Saída”.
+- OCR da captura confirma divergências: “Resumo do mês”, “LANCAMENTOS” e botão de saída inconsistente.
 
-## Resumo
-Redesign visual completo do app com design mais moderno, vibrante e intuitivo, além de correções funcionais em todas as abas. A paleta rosa/dourado será mantida mas com mais contraste e elementos visuais 3D.
+Plano de execução (na próxima etapa de implementação):
+1) Travar textos críticos da dashboard
+- Garantir:
+  - “📊 Resumo Financeiro do Mês”
+  - “ENTRADAS | SAÍDAS | LUCRO”
+  - Botões: “Adicionar Entrada”, “Adicionar Saída”, “Calculadora de Compras”, “Nova Encomenda”.
 
----
+2) Corrigir saudação do nome da usuária
+- Dashboard: usar `profile.name` quando existir.
+- Fallback obrigatório: `Oi! 👋` (nunca “Confeiteira”).
+- Aplicar o mesmo padrão no header do `AppLayout`.
 
-## 1. Design System Global
-- Atualizar CSS com cores mais vibrantes, sombras 3D em botões, gradientes mais expressivos
-- Botões com estilo "raised/3D" (box-shadow com profundidade)
-- Cards com hover effects e sombras mais pronunciadas
-- Tipografia com mais hierarquia visual
+3) Bloquear tradução automática do navegador
+- Atualizar `index.html` para `lang="pt-BR"` e adicionar atributo anti-tradução (`translate="no"` no documento/app root).
 
-## 2. Tela de Login/Cadastro
-- Logo maior (w-32 h-32 ao invés de w-24 h-24)
-- Botão de mostrar/ocultar senha (ícone Eye/EyeOff) em todos os campos de senha
-- Background com gradiente mais vivo
+4) Corrigir o bug visual do botão “Adicionar Saída”
+- Revisar cadeia `Dashboard -> FinanceDialog -> Dialog/CurrencyInput`.
+- Eliminar warning de `ref` no modal (ajuste de componentes que recebem `ref` no fluxo do Dialog).
+- Validar ícone `ArrowDownRight` + texto visível no botão vermelho.
 
-## 3. Aba PLANOS
-- Cards com gradientes coloridos por plano (prata=cinza elegante, ouro=dourado, diamante=rosa)
-- Ícones mais elaborados (Shield, Gem, Crown)
-- Badges com efeito brilho
-- Botões com efeito 3D
+5) Teste completo do dashboard (funcional + visual)
+- CTA “VAMOS PRECIFICAR HOJE?” navega para `/pricing`.
+- Abrir modal de Entrada e Saída, preencher e salvar (criando dados de teste).
+- Confirmar atualização de cards e “Atividades recentes”.
+- Verificar calendário (mudar mês, abrir detalhe por data com pedido).
+- Verificar alerta de estoque baixo e navegação para insumos.
+- Validar desktop + mobile e ausência de warnings no console.
+- Comparar preview e publicado para garantir paridade visual/textual.
 
-## 4. Aba INFORMAÇÕES (BusinessInfo)
-- Topo: upload de logo da loja
-- Textos explicativos e amigáveis falando diretamente com a pessoa
-- Seção "Descubra o valor da sua hora" com campos vazios e labels explicativas
-- Custos fixos: fluxo de adicionar um por vez (nome + valor + botão Adicionar), lista com editar/excluir, total no final
-- Custos variáveis: mesmo fluxo dos fixos, com total
+Critérios de aceite
+- Nenhum “Confeiteira” na interface.
+- Sem “Lançamentos/LANCAMENTOS” no card principal.
+- Botão “Adicionar Saída” com ícone + texto, estilo vermelho intacto.
+- Dashboard igual ao preview (textos, cores, ícones, estrutura).
+- Sem warning de `ref` relacionado ao FinanceDialog/Dialog.
 
-## 5. Cardápio Digital
-- Layout estilo iFood: capa, logo, horário, categorias com produtos
-- Produtos com imagem, nome, preço, descrição
-- Toggle visível/oculto
-- Botão compartilhar via WhatsApp e link
-
-## 6. Calculadora de Compras
-- Adicionar botões Copiar e Editar nos itens
-- Total com botão 3D chamativo
-
-## 7. Finanças (Entradas e Saídas)
-- Design mais moderno nos cards e seletores
-- Formas de pagamento em estilo 3D (Pix, Cartão débito, Cartão crédito)
-- Gráfico de categorias (recharts PieChart)
-- Indicador positivo/negativo
-- Títulos mais pessoais
-
-## 8. Insumos e Embalagens
-- Ingredientes: remover campo categoria, unidades fixas (g, ml, kg, l)
-- Embalagens: remover campo categoria, unidades fixas (unidade, pacote, caixa fechada)
-
-## 9. Precificação (Wizard completo)
-- Step 1: adicionar imagem, categorias fixas (Massa, Recheio, Bolo, Fatias, Cupcakes, Salgados, Doces), tipo de venda (Unidade, Fatias, Porções, Kg), nada pré-preenchido
-- Step 2: puxar ingredientes/embalagens do estoque automaticamente, editar/excluir cada item
-- Step 3: buscar valor/hora do perfil automaticamente, custos fixos sugeridos com ajuste %, dicas explicativas
-- Step 4: margem de lucro com sugestão editável, lucro em verde, taxas opcionais (iFood %, delivery, maquininha %)
-- Step 5: preço final destacado, gráfico composição (PieChart), dica de divisão financeira, resumo completo, botão Salvar
-
-## 10. Clientes
-- Clientes já serão referenciados na criação de encomendas (select dropdown)
-
-## 11. Encomendas
-- Títulos com primeira letra maiúscula
-- Design mais moderno e colorido
-- Formas de pagamento: Pix, Cartão crédito, Cartão débito
-- Taxas opcionais: maquininha, decoração, embalagem, topo de bolo, outros
-- "Outros" com editar/duplicar/excluir
-- Enviar por WhatsApp e link
-- Puxar clientes automaticamente
-
-## 12. Produtos
-- Exibir custo, lucro e preço final
-- Opções: editar, copiar, excluir
-
----
-
-## Escopo de Implementação
-
-Dado o volume de mudanças, sugiro implementar em **3 fases**:
-
-**Fase 1** — Design system + Login + Planos + Informações (custos fixos/variáveis dinâmicos)
-**Fase 2** — Precificação completa + Produtos + Insumos
-**Fase 3** — Encomendas + Finanças + Calculadora + Cardápio Digital
-
-Cada fase será uma mensagem separada para manter qualidade e evitar erros.
-
+Detalhes técnicos (arquivos previstos)
+- `src/pages/Dashboard.tsx`
+- `src/components/layout/AppLayout.tsx`
+- `src/components/dashboard/FinanceDialog.tsx`
+- `src/components/ui/dialog.tsx` (se necessário para correção do warning)
+- `index.html`
