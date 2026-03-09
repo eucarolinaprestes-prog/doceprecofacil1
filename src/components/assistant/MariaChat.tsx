@@ -171,7 +171,7 @@ const MariaChat = () => {
           {/* Header */}
           <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src={mariaAvatar} alt="Maria" className="w-10 h-10 rounded-full object-cover bg-white" />
+              <img src={mariaAvatar} alt="Maria" className="w-10 h-10 rounded-full object-cover" />
               <div>
                 <p className="font-semibold">Maria</p>
                 <p className="text-xs opacity-80">Assistente Confeiteira</p>
