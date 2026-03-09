@@ -339,7 +339,7 @@ const Pricing = () => {
         await supabase.from("products").update(payload).eq("id", editingProductId);
         toast({ title: "Produto atualizado com sucesso! 🎉" });
       } else {
-        await supabase.from("products").insert({ ...payload, user_id: user.id });
+        await supabase.from("products").insert({ ...payload, user_id: user.id, business_id: businessId } as any);
         toast({ title: "Produto salvo com sucesso! 🎉" });
       }
       navigate("/products");
