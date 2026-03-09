@@ -394,7 +394,7 @@ const Shopping = () => {
                 variant="destructive"
                 onClick={async () => {
                   if (!user) return;
-                  await supabase.from("shopping_list").delete().eq("user_id", user.id);
+                  await supabase.from("shopping_list").delete().eq("business_id", businessId);
                   setAllItems([]);
                   const map: Record<string, ShoppingItem[]> = {};
                   storeOptions.forEach(store => { map[store] = [emptyRow()]; });
