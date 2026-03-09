@@ -145,7 +145,7 @@ const SettingsPage = () => {
         work_hours_per_day: Number(workHours) || 0,
       }).eq("user_id", user.id);
 
-      await supabase.from("fixed_costs").delete().eq("user_id", user.id);
+      await supabase.from("fixed_costs").delete().eq("business_id", businessId);
       if (fixedCosts.length > 0) {
         await supabase.from("fixed_costs").insert(fixedCosts.map((c) => ({ user_id: user.id, business_id: businessId, category: c.category, amount: toMonthly(c.amount, c.frequency) } as any)));
       }
