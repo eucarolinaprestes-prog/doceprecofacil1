@@ -71,7 +71,7 @@ const DEFAULT_SETTINGS: Partial<MenuSettings> = {
 };
 
 const DigitalMenu = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, businessId } = useAuth();
   const { toast } = useToast();
   const [products, setProducts] = useState<MenuProduct[]>([]);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
