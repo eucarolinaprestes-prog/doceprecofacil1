@@ -135,7 +135,7 @@ const DigitalMenu = () => {
       setStoreName(profile?.store_name || "");
     }
     setLoading(false);
-  }, [user, profile]);
+  }, [user, profile, businessId]);
 
   useEffect(() => { reload(); }, [reload]);
 

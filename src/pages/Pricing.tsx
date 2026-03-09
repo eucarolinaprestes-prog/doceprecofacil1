@@ -195,7 +195,7 @@ const Pricing = () => {
       }
     };
     load();
-  }, [user]);
+  }, [user, businessId]);
 
   const addFromStock = (item: StockItem, type: "ingredient" | "packaging") => {
     const list = type === "ingredient" ? selectedIngredients : selectedPackaging;
