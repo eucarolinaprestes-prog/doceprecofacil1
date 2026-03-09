@@ -60,12 +60,12 @@ const Finance = () => {
     const finalCat = category === "Outros" && customCategory.trim() ? customCategory.trim() : category;
     if (dialogType === "income") {
       await supabase.from("financial_income").insert({
-        user_id: user.id, amount: Number(amount), category: finalCat, date, payment_method: paymentMethod, client_name: clientName, notes,
-      });
+        user_id: user.id, business_id: businessId, amount: Number(amount), category: finalCat, date, payment_method: paymentMethod, client_name: clientName, notes,
+      } as any);
     } else {
       await supabase.from("financial_expense").insert({
-        user_id: user.id, amount: Number(amount), category: finalCat, date, supplier, description,
-      });
+        user_id: user.id, business_id: businessId, amount: Number(amount), category: finalCat, date, supplier, description,
+      } as any);
     }
     toast({ title: dialogType === "income" ? "Entrada registrada! 💚" : "Saída registrada! 📝" });
     setDialogType(null);

@@ -73,8 +73,8 @@ const Supplies = () => {
   const handleSave = async () => {
     if (!user || !name.trim()) return;
     const table = dialogType === "ingredient" ? "ingredients" : "packaging";
-    const payload = {
-      user_id: user.id, name: name.trim(), unit,
+    const payload: any = {
+      user_id: user.id, business_id: businessId, name: name.trim(), unit,
       total_cost: Number(totalCost) || 0,
       quantity_purchased: Number(quantityPurchased) || 0,
       supplier, category: "",

@@ -91,8 +91,9 @@ const Orders = () => {
 
   const handleSave = async () => {
     if (!user) return;
-    const data = {
+    const data: any = {
       user_id: user.id,
+      business_id: businessId,
       client_id: clientId || null,
       event_date: eventDate || null,
       status,
