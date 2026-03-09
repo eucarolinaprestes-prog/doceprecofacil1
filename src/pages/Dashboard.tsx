@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
-import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight, CalendarDays, AlertTriangle, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { format, startOfMonth, endOfMonth, startOfWeek, addDays, addMonths, subMonths, isToday, isSameMonth } from "date-fns";
+import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight, CalendarDays, AlertTriangle, ChevronLeft, ChevronRight, X, Bell } from "lucide-react";
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isToday, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import FinanceDialog from "@/components/dashboard/FinanceDialog";
 
@@ -16,59 +17,76 @@ const Dashboard = () => {
   const displayName = profile?.name?.trim();
   const greetingText = displayName ? `Oi, ${displayName}! 👋` : "Oi! 👋";
 
-  const [incomes, setIncomes] = useState<any[]>([]);
-  const [expenses, setExpenses] = useState<any[]>([]);
-  const [orders, setOrders] = useState<any[]>([]);
-  const [recentActivity, setRecentActivity] = useState<any[]>([]);
-  const [lowStockItems, setLowStockItems] = useState<any[]>([]);
   const [calendarMonth, setCalendarMonth] = useState(today);
   const [dialogType, setDialogType] = useState<"income" | "expense" | null>(null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
+  const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
+  const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
+  const weekStart = format(startOfWeek(today, { weekStartsOn: 0 }), "yyyy-MM-dd");
+  const weekEnd = format(endOfWeek(today, { weekStartsOn: 0 }), "yyyy-MM-dd");
+  const todayStr = format(today, "yyyy-MM-dd");
 
-  const fetchData = () => {
-    if (!user) return;
-    const monthStart = format(startOfMonth(today), "yyyy-MM-dd");
-    const monthEnd = format(endOfMonth(today), "yyyy-MM-dd");
+  // Cached dashboard query with 60s staleTime
+  const { data: dashboardData, refetch: fetchData } = useQuery({
+    queryKey: ["dashboard", businessId, monthStart],
+    queryFn: async () => {
+      if (!businessId) return null;
+      const [{ data: inc }, { data: exp }, { data: ord }, { data: ing }, { data: pkg }] = await Promise.all([
+        supabase.from("financial_income").select("*").eq("business_id", businessId).gte("date", monthStart).lte("date", monthEnd),
+        supabase.from("financial_expense").select("*").eq("business_id", businessId).gte("date", monthStart).lte("date", monthEnd),
+        supabase.from("orders").select("*, clients(name)").eq("business_id", businessId).order("created_at", { ascending: false }).limit(50),
+        supabase.from("ingredients").select("id, name, current_stock, min_stock, unit").eq("business_id", businessId),
+        supabase.from("packaging").select("id, name, current_stock, min_stock, unit").eq("business_id", businessId),
+      ]);
+      return { incomes: inc || [], expenses: exp || [], orders: ord || [], ingredients: ing || [], packaging: pkg || [] };
+    },
+    enabled: !!user && !!businessId,
+    staleTime: 60_000, // 60 seconds cache
+    refetchOnWindowFocus: false,
+  });
 
-    if (!businessId) return;
-    Promise.all([
-      supabase.from("financial_income").select("*").eq("business_id", businessId).gte("date", monthStart).lte("date", monthEnd),
-      supabase.from("financial_expense").select("*").eq("business_id", businessId).gte("date", monthStart).lte("date", monthEnd),
-      supabase.from("orders").select("*, clients(name)").eq("business_id", businessId).order("created_at", { ascending: false }).limit(10),
-      supabase.from("ingredients").select("id, name, current_stock, min_stock, unit").eq("business_id", businessId),
-      supabase.from("packaging").select("id, name, current_stock, min_stock, unit").eq("business_id", businessId),
-    ]).then(([{ data: inc }, { data: exp }, { data: ord }, { data: ing }, { data: pkg }]) => {
-      setIncomes(inc || []);
-      setExpenses(exp || []);
-      setOrders(ord || []);
+  const incomes = dashboardData?.incomes || [];
+  const expenses = dashboardData?.expenses || [];
+  const orders = dashboardData?.orders || [];
 
-      // Low stock alerts
-      const lowItems: any[] = [];
-      (ing || []).forEach(i => {
-        if (i.min_stock && i.min_stock > 0 && (i.current_stock || 0) <= i.min_stock) {
-          lowItems.push({ ...i, type: "ingredient" });
-        }
-      });
-      (pkg || []).forEach(p => {
-        if (p.min_stock && p.min_stock > 0 && (p.current_stock || 0) <= p.min_stock) {
-          lowItems.push({ ...p, type: "packaging" });
-        }
-      });
-      setLowStockItems(lowItems);
+  // Notifications
+  const todayOrders = useMemo(() => 
+    orders.filter(o => o.event_date && format(new Date(o.event_date), "yyyy-MM-dd") === todayStr),
+    [orders, todayStr]
+  );
+  const weekOrders = useMemo(() =>
+    orders.filter(o => {
+      if (!o.event_date) return false;
+      const d = format(new Date(o.event_date), "yyyy-MM-dd");
+      return d >= weekStart && d <= weekEnd;
+    }),
+    [orders, weekStart, weekEnd]
+  );
 
-      const activity: any[] = [];
-      (inc || []).slice(0, 3).forEach(i => activity.push({ type: "income", text: `Entrada: R$ ${Number(i.amount).toFixed(2)}`, sub: i.category, date: i.date }));
-      (exp || []).slice(0, 3).forEach(e => activity.push({ type: "expense", text: `Saída: R$ ${Number(e.amount).toFixed(2)}`, sub: e.category, date: e.date }));
-      (ord || []).slice(0, 3).forEach(o => activity.push({ type: "order", text: `Encomenda: ${o.clients?.name || "Cliente"}`, sub: o.category, date: o.created_at?.split("T")[0] }));
-      setRecentActivity(activity.sort((a, b) => b.date?.localeCompare(a.date || "") || 0).slice(0, 5));
+  const lowStockItems = useMemo(() => {
+    const items: any[] = [];
+    (dashboardData?.ingredients || []).forEach((i: any) => {
+      if (i.min_stock && i.min_stock > 0 && (i.current_stock || 0) <= i.min_stock)
+        items.push({ ...i, type: "ingredient" });
     });
-  };
+    (dashboardData?.packaging || []).forEach((p: any) => {
+      if (p.min_stock && p.min_stock > 0 && (p.current_stock || 0) <= p.min_stock)
+        items.push({ ...p, type: "packaging" });
+    });
+    return items;
+  }, [dashboardData]);
 
-  useEffect(() => { fetchData(); }, [user, businessId]);
+  const recentActivity = useMemo(() => {
+    const activity: any[] = [];
+    incomes.slice(0, 3).forEach((i: any) => activity.push({ type: "income", text: `Entrada: R$ ${Number(i.amount).toFixed(2)}`, sub: i.category, date: i.date }));
+    expenses.slice(0, 3).forEach((e: any) => activity.push({ type: "expense", text: `Saída: R$ ${Number(e.amount).toFixed(2)}`, sub: e.category, date: e.date }));
+    orders.slice(0, 3).forEach((o: any) => activity.push({ type: "order", text: `Encomenda: ${o.clients?.name || "Cliente"}`, sub: o.category, date: o.created_at?.split("T")[0] }));
+    return activity.sort((a, b) => b.date?.localeCompare(a.date || "") || 0).slice(0, 5);
+  }, [incomes, expenses, orders]);
 
-  const totalIncome = incomes.reduce((s, i) => s + Number(i.amount), 0);
-  const totalExpense = expenses.reduce((s, e) => s + Number(e.amount), 0);
+  const totalIncome = incomes.reduce((s: number, i: any) => s + Number(i.amount), 0);
+  const totalExpense = expenses.reduce((s: number, e: any) => s + Number(e.amount), 0);
   const profit = totalIncome - totalExpense;
 
 
@@ -103,6 +121,37 @@ const Dashboard = () => {
           <Calculator className="w-8 h-8 text-primary-foreground" />
         </div>
       </button>
+
+      {/* Notifications */}
+      {(todayOrders.length > 0 || weekOrders.length > 0) && (
+        <Card className="card-elevated border-primary/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
+                <Bell className="w-4 h-4 text-primary" />
+              </div>
+              <p className="text-sm font-bold text-foreground">🔔 Lembretes</p>
+            </div>
+            <div className="space-y-1.5">
+              {todayOrders.length > 0 && (
+                <p className="text-sm text-foreground">
+                  📅 Hoje você tem <span className="font-bold text-primary">{todayOrders.length}</span> encomenda{todayOrders.length > 1 ? "s" : ""}.
+                </p>
+              )}
+              {weekOrders.length > 0 && (
+                <p className="text-sm text-foreground">
+                  📆 Esta semana: <span className="font-bold text-primary">{weekOrders.length}</span> encomenda{weekOrders.length > 1 ? "s" : ""}.
+                </p>
+              )}
+              {orders.filter(o => o.status === "finished").length > 0 && (
+                <p className="text-sm text-foreground">
+                  ✅ <span className="font-bold text-success">{orders.filter(o => o.status === "finished").length}</span> pedido{orders.filter(o => o.status === "finished").length > 1 ? "s" : ""} pronto{orders.filter(o => o.status === "finished").length > 1 ? "s" : ""} para entrega.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Resumo do mês - setas */}
       <Card className="card-elevated overflow-hidden">
@@ -318,7 +367,7 @@ const Dashboard = () => {
         </Card>
       )}
 
-      <FinanceDialog key={dialogType ?? "closed"} type={dialogType} onClose={() => setDialogType(null)} onSaved={fetchData} />
+      <FinanceDialog key={dialogType ?? "closed"} type={dialogType} onClose={() => setDialogType(null)} onSaved={() => fetchData()} />
     </div>
   );
 };

@@ -43,13 +43,19 @@ const Clients = () => {
   };
 
   const handleSave = async () => {
-    if (!user || !name.trim()) return;
+    if (!user) return;
+    const trimmedName = name.trim();
+    if (!trimmedName) { toast({ title: "Nome é obrigatório", variant: "destructive" }); return; }
+    if (trimmedName.length > 100) { toast({ title: "Nome muito longo (máx 100 caracteres)", variant: "destructive" }); return; }
+    if (whatsapp && whatsapp.length > 20) { toast({ title: "WhatsApp inválido", variant: "destructive" }); return; }
+    if (address && address.length > 200) { toast({ title: "Endereço muito longo", variant: "destructive" }); return; }
+
     if (editingId) {
-      const { error } = await supabase.from("clients").update({ name: name.trim(), whatsapp, address }).eq("id", editingId);
+      const { error } = await supabase.from("clients").update({ name: trimmedName, whatsapp, address }).eq("id", editingId);
       if (error) { toast({ title: "Erro ao atualizar", variant: "destructive" }); return; }
       toast({ title: "Cliente atualizado!" });
     } else {
-      const { error } = await supabase.from("clients").insert({ user_id: user.id, business_id: businessId, name: name.trim(), whatsapp, address } as any);
+      const { error } = await supabase.from("clients").insert({ user_id: user.id, business_id: businessId, name: trimmedName, whatsapp, address } as any);
       if (error) { toast({ title: "Erro ao salvar", variant: "destructive" }); return; }
       toast({ title: "Cliente adicionado!" });
     }
