@@ -171,7 +171,7 @@ const MariaChat = () => {
           {/* Header */}
           <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <img src={mariaAvatar} alt="Maria" className="w-10 h-10 rounded-full object-cover bg-white" />
+              <img src={mariaAvatar} alt="Maria" className="w-10 h-10 rounded-full object-cover" />
               <div>
                 <p className="font-semibold">Maria</p>
                 <p className="text-xs opacity-80">Assistente Confeiteira</p>
@@ -191,10 +191,13 @@ const MariaChat = () => {
               <div className="space-y-4">
                 <div className="bg-muted rounded-2xl rounded-tl-sm p-4">
                   <p className="text-sm">
-                    Oi! Eu sou a <strong>Maria</strong> 🍰
+                    Oi! Eu sou a <strong>Maria</strong>, sua assistente confeiteira! 🍰
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Estou aqui para te ajudar em <strong>qualquer dúvida</strong> sobre o sistema! 
                   </p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Posso te ajudar a calcular preços, criar encomendas, controlar estoque e muito mais!
+                    Pode perguntar sobre precificação, receitas, estoque, encomendas, financeiro... o que precisar! 💕
                   </p>
                 </div>
 
