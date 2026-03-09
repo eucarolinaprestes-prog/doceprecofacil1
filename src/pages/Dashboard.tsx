@@ -103,7 +103,7 @@ const Dashboard = () => {
       {/* Resumo do mês - setas */}
       <Card className="card-elevated overflow-hidden">
         <CardContent className="p-4">
-          <p className="text-sm font-bold text-foreground mb-4">📊 Resumo do mês</p>
+          <p className="text-sm font-bold text-foreground mb-4">📊 Resumo Financeiro do Mês</p>
           <div className="grid grid-cols-3 gap-3">
             <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-success/10">
               <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
