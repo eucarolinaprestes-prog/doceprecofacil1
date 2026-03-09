@@ -110,21 +110,21 @@ const Dashboard = () => {
               <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
                 <ArrowUpRight className="w-5 h-5 text-success" />
               </div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Entradas</p>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">ENTRADAS</p>
               <p className="text-sm font-extrabold text-success">R$ {totalIncome.toFixed(2)}</p>
             </div>
             <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-destructive/10">
               <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center">
                 <ArrowDownRight className="w-5 h-5 text-destructive" />
               </div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Saídas</p>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">SAÍDAS</p>
               <p className="text-sm font-extrabold text-destructive">R$ {totalExpense.toFixed(2)}</p>
             </div>
             <div className={`flex flex-col items-center gap-1.5 p-3 rounded-xl ${profit >= 0 ? "bg-success/10" : "bg-destructive/10"}`}>
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${profit >= 0 ? "bg-success/20" : "bg-destructive/20"}`}>
                 {profit >= 0 ? <TrendingUp className="w-5 h-5 text-success" /> : <TrendingDown className="w-5 h-5 text-destructive" />}
               </div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Lucro</p>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">LUCRO</p>
               <p className={`text-sm font-extrabold ${profit >= 0 ? "text-success" : "text-destructive"}`}>R$ {profit.toFixed(2)}</p>
             </div>
           </div>
