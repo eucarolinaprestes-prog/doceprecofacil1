@@ -122,6 +122,37 @@ const Dashboard = () => {
         </div>
       </button>
 
+      {/* Notifications */}
+      {(todayOrders.length > 0 || weekOrders.length > 0) && (
+        <Card className="card-elevated border-primary/30">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center">
+                <Bell className="w-4 h-4 text-primary" />
+              </div>
+              <p className="text-sm font-bold text-foreground">🔔 Lembretes</p>
+            </div>
+            <div className="space-y-1.5">
+              {todayOrders.length > 0 && (
+                <p className="text-sm text-foreground">
+                  📅 Hoje você tem <span className="font-bold text-primary">{todayOrders.length}</span> encomenda{todayOrders.length > 1 ? "s" : ""}.
+                </p>
+              )}
+              {weekOrders.length > 0 && (
+                <p className="text-sm text-foreground">
+                  📆 Esta semana: <span className="font-bold text-primary">{weekOrders.length}</span> encomenda{weekOrders.length > 1 ? "s" : ""}.
+                </p>
+              )}
+              {orders.filter(o => o.status === "finished").length > 0 && (
+                <p className="text-sm text-foreground">
+                  ✅ <span className="font-bold text-success">{orders.filter(o => o.status === "finished").length}</span> pedido{orders.filter(o => o.status === "finished").length > 1 ? "s" : ""} pronto{orders.filter(o => o.status === "finished").length > 1 ? "s" : ""} para entrega.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Resumo do mês - setas */}
       <Card className="card-elevated overflow-hidden">
         <CardContent className="p-4">
