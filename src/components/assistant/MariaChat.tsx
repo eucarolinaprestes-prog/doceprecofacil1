@@ -146,16 +146,16 @@ const MariaChat = () => {
         onClick={() => setIsOpen(true)}
         className={cn(
           "fixed bottom-24 right-4 md:bottom-6 md:right-6 z-50",
-          "w-14 h-14 rounded-full shadow-lg",
-          "bg-gradient-to-br from-pink-500 to-rose-600",
+          "w-16 h-16 rounded-full shadow-lg border-2 border-primary/20",
+          "bg-card",
           "flex items-center justify-center",
           "hover:scale-105 transition-transform",
-          "focus:outline-none focus:ring-2 focus:ring-pink-400 focus:ring-offset-2",
+          "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
           isOpen && "hidden"
         )}
         aria-label="Perguntar para Maria"
       >
-        <MessageCircle className="w-6 h-6 text-white" />
+        <img src={mariaAvatar} alt="Maria" className="w-14 h-14 rounded-full object-cover" />
       </button>
 
       {/* Chat Panel */}
@@ -169,14 +169,12 @@ const MariaChat = () => {
           )}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-pink-500 to-rose-600 text-white px-4 py-3 flex items-center justify-between">
+          <div className="bg-gradient-to-r from-primary to-pink-600 text-primary-foreground px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                🍰
-              </div>
+              <img src={mariaAvatar} alt="Maria" className="w-10 h-10 rounded-full object-cover bg-white" />
               <div>
                 <p className="font-semibold">Maria</p>
-                <p className="text-xs text-white/80">Assistente Confeiteira</p>
+                <p className="text-xs opacity-80">Assistente Confeiteira</p>
               </div>
             </div>
             <button
