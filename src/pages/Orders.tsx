@@ -67,10 +67,11 @@ const Orders = () => {
 
   const fetchData = async () => {
     if (!user) return;
+    if (!businessId) return;
     const [{ data: ord }, { data: cli }, { data: prods }] = await Promise.all([
-      supabase.from("orders").select("*, clients(name, whatsapp, address)").eq("user_id", user.id).order("created_at", { ascending: false }),
-      supabase.from("clients").select("*").eq("user_id", user.id).order("name"),
-      supabase.from("products").select("*").eq("user_id", user.id).order("name"),
+      supabase.from("orders").select("*, clients(name, whatsapp, address)").eq("business_id", businessId).order("created_at", { ascending: false }),
+      supabase.from("clients").select("*").eq("business_id", businessId).order("name"),
+      supabase.from("products").select("*").eq("business_id", businessId).order("name"),
     ]);
     setOrders(ord || []);
     setClients(cli || []);

@@ -17,7 +17,8 @@ const Products = () => {
 
   const fetchProducts = async () => {
     if (!user) return;
-    const { data } = await supabase.from("products").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    if (!businessId) return;
+    const { data } = await supabase.from("products").select("*").eq("business_id", businessId).order("created_at", { ascending: false });
     setProducts(data || []);
     setLoading(false);
   };

@@ -40,8 +40,9 @@ const Shopping = () => {
     const { data } = await supabase
       .from("shopping_list")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("business_id", businessId)
       .order("created_at", { ascending: true });
+    if (!businessId) return;
 
     const mapped = data?.map(d => ({
       id: d.id,

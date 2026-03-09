@@ -22,7 +22,8 @@ const Clients = () => {
 
   const fetchClients = async () => {
     if (!user) return;
-    const { data } = await supabase.from("clients").select("*").eq("user_id", user.id).order("name");
+    if (!businessId) return;
+    const { data } = await supabase.from("clients").select("*").eq("business_id", businessId).order("name");
     setClients(data || []);
     setLoading(false);
   };
