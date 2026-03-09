@@ -7,6 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import mariaAvatar from "@/assets/maria-avatar.png";
+
+interface Message {
   role: "user" | "assistant";
   content: string;
 }
