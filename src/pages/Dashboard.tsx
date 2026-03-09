@@ -4,9 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowUpRight, ArrowDownRight, CalendarDays, AlertTriangle, ChevronLeft, ChevronRight, X } from "lucide-react";
-import { format, startOfMonth, endOfMonth, startOfWeek, addDays, addMonths, subMonths, isToday, isSameMonth } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfWeek, addDays, addMonths, subMonths, isToday, isSameMonth, subDays, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import FinanceDialog from "@/components/dashboard/FinanceDialog";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 const Dashboard = () => {
   const { user, profile } = useAuth();
