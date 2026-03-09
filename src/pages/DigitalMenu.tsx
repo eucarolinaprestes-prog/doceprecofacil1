@@ -187,7 +187,7 @@ const DigitalMenu = () => {
     if (editCatId) {
       await supabase.from("menu_categories").update({ name: catName.trim() }).eq("id", editCatId);
     } else {
-      await supabase.from("menu_categories").insert({ user_id: user.id, name: catName.trim(), sort_order: categories.length });
+      await supabase.from("menu_categories").insert({ user_id: user.id, business_id: businessId, name: catName.trim(), sort_order: categories.length } as any);
     }
     setCatDialogOpen(false);
     toast({ title: editCatId ? "Categoria atualizada!" : "Categoria adicionada!" });
