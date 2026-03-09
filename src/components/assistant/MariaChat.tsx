@@ -6,8 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
-
-interface Message {
+import mariaAvatar from "@/assets/maria-avatar.png";
   role: "user" | "assistant";
   content: string;
 }
