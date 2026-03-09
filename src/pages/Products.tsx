@@ -83,9 +83,9 @@ const Products = () => {
 
                   {/* Foto abaixo do nome */}
                   {p.photo_url ? (
-                    <img src={p.photo_url} alt={p.name} className="w-full h-40 rounded-xl object-cover shadow-sm" />
+                    <img src={p.photo_url} alt={p.name} className="w-full aspect-square rounded-xl object-contain bg-secondary shadow-sm" />
                   ) : (
-                    <div className="w-full h-28 rounded-xl bg-secondary flex items-center justify-center">
+                    <div className="w-full aspect-square rounded-xl bg-secondary flex items-center justify-center">
                       <Cake className="w-10 h-10 text-muted-foreground" />
                     </div>
                   )}
