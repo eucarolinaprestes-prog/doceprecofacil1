@@ -29,9 +29,9 @@ const sidebarNav = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
   { label: "Informações da Empresa", icon: Building2, path: "/business-info" },
   { label: "Precificação", icon: DollarSign, path: "/pricing" },
-  { label: "Produtos", icon: Cake, path: "/products" },
+  { label: "Produtos", icon: Cake, path: "/pricing?mode=product" },
   { label: "Insumos", icon: Package, path: "/supplies" },
-  { label: "Receitas", icon: BookOpen, path: "/recipes" },
+  { label: "Receitas", icon: BookOpen, path: "/pricing?mode=recipe" },
   { label: "Cadastro de Clientes", icon: Users, path: "/clients" },
   { label: "Encomendas", icon: ShoppingBag, path: "/orders" },
   { label: "Cardápio Digital", icon: UtensilsCrossed, path: "/menu" },
@@ -58,7 +58,13 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    const [pathBase, pathQuery] = path.split("?");
+    if (pathQuery) {
+      return location.pathname === pathBase && location.search === `?${pathQuery}`;
+    }
+    return location.pathname === path && !location.search;
+  };
 
   const getGreeting = () => {
     const hour = new Date().getHours();
