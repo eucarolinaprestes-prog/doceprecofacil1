@@ -25,7 +25,7 @@ interface FinanceDialogProps {
 }
 
 const FinanceDialog = ({ type, onClose, onSaved }: FinanceDialogProps) => {
-  const { user } = useAuth();
+  const { user, businessId } = useAuth();
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
