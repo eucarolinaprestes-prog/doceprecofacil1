@@ -169,7 +169,7 @@ const MariaChat = () => {
           )}
         >
           {/* Header */}
-          <div className="bg-gradient-to-r from-primary to-pink-600 text-primary-foreground px-4 py-3 flex items-center justify-between">
+          <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <img src={mariaAvatar} alt="Maria" className="w-10 h-10 rounded-full object-cover bg-white" />
               <div>
