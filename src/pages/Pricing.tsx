@@ -206,7 +206,7 @@ const Pricing = () => {
       }
     };
     load();
-  }, [user, businessId]);
+  }, [user, businessId, searchParams.toString()]);
 
   const addFromStock = (item: StockItem, type: "ingredient" | "packaging") => {
     const list = type === "ingredient" ? selectedIngredients : selectedPackaging;
