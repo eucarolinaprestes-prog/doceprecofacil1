@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
+import MariaChat from "@/components/assistant/MariaChat";
 import {
   LayoutDashboard,
   DollarSign,
