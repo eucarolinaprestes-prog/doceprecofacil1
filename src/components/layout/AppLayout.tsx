@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
+import MariaChat from "@/components/assistant/MariaChat";
 import {
   LayoutDashboard,
   DollarSign,
@@ -173,6 +174,9 @@ const AppLayout = ({ children }: AppLayoutProps) => {
           </button>
         ))}
       </nav>
+
+      {/* Maria Chat Assistant */}
+      <MariaChat />
     </div>
   );
 };
