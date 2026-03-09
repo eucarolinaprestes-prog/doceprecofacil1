@@ -160,6 +160,7 @@ const Dashboard = () => {
       </Card>
 
 
+
       {/* Gráficos Financeiros - Últimos 7 dias */}
       <div className="grid grid-cols-1 gap-4">
         <Card className="card-elevated overflow-hidden">
