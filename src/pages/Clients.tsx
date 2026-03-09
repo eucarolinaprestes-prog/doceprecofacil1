@@ -10,7 +10,7 @@ import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
 const Clients = () => {
-  const { user } = useAuth();
+  const { user, businessId } = useAuth();
   const { toast } = useToast();
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
