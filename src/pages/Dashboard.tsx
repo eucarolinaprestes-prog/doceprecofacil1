@@ -84,36 +84,9 @@ const Dashboard = () => {
     orders.slice(0, 3).forEach((o: any) => activity.push({ type: "order", text: `Encomenda: ${o.clients?.name || "Cliente"}`, sub: o.category, date: o.created_at?.split("T")[0] }));
     return activity.sort((a, b) => b.date?.localeCompare(a.date || "") || 0).slice(0, 5);
   }, [incomes, expenses, orders]);
-      setIncomes(inc || []);
-      setExpenses(exp || []);
-      setOrders(ord || []);
 
-      // Low stock alerts
-      const lowItems: any[] = [];
-      (ing || []).forEach(i => {
-        if (i.min_stock && i.min_stock > 0 && (i.current_stock || 0) <= i.min_stock) {
-          lowItems.push({ ...i, type: "ingredient" });
-        }
-      });
-      (pkg || []).forEach(p => {
-        if (p.min_stock && p.min_stock > 0 && (p.current_stock || 0) <= p.min_stock) {
-          lowItems.push({ ...p, type: "packaging" });
-        }
-      });
-      setLowStockItems(lowItems);
-
-      const activity: any[] = [];
-      (inc || []).slice(0, 3).forEach(i => activity.push({ type: "income", text: `Entrada: R$ ${Number(i.amount).toFixed(2)}`, sub: i.category, date: i.date }));
-      (exp || []).slice(0, 3).forEach(e => activity.push({ type: "expense", text: `Saída: R$ ${Number(e.amount).toFixed(2)}`, sub: e.category, date: e.date }));
-      (ord || []).slice(0, 3).forEach(o => activity.push({ type: "order", text: `Encomenda: ${o.clients?.name || "Cliente"}`, sub: o.category, date: o.created_at?.split("T")[0] }));
-      setRecentActivity(activity.sort((a, b) => b.date?.localeCompare(a.date || "") || 0).slice(0, 5));
-    });
-  };
-
-  useEffect(() => { fetchData(); }, [user, businessId]);
-
-  const totalIncome = incomes.reduce((s, i) => s + Number(i.amount), 0);
-  const totalExpense = expenses.reduce((s, e) => s + Number(e.amount), 0);
+  const totalIncome = incomes.reduce((s: number, i: any) => s + Number(i.amount), 0);
+  const totalExpense = expenses.reduce((s: number, e: any) => s + Number(e.amount), 0);
   const profit = totalIncome - totalExpense;
 
 
