@@ -26,7 +26,7 @@ const statusColors: Record<string, string> = { pending: "text-warning", schedule
 const orderCategories = ["Bolos", "Doces", "Salgados", "Cupcakes", "Fatias", "Outros"];
 
 const Orders = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, businessId } = useAuth();
   const { toast } = useToast();
   const [orders, setOrders] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
