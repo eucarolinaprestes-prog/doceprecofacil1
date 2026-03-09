@@ -58,7 +58,13 @@ const AppLayout = ({ children }: AppLayoutProps) => {
   const location = useLocation();
   const [open, setOpen] = useState(false);
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => {
+    const [pathBase, pathQuery] = path.split("?");
+    if (pathQuery) {
+      return location.pathname === pathBase && location.search === `?${pathQuery}`;
+    }
+    return location.pathname === path && !location.search;
+  };
 
   const getGreeting = () => {
     const hour = new Date().getHours();

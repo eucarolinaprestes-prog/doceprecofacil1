@@ -132,9 +132,20 @@ const Pricing = () => {
         yield_quantity: Number(r.yield_quantity) || 1, yield_unit: r.yield_unit || "un",
       })) || []);
 
-      // Check if editing a recipe from URL params
+      // Check URL params for mode or editing
       const editType = searchParams.get("edit");
       const editId = searchParams.get("id");
+      const modeParam = searchParams.get("mode");
+
+      // Direct mode opening (no edit)
+      if (!editType && modeParam === "product") {
+        setMode("product");
+        setStep(0);
+      } else if (!editType && modeParam === "recipe") {
+        setMode("recipe");
+        setStep(0);
+      }
+
       if (editType === "recipe" && editId) {
         const { data: recipe } = await supabase.from("recipes").select("*").eq("id", editId).single();
         if (recipe) {
