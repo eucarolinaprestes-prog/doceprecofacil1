@@ -12,7 +12,8 @@ const Dashboard = () => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const today = new Date();
-  const displayName = profile?.name || "Confeiteira";
+  const displayName = profile?.name?.trim();
+  const greetingText = displayName ? `Oi, ${displayName}! 👋` : "Oi! 👋";
 
   const [incomes, setIncomes] = useState<any[]>([]);
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -92,7 +93,7 @@ const Dashboard = () => {
         style={{ background: "linear-gradient(135deg, hsl(340 70% 58%), hsl(340 65% 65%))", boxShadow: "0 6px 0 0 hsl(340 70% 48%), 0 10px 20px -4px hsl(340 70% 58% / 0.4)" }}
       >
         <div className="text-left">
-          <p className="text-lg font-extrabold">Oi, {displayName}! 👋</p>
+          <p className="text-lg font-extrabold">{greetingText}</p>
           <p className="text-xl font-extrabold opacity-95 mt-1 tracking-wide uppercase">VAMOS PRECIFICAR HOJE?</p>
         </div>
         <div className="w-16 h-16 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
@@ -109,21 +110,21 @@ const Dashboard = () => {
               <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center">
                 <ArrowUpRight className="w-5 h-5 text-success" />
               </div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Entradas</p>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">ENTRADAS</p>
               <p className="text-sm font-extrabold text-success">R$ {totalIncome.toFixed(2)}</p>
             </div>
             <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-destructive/10">
               <div className="w-10 h-10 rounded-full bg-destructive/20 flex items-center justify-center">
                 <ArrowDownRight className="w-5 h-5 text-destructive" />
               </div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Saídas</p>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">SAÍDAS</p>
               <p className="text-sm font-extrabold text-destructive">R$ {totalExpense.toFixed(2)}</p>
             </div>
             <div className={`flex flex-col items-center gap-1.5 p-3 rounded-xl ${profit >= 0 ? "bg-success/10" : "bg-destructive/10"}`}>
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${profit >= 0 ? "bg-success/20" : "bg-destructive/20"}`}>
                 {profit >= 0 ? <TrendingUp className="w-5 h-5 text-success" /> : <TrendingDown className="w-5 h-5 text-destructive" />}
               </div>
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">Lucro</p>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide">LUCRO</p>
               <p className={`text-sm font-extrabold ${profit >= 0 ? "text-success" : "text-destructive"}`}>R$ {profit.toFixed(2)}</p>
             </div>
           </div>
@@ -314,7 +315,7 @@ const Dashboard = () => {
         </Card>
       )}
 
-      <FinanceDialog type={dialogType} onClose={() => setDialogType(null)} onSaved={fetchData} />
+      <FinanceDialog key={dialogType ?? "closed"} type={dialogType} onClose={() => setDialogType(null)} onSaved={fetchData} />
     </div>
   );
 };

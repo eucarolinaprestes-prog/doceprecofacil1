@@ -118,7 +118,7 @@ const AppLayout = ({ children }: AppLayoutProps) => {
 
         <div className="flex-1 text-center md:text-left md:ml-4">
           <p className="text-xs text-muted-foreground leading-none">{getGreeting()},</p>
-          <p className="text-sm font-bold text-foreground">{profile?.name || "Confeiteira"} 🌸</p>
+          <p className="text-sm font-bold text-foreground">{profile?.name?.trim() ? `${profile.name} 🌸` : "Oi! 👋"}</p>
         </div>
 
         <div className="flex items-center gap-2">
