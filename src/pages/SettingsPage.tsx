@@ -29,7 +29,7 @@ const fixedCostCategories = ["Aluguel", "Luz", "Água", "Gás", "Internet", "Tel
 const variableCostCategories = ["Ingredientes", "Embalagens", "Entregador", "Uber/99", "Aplicativos", "Marketing", "Outros"];
 
 const SettingsPage = () => {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, refreshProfile, businessId } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
