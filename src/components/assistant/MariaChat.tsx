@@ -263,7 +263,7 @@ const MariaChat = () => {
                 onClick={() => handleSend()}
                 disabled={!input.trim() || isLoading}
                 size="icon"
-                className="bg-gradient-to-br from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 <Send className="w-4 h-4" />
               </Button>
