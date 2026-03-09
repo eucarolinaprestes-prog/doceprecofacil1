@@ -49,7 +49,7 @@ const Hint = ({ children }: { children: React.ReactNode }) => (
 );
 
 const Pricing = () => {
-  const { user } = useAuth();
+  const { user, businessId } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
