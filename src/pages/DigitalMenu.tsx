@@ -173,7 +173,7 @@ const DigitalMenu = () => {
     if (settings) {
       await (supabase.from("menu_settings") as any).update(payload).eq("id", settings.id);
     } else {
-      await (supabase.from("menu_settings") as any).insert({ ...payload, user_id: user.id });
+      await (supabase.from("menu_settings") as any).insert({ ...payload, user_id: user.id, business_id: businessId });
     }
     toast({ title: "Configurações salvas! ✅" });
     reload();
