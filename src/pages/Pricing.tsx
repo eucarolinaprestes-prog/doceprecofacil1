@@ -49,7 +49,7 @@ const Hint = ({ children }: { children: React.ReactNode }) => (
 );
 
 const Pricing = () => {
-  const { user } = useAuth();
+  const { user, businessId } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -339,7 +339,7 @@ const Pricing = () => {
         await supabase.from("products").update(payload).eq("id", editingProductId);
         toast({ title: "Produto atualizado com sucesso! 🎉" });
       } else {
-        await supabase.from("products").insert({ ...payload, user_id: user.id });
+        await supabase.from("products").insert({ ...payload, user_id: user.id, business_id: businessId } as any);
         toast({ title: "Produto salvo com sucesso! 🎉" });
       }
       navigate("/products");
@@ -372,7 +372,7 @@ const Pricing = () => {
         await supabase.from("recipes").update(payload).eq("id", editingRecipeId);
         toast({ title: "Receita atualizada com sucesso! 🎉" });
       } else {
-        await supabase.from("recipes").insert({ ...payload, user_id: user.id } as any);
+        await supabase.from("recipes").insert({ ...payload, user_id: user.id, business_id: businessId } as any);
         toast({ title: "Receita salva com sucesso! 🎉" });
       }
       navigate("/recipes");

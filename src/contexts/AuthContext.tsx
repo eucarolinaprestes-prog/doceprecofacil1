@@ -11,7 +11,10 @@ interface Profile {
   desired_salary: number | null;
   work_days_per_week: number | null;
   work_hours_per_day: number | null;
+  business_id: string | null;
 }
+
+type AppRole = "owner" | "staff";
 
 interface AuthContextType {
   user: User | null;
@@ -19,6 +22,9 @@ interface AuthContextType {
   session: Session | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  businessId: string | null;
+  role: AppRole | null;
+  isOwner: boolean;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -32,15 +38,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [businessId, setBusinessId] = useState<string | null>(null);
+  const [role, setRole] = useState<AppRole | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
       .from("profiles")
-      .select("name, store_name, address, whatsapp, logo_url, desired_salary, work_days_per_week, work_hours_per_day")
+      .select("name, store_name, address, whatsapp, logo_url, desired_salary, work_days_per_week, work_hours_per_day, business_id")
       .eq("user_id", userId)
       .single();
-    if (data) setProfile(data);
+    if (data) {
+      setProfile(data as Profile);
+      if (data.business_id) {
+        setBusinessId(data.business_id);
+      }
+    }
+
+    // Fetch role
+    const { data: roleData } = await (supabase.from("user_roles") as any)
+      .select("role, business_id")
+      .eq("user_id", userId)
+      .limit(1)
+      .single();
+    if (roleData) {
+      setRole(roleData.role as AppRole);
+      if (!data?.business_id && roleData.business_id) {
+        setBusinessId(roleData.business_id);
+      }
+    }
   };
 
   const refreshProfile = async () => {
@@ -56,6 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setTimeout(() => fetchProfile(session.user.id), 0);
         } else {
           setProfile(null);
+          setBusinessId(null);
+          setRole(null);
         }
         setIsLoading(false);
       }
@@ -90,6 +118,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     setSession(null);
     setProfile(null);
+    setBusinessId(null);
+    setRole(null);
   };
 
   const resetPassword = async (email: string) => {
@@ -99,8 +129,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
+  const isOwner = role === "owner";
+
   return (
-    <AuthContext.Provider value={{ user, profile, session, isAuthenticated: !!session, isLoading, signUp, signIn, signOut, resetPassword, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, session, isAuthenticated: !!session, isLoading, businessId, role, isOwner, signUp, signIn, signOut, resetPassword, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

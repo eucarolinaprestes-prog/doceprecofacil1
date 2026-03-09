@@ -71,7 +71,7 @@ const DEFAULT_SETTINGS: Partial<MenuSettings> = {
 };
 
 const DigitalMenu = () => {
-  const { user, profile } = useAuth();
+  const { user, profile, businessId } = useAuth();
   const { toast } = useToast();
   const [products, setProducts] = useState<MenuProduct[]>([]);
   const [categories, setCategories] = useState<MenuCategory[]>([]);
@@ -173,7 +173,7 @@ const DigitalMenu = () => {
     if (settings) {
       await (supabase.from("menu_settings") as any).update(payload).eq("id", settings.id);
     } else {
-      await (supabase.from("menu_settings") as any).insert({ ...payload, user_id: user.id });
+      await (supabase.from("menu_settings") as any).insert({ ...payload, user_id: user.id, business_id: businessId });
     }
     toast({ title: "Configurações salvas! ✅" });
     reload();
@@ -187,7 +187,7 @@ const DigitalMenu = () => {
     if (editCatId) {
       await supabase.from("menu_categories").update({ name: catName.trim() }).eq("id", editCatId);
     } else {
-      await supabase.from("menu_categories").insert({ user_id: user.id, name: catName.trim(), sort_order: categories.length });
+      await supabase.from("menu_categories").insert({ user_id: user.id, business_id: businessId, name: catName.trim(), sort_order: categories.length } as any);
     }
     setCatDialogOpen(false);
     toast({ title: editCatId ? "Categoria atualizada!" : "Categoria adicionada!" });
@@ -227,7 +227,7 @@ const DigitalMenu = () => {
     if (editProdId) {
       await (supabase.from("menu_products") as any).update(payload).eq("id", editProdId);
     } else {
-      await (supabase.from("menu_products") as any).insert({ ...payload, user_id: user.id, sort_order: products.length });
+      await (supabase.from("menu_products") as any).insert({ ...payload, user_id: user.id, business_id: businessId, sort_order: products.length });
     }
     setProdDialogOpen(false);
     toast({ title: editProdId ? "Produto atualizado!" : "Produto adicionado!" });
@@ -240,7 +240,7 @@ const DigitalMenu = () => {
   };
   const duplicateProd = async (p: MenuProduct) => {
     await (supabase.from("menu_products") as any).insert({
-      user_id: user!.id, name: `${p.name} (cópia)`, description: p.description,
+      user_id: user!.id, business_id: businessId, name: `${p.name} (cópia)`, description: p.description,
       price: p.price, category_id: p.category_id, status: p.status,
       featured: p.featured, available_today: p.available_today, photo_url: p.photo_url,
       sort_order: products.length,

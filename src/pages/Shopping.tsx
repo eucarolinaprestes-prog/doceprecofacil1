@@ -22,7 +22,7 @@ interface ShoppingItem {
 const storeOptions = ["Supermercado", "Mercado", "Loja de Confeitaria", "Atacado"];
 
 const Shopping = () => {
-  const { user } = useAuth();
+  const { user, businessId } = useAuth();
   const { toast } = useToast();
   const [selectedStore, setSelectedStore] = useState<string | null>(null);
   // Items per store kept in a map so switching stores doesn't erase data
@@ -133,6 +133,7 @@ const Shopping = () => {
       await (supabase.from("shopping_list") as any).insert(
         validItems.map(i => ({
           user_id: user.id,
+          business_id: businessId,
           ingredient_name: i.ingredient_name,
           quantity: i.quantity,
           unit_price: i.unit_price,

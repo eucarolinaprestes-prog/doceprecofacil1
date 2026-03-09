@@ -25,7 +25,7 @@ interface FinanceDialogProps {
 }
 
 const FinanceDialog = ({ type, onClose, onSaved }: FinanceDialogProps) => {
-  const { user } = useAuth();
+  const { user, businessId } = useAuth();
   const { toast } = useToast();
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
@@ -46,12 +46,12 @@ const FinanceDialog = ({ type, onClose, onSaved }: FinanceDialogProps) => {
     try {
       if (type === "income") {
         await supabase.from("financial_income").insert({
-          user_id: user.id, amount: Number(amount), category: finalCategory, date, payment_method: paymentMethod, client_name: clientName, notes,
-        });
+          user_id: user.id, business_id: businessId, amount: Number(amount), category: finalCategory, date, payment_method: paymentMethod, client_name: clientName, notes,
+        } as any);
       } else {
         await supabase.from("financial_expense").insert({
-          user_id: user.id, amount: Number(amount), category: finalCategory, date, supplier, description,
-        });
+          user_id: user.id, business_id: businessId, amount: Number(amount), category: finalCategory, date, supplier, description,
+        } as any);
       }
       toast({ title: type === "income" ? "Entrada registrada! 💚" : "Saída registrada! 📝" });
       onSaved();

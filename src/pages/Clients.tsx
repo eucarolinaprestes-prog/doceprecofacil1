@@ -10,7 +10,7 @@ import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
 const Clients = () => {
-  const { user } = useAuth();
+  const { user, businessId } = useAuth();
   const { toast } = useToast();
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +48,7 @@ const Clients = () => {
       if (error) { toast({ title: "Erro ao atualizar", variant: "destructive" }); return; }
       toast({ title: "Cliente atualizado!" });
     } else {
-      const { error } = await supabase.from("clients").insert({ user_id: user.id, name: name.trim(), whatsapp, address });
+      const { error } = await supabase.from("clients").insert({ user_id: user.id, business_id: businessId, name: name.trim(), whatsapp, address } as any);
       if (error) { toast({ title: "Erro ao salvar", variant: "destructive" }); return; }
       toast({ title: "Cliente adicionado!" });
     }
