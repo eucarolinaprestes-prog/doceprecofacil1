@@ -70,7 +70,7 @@ const Shopping = () => {
     setLoading(false);
   };
 
-  useEffect(() => { fetchAllItems(); }, [user]);
+  useEffect(() => { fetchAllItems(); }, [user, businessId]);
 
   const items = selectedStore ? (storeItems[selectedStore] || [emptyRow()]) : [];
 
