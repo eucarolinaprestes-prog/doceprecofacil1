@@ -240,7 +240,7 @@ const DigitalMenu = () => {
   };
   const duplicateProd = async (p: MenuProduct) => {
     await (supabase.from("menu_products") as any).insert({
-      user_id: user!.id, name: `${p.name} (cópia)`, description: p.description,
+      user_id: user!.id, business_id: businessId, name: `${p.name} (cópia)`, description: p.description,
       price: p.price, category_id: p.category_id, status: p.status,
       featured: p.featured, available_today: p.available_today, photo_url: p.photo_url,
       sort_order: products.length,

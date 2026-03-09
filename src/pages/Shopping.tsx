@@ -133,6 +133,7 @@ const Shopping = () => {
       await (supabase.from("shopping_list") as any).insert(
         validItems.map(i => ({
           user_id: user.id,
+          business_id: businessId,
           ingredient_name: i.ingredient_name,
           quantity: i.quantity,
           unit_price: i.unit_price,

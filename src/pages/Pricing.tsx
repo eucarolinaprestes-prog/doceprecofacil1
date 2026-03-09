@@ -372,7 +372,7 @@ const Pricing = () => {
         await supabase.from("recipes").update(payload).eq("id", editingRecipeId);
         toast({ title: "Receita atualizada com sucesso! 🎉" });
       } else {
-        await supabase.from("recipes").insert({ ...payload, user_id: user.id } as any);
+        await supabase.from("recipes").insert({ ...payload, user_id: user.id, business_id: businessId } as any);
         toast({ title: "Receita salva com sucesso! 🎉" });
       }
       navigate("/recipes");

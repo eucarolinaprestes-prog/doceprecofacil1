@@ -9,7 +9,7 @@ import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 
 const Recipes = () => {
-  const { user } = useAuth();
+  const { user, businessId } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [recipes, setRecipes] = useState<any[]>([]);

@@ -152,7 +152,7 @@ const SettingsPage = () => {
 
       await supabase.from("variable_costs").delete().eq("user_id", user.id);
       if (variableCosts.length > 0) {
-        await supabase.from("variable_costs").insert(variableCosts.map((c) => ({ user_id: user.id, category: c.category, amount: toMonthly(c.amount, c.frequency) })));
+        await supabase.from("variable_costs").insert(variableCosts.map((c) => ({ user_id: user.id, business_id: businessId, category: c.category, amount: toMonthly(c.amount, c.frequency) } as any)));
       }
 
       await refreshProfile();
