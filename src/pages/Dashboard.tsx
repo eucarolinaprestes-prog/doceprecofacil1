@@ -161,6 +161,7 @@ const Dashboard = () => {
 
 
       {/* Botões de ação */}
+      <div className="grid grid-cols-2 gap-3">
         <button
           onClick={() => setDialogType("income")}
           className="rounded-2xl h-16 bg-success text-success-foreground font-bold flex items-center justify-center gap-2 text-sm active:translate-y-0.5 transition-all"
