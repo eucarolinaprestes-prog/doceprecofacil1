@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   Crown,
   Settings,
+  Download,
   LogOut,
   Menu,
   Bell,
@@ -37,6 +38,7 @@ const sidebarNav = [
   { label: "Cardápio Digital", icon: UtensilsCrossed, path: "/menu" },
   { label: "Suas Finanças", icon: Wallet, path: "/finance" },
   { label: "Calculadora de Compras", icon: ShoppingCart, path: "/shopping" },
+  { label: "Exportar Dados", icon: Download, path: "/export" },
   { label: "Planos", icon: Crown, path: "/plans" },
   { label: "Configurações", icon: Settings, path: "/settings" },
 ];

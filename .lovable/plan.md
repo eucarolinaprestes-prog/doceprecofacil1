@@ -1,53 +1,89 @@
 
 
-# Plano: Página de Exportação de Dados CSV
+# Doce Preço Fácil — Correções e Melhorias Completas
 
 ## Resumo
+Redesign visual completo do app com design mais moderno, vibrante e intuitivo, além de correções funcionais em todas as abas. A paleta rosa/dourado será mantida mas com mais contraste e elementos visuais 3D.
 
-Criar uma nova página "Exportar Dados" acessível pelo menu lateral (sidebar), onde o usuário pode exportar em CSV todos os dados das tabelas do banco de dados vinculadas ao seu negócio.
+---
 
-## O que será feito
+## 1. Design System Global
+- Atualizar CSS com cores mais vibrantes, sombras 3D em botões, gradientes mais expressivos
+- Botões com estilo "raised/3D" (box-shadow com profundidade)
+- Cards com hover effects e sombras mais pronunciadas
+- Tipografia com mais hierarquia visual
 
-1. **Nova rota `/export`** — Página com cards para cada categoria de dados exportável
-2. **Novo item no sidebar** — Ícone `Download` com label "Exportar Dados", posicionado antes de "Planos"
-3. **Página `ExportData.tsx`** — Interface com botões para exportar cada tabela em CSV
+## 2. Tela de Login/Cadastro
+- Logo maior (w-32 h-32 ao invés de w-24 h-24)
+- Botão de mostrar/ocultar senha (ícone Eye/EyeOff) em todos os campos de senha
+- Background com gradiente mais vivo
 
-## Tabelas disponíveis para exportação
+## 3. Aba PLANOS
+- Cards com gradientes coloridos por plano (prata=cinza elegante, ouro=dourado, diamante=rosa)
+- Ícones mais elaborados (Shield, Gem, Crown)
+- Badges com efeito brilho
+- Botões com efeito 3D
 
-Cada botão exporta os dados do `business_id` do usuário logado:
+## 4. Aba INFORMAÇÕES (BusinessInfo)
+- Topo: upload de logo da loja
+- Textos explicativos e amigáveis falando diretamente com a pessoa
+- Seção "Descubra o valor da sua hora" com campos vazios e labels explicativas
+- Custos fixos: fluxo de adicionar um por vez (nome + valor + botão Adicionar), lista com editar/excluir, total no final
+- Custos variáveis: mesmo fluxo dos fixos, com total
 
-| Botão | Tabela | Descrição |
-|-------|--------|-----------|
-| Produtos | `products` | Todos os produtos |
-| Receitas | `recipes` | Todas as receitas |
-| Insumos | `ingredients` | Ingredientes cadastrados |
-| Embalagens | `packaging` | Embalagens cadastradas |
-| Clientes | `clients` | Cadastro de clientes |
-| Encomendas | `orders` | Pedidos/encomendas |
-| Receitas Financeiras | `financial_income` | Entradas financeiras |
-| Despesas | `financial_expense` | Saídas financeiras |
-| Custos Fixos | `fixed_costs` | Custos fixos |
-| Custos Variáveis | `variable_costs` | Custos variáveis |
-| Lista de Compras | `shopping_list` | Itens da lista de compras |
-| Assinaturas | `assinaturas` | Dados da assinatura |
-| Cardápio - Produtos | `menu_products` | Produtos do cardápio |
-| Cardápio - Categorias | `menu_categories` | Categorias do cardápio |
-| Logs de Auditoria | `audit_logs` | Registro de ações |
+## 5. Cardápio Digital
+- Layout estilo iFood: capa, logo, horário, categorias com produtos
+- Produtos com imagem, nome, preço, descrição
+- Toggle visível/oculto
+- Botão compartilhar via WhatsApp e link
 
-## Lógica de exportação
+## 6. Calculadora de Compras
+- Adicionar botões Copiar e Editar nos itens
+- Total com botão 3D chamativo
 
-- Consulta a tabela via Supabase client (respeitando RLS)
-- Converte os dados em formato CSV (headers + rows)
-- Dispara download automático do arquivo `.csv` no navegador
-- Botão "Exportar Tudo" gera um ZIP ou exporta cada tabela individualmente em sequência
+## 7. Finanças (Entradas e Saídas)
+- Design mais moderno nos cards e seletores
+- Formas de pagamento em estilo 3D (Pix, Cartão débito, Cartão crédito)
+- Gráfico de categorias (recharts PieChart)
+- Indicador positivo/negativo
+- Títulos mais pessoais
 
-## Arquivos modificados
+## 8. Insumos e Embalagens
+- Ingredientes: remover campo categoria, unidades fixas (g, ml, kg, l)
+- Embalagens: remover campo categoria, unidades fixas (unidade, pacote, caixa fechada)
 
-- `src/pages/ExportData.tsx` — Nova página
-- `src/components/layout/AppLayout.tsx` — Adicionar item "Exportar Dados" no sidebar
-- `src/App.tsx` — Adicionar rota `/export`
+## 9. Precificação (Wizard completo)
+- Step 1: adicionar imagem, categorias fixas (Massa, Recheio, Bolo, Fatias, Cupcakes, Salgados, Doces), tipo de venda (Unidade, Fatias, Porções, Kg), nada pré-preenchido
+- Step 2: puxar ingredientes/embalagens do estoque automaticamente, editar/excluir cada item
+- Step 3: buscar valor/hora do perfil automaticamente, custos fixos sugeridos com ajuste %, dicas explicativas
+- Step 4: margem de lucro com sugestão editável, lucro em verde, taxas opcionais (iFood %, delivery, maquininha %)
+- Step 5: preço final destacado, gráfico composição (PieChart), dica de divisão financeira, resumo completo, botão Salvar
 
-## Design
+## 10. Clientes
+- Clientes já serão referenciados na criação de encomendas (select dropdown)
 
-Mantém o padrão visual existente (cards, botões, cores). Sem alterações de layout ou estilo global.
+## 11. Encomendas
+- Títulos com primeira letra maiúscula
+- Design mais moderno e colorido
+- Formas de pagamento: Pix, Cartão crédito, Cartão débito
+- Taxas opcionais: maquininha, decoração, embalagem, topo de bolo, outros
+- "Outros" com editar/duplicar/excluir
+- Enviar por WhatsApp e link
+- Puxar clientes automaticamente
+
+## 12. Produtos
+- Exibir custo, lucro e preço final
+- Opções: editar, copiar, excluir
+
+---
+
+## Escopo de Implementação
+
+Dado o volume de mudanças, sugiro implementar em **3 fases**:
+
+**Fase 1** — Design system + Login + Planos + Informações (custos fixos/variáveis dinâmicos)
+**Fase 2** — Precificação completa + Produtos + Insumos
+**Fase 3** — Encomendas + Finanças + Calculadora + Cardápio Digital
+
+Cada fase será uma mensagem separada para manter qualidade e evitar erros.
 
