@@ -24,6 +24,7 @@ import BusinessInfo from "@/pages/BusinessInfo";
 import Plans from "@/pages/Plans";
 import SettingsPage from "@/pages/SettingsPage";
 import AccountSettings from "@/pages/AccountSettings";
+import ExportData from "@/pages/ExportData";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();

@@ -10,6 +10,7 @@ import {
   ShoppingCart,
   Crown,
   Settings,
+  Download,
   LogOut,
   Menu,
   Bell,
