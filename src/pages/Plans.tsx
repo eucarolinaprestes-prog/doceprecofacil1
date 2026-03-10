@@ -41,8 +41,27 @@ const plans = [
 ];
 
 const Plans = () => {
+  const { hasActiveSubscription, subscription } = useAuth();
+  const isExpired = subscription && (subscription.status !== "ativo" || new Date(subscription.data_expiracao) <= new Date());
+
   return (
     <div className="space-y-8">
+      {/* Expired / No plan banner */}
+      {!hasActiveSubscription && (
+        <Card className="border-2 border-destructive/40 bg-destructive/5">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-destructive/15 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">
+                {isExpired ? "Seu plano expirou. Renove para continuar usando o sistema." : "Você ainda não possui um plano ativo."}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">Escolha um plano abaixo para liberar o acesso completo.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <div className="text-center space-y-3">
         <div className="w-16 h-16 rounded-2xl gradient-gold flex items-center justify-center mx-auto shadow-lg">
           <Crown className="w-8 h-8 text-yellow-950" />
