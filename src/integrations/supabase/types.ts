@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      assinaturas: {
+        Row: {
+          created_at: string
+          data_expiracao: string
+          data_inicio: string
+          id: string
+          id_usuario: string
+          plano: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          data_expiracao: string
+          data_inicio?: string
+          id?: string
+          id_usuario: string
+          plano?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          data_expiracao?: string
+          data_inicio?: string
+          id?: string
+          id_usuario?: string
+          plano?: string
+          status?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
