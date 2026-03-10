@@ -28,10 +28,11 @@ import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+function ProtectedRoute({ children, allowWithoutSubscription }: { children: React.ReactNode; allowWithoutSubscription?: boolean }) {
+  const { isAuthenticated, isLoading, hasActiveSubscription } = useAuth();
   if (isLoading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Carregando...</div>;
   if (!isAuthenticated) return <Navigate to="/auth" replace />;
+  if (!allowWithoutSubscription && !hasActiveSubscription) return <Navigate to="/plans" replace />;
   return <AppLayout>{children}</AppLayout>;
 }
 
@@ -61,8 +62,8 @@ const AppRoutes = () => (
     <Route path="/shopping" element={<ProtectedRoute><Shopping /></ProtectedRoute>} />
     <Route path="/menu" element={<ProtectedRoute><DigitalMenu /></ProtectedRoute>} />
     <Route path="/business-info" element={<ProtectedRoute><BusinessInfo /></ProtectedRoute>} />
-    <Route path="/plans" element={<ProtectedRoute><Plans /></ProtectedRoute>} />
-    <Route path="/settings" element={<ProtectedRoute><AccountSettings /></ProtectedRoute>} />
+    <Route path="/plans" element={<ProtectedRoute allowWithoutSubscription><Plans /></ProtectedRoute>} />
+    <Route path="/settings" element={<ProtectedRoute allowWithoutSubscription><AccountSettings /></ProtectedRoute>} />
     <Route path="/cardapio/:userId" element={<PublicMenu />} />
     <Route path="*" element={<NotFound />} />
   </Routes>

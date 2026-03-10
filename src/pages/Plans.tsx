@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Crown, Star, Award, Gem, Check, Sparkles } from "lucide-react";
+import { Crown, Star, Award, Gem, Check, Sparkles, AlertTriangle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const plans = [
   {
@@ -11,6 +12,7 @@ const plans = [
     gradient: "from-slate-400 via-slate-300 to-slate-200",
     borderColor: "border-slate-300",
     btnClass: "bg-slate-500 hover:bg-slate-600 text-white",
+    checkoutUrl: "https://pay.kiwify.com.br/svrszxU",
     features: ["Precificação ilimitada", "Até 20 produtos", "Suporte individual"],
   },
   {
@@ -22,6 +24,7 @@ const plans = [
     borderColor: "border-amber-300",
     btnClass: "bg-amber-500 hover:bg-amber-600 text-white",
     popular: true,
+    checkoutUrl: "https://pay.kiwify.com.br/GrsK5J4",
     features: ["Tudo do Prata", "Cardápio digital", "Encomendas ilimitadas", "Suporte individual VIP"],
   },
   {
@@ -32,13 +35,33 @@ const plans = [
     gradient: "from-rose-400 via-pink-300 to-rose-200",
     borderColor: "border-primary/40",
     btnClass: "bg-primary hover:bg-primary/90 text-primary-foreground btn-3d",
+    checkoutUrl: "https://pay.kiwify.com.br/nqVZFgx",
     features: ["Tudo do Ouro", "Relatórios avançados", "WhatsApp automático", "Suporte individual premium"],
   },
 ];
 
 const Plans = () => {
+  const { hasActiveSubscription, subscription } = useAuth();
+  const isExpired = subscription && (subscription.status !== "ativo" || new Date(subscription.data_expiracao) <= new Date());
+
   return (
     <div className="space-y-8">
+      {/* Expired / No plan banner */}
+      {!hasActiveSubscription && (
+        <Card className="border-2 border-destructive/40 bg-destructive/5">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-destructive/15 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-foreground">
+                {isExpired ? "Seu plano expirou. Renove para continuar usando o sistema." : "Você ainda não possui um plano ativo."}
+              </p>
+              <p className="text-xs text-muted-foreground mt-0.5">Escolha um plano abaixo para liberar o acesso completo.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       <div className="text-center space-y-3">
         <div className="w-16 h-16 rounded-2xl gradient-gold flex items-center justify-center mx-auto shadow-lg">
           <Crown className="w-8 h-8 text-yellow-950" />
@@ -81,9 +104,12 @@ const Plans = () => {
                     <span className="font-medium">{f}</span>
                   </div>
                 ))}
-                <Button className={`w-full rounded-xl mt-3 h-12 text-base font-bold ${plan.btnClass}`}>
-                  ASSINAR AGORA
-                </Button>
+              <Button
+                className={`w-full rounded-xl mt-3 h-12 text-base font-bold ${plan.btnClass}`}
+                onClick={() => window.open(plan.checkoutUrl, "_blank")}
+              >
+                ASSINAR AGORA
+              </Button>
               </CardContent>
             </Card>
           );

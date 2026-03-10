@@ -16,6 +16,13 @@ interface Profile {
 
 type AppRole = "owner" | "staff";
 
+interface Subscription {
+  plano: string;
+  status: string;
+  data_inicio: string;
+  data_expiracao: string;
+}
+
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
@@ -25,6 +32,8 @@ interface AuthContextType {
   businessId: string | null;
   role: AppRole | null;
   isOwner: boolean;
+  subscription: Subscription | null;
+  hasActiveSubscription: boolean;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -40,7 +49,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  const fetchSubscription = async (userId: string) => {
+    const { data } = await supabase
+      .from("assinaturas" as any)
+      .select("plano, status, data_inicio, data_expiracao")
+      .eq("id_usuario", userId)
+      .order("data_inicio", { ascending: false })
+      .limit(1)
+      .single();
+    if (data) {
+      setSubscription(data as any);
+    } else {
+      setSubscription(null);
+    }
+  };
 
   const fetchProfile = async (userId: string) => {
     const { data } = await supabase
@@ -67,6 +92,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setBusinessId(roleData.business_id);
       }
     }
+
+    // Fetch subscription
+    await fetchSubscription(userId);
   };
 
   const refreshProfile = async () => {
@@ -74,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const { data: { subscription: authSub } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
@@ -84,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setProfile(null);
           setBusinessId(null);
           setRole(null);
+          setSubscription(null);
         }
         setIsLoading(false);
       }
@@ -96,7 +125,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => authSub.unsubscribe();
   }, []);
 
   const signUp = async (email: string, password: string, name: string) => {
@@ -120,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(null);
     setBusinessId(null);
     setRole(null);
+    setSubscription(null);
   };
 
   const resetPassword = async (email: string) => {
@@ -131,8 +161,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const isOwner = role === "owner";
 
+  const hasActiveSubscription = !!(
+    subscription &&
+    subscription.status === "ativo" &&
+    new Date(subscription.data_expiracao) > new Date()
+  );
+
   return (
-    <AuthContext.Provider value={{ user, profile, session, isAuthenticated: !!session, isLoading, businessId, role, isOwner, signUp, signIn, signOut, resetPassword, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, session, isAuthenticated: !!session, isLoading, businessId, role, isOwner, subscription, hasActiveSubscription, signUp, signIn, signOut, resetPassword, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

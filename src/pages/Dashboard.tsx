@@ -8,6 +8,7 @@ import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowU
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isToday, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import FinanceDialog from "@/components/dashboard/FinanceDialog";
+import logoDoce from "@/assets/logo-doce.jpeg";
 
 
 const Dashboard = () => {
@@ -104,6 +105,11 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-5">
+      {/* Logo */}
+      <div className="flex justify-center">
+        <img src={logoDoce} alt="Doce Preço Fácil" className="h-20 object-contain" />
+      </div>
+
       {/* Date */}
       <p className="text-xs text-muted-foreground capitalize">{format(today, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
 
