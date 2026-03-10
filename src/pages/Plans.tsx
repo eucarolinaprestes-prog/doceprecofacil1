@@ -81,9 +81,12 @@ const Plans = () => {
                     <span className="font-medium">{f}</span>
                   </div>
                 ))}
-                <Button className={`w-full rounded-xl mt-3 h-12 text-base font-bold ${plan.btnClass}`}>
-                  ASSINAR AGORA
-                </Button>
+              <Button
+                className={`w-full rounded-xl mt-3 h-12 text-base font-bold ${plan.btnClass}`}
+                onClick={() => window.open(plan.checkoutUrl, "_blank")}
+              >
+                ASSINAR AGORA
+              </Button>
               </CardContent>
             </Card>
           );
