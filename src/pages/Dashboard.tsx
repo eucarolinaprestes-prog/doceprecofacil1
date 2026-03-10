@@ -105,6 +105,11 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-5">
+      {/* Logo */}
+      <div className="flex justify-center">
+        <img src={logoDoce} alt="Doce Preço Fácil" className="h-20 object-contain" />
+      </div>
+
       {/* Date */}
       <p className="text-xs text-muted-foreground capitalize">{format(today, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
 

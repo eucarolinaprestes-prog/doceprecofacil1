@@ -11,6 +11,7 @@ const plans = [
     gradient: "from-slate-400 via-slate-300 to-slate-200",
     borderColor: "border-slate-300",
     btnClass: "bg-slate-500 hover:bg-slate-600 text-white",
+    checkoutUrl: "https://pay.kiwify.com.br/svrszxU",
     features: ["Precificação ilimitada", "Até 20 produtos", "Suporte individual"],
   },
   {
@@ -22,6 +23,7 @@ const plans = [
     borderColor: "border-amber-300",
     btnClass: "bg-amber-500 hover:bg-amber-600 text-white",
     popular: true,
+    checkoutUrl: "https://pay.kiwify.com.br/GrsK5J4",
     features: ["Tudo do Prata", "Cardápio digital", "Encomendas ilimitadas", "Suporte individual VIP"],
   },
   {
@@ -32,6 +34,7 @@ const plans = [
     gradient: "from-rose-400 via-pink-300 to-rose-200",
     borderColor: "border-primary/40",
     btnClass: "bg-primary hover:bg-primary/90 text-primary-foreground btn-3d",
+    checkoutUrl: "https://pay.kiwify.com.br/nqVZFgx",
     features: ["Tudo do Ouro", "Relatórios avançados", "WhatsApp automático", "Suporte individual premium"],
   },
 ];
