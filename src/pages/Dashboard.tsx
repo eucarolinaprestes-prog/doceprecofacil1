@@ -8,6 +8,7 @@ import { Calculator, TrendingUp, TrendingDown, ShoppingCart, ShoppingBag, ArrowU
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays, addMonths, subMonths, isToday, isSameMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import FinanceDialog from "@/components/dashboard/FinanceDialog";
+import logoDoce from "@/assets/logo-doce.jpeg";
 
 
 const Dashboard = () => {
